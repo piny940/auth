@@ -37,9 +37,7 @@ export default function RootLayout({
               </Link>
             </Toolbar>
           </AppBar>
-          <Container component="main" sx={{ pt: 4, pb: 6 }}>
-            {children}
-          </Container>
+          {children}
         </Box>
       </body>
     </html>
