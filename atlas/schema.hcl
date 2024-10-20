@@ -1,8 +1,7 @@
 schema "public"{}
-schema "auth" {}
 
 table "users" {
-  schema = schema.auth
+  schema = schema.public
   column "id" {
     type = bigserial
   }
