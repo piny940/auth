@@ -4,13 +4,17 @@
   "type": "module",
   "scripts": {
     "compile": "tsp compile .",
-    "dev": "tsp compile . --watch"
+    "dev": "tsp compile . --watch",
+    "doc": "redocly preview-docs schema/@typespec/openapi3/openapi.yaml",
+    "lint": "npx prettier --write . && npx eslint . --fix",
+    "lint-check": "npx prettier -c . & npx eslint ."
   },
   "peerDependencies": {
     "@typespec/compiler": "latest",
     "@typespec/http": "latest",
     "@typespec/openapi3": "latest",
-    "@typespec/rest": "latest"
+    "@typespec/rest": "latest",
+    "@redocly/cli": "^1.25.7"
   },
   "devDependencies": {
     "@typespec/compiler": "latest",

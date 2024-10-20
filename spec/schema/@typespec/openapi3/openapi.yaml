@@ -3,5 +3,162 @@ info:
   title: Auth
   version: 0.0.0
 tags: []
-paths: {}
-components: {}
+paths:
+  /api/v1/account/clients/:
+    get:
+      operationId: Clients_listClients
+      summary: Get all clients
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Client'
+    post:
+      operationId: Clients_createClient
+      summary: Create a new client
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+        '400':
+          description: The server could not understand the request due to invalid syntax.
+          content:
+            application/json:
+              schema:
+                type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                client:
+                  $ref: '#/components/schemas/ClientCreate'
+              required:
+                - client
+  /api/v1/account/clients/:id/{id}:
+    post:
+      operationId: Clients_updateClient
+      summary: Update a client
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+        '400':
+          description: The server could not understand the request due to invalid syntax.
+          content:
+            application/json:
+              schema:
+                type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                client:
+                  $ref: '#/components/schemas/ClientCreate'
+              required:
+                - client
+    delete:
+      operationId: Clients_deleteClient
+      summary: Delete a client
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        '400':
+          description: The server could not understand the request due to invalid syntax.
+          content:
+            application/json:
+              schema:
+                type: string
+  /api/v1/token/:
+    post:
+      operationId: Token_getToken
+      summary: Get a token
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: The server could not understand the request due to invalid syntax.
+          content:
+            application/json:
+              schema:
+                type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                client_id:
+                  type: string
+                client_secret:
+                  type: string
+              required:
+                - client_id
+                - client_secret
+components:
+  schemas:
+    Client:
+      type: object
+      required:
+        - id
+        - name
+        - redirect_urls
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        redirect_urls:
+          type: array
+          items:
+            type: string
+    ClientCreate:
+      type: object
+      required:
+        - name
+        - redirect_urls
+      properties:
+        name:
+          type: string
+        redirect_urls:
+          type: array
+          items:
+            type: string
