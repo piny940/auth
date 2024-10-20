@@ -6,9 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "npx prettier --write . && npx eslint . --fix",
+    "lint-check": "npx prettier -c . & npx eslint ."
   },
   "dependencies": {
+    "@emotion/react": "^11.13.3",
+    "@emotion/styled": "^11.13.0",
+    "@mui/material": "^6.1.4",
     "next": "14.2.15",
     "react": "^18",
     "react-dom": "^18"
