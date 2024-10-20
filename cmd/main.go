@@ -1,6 +1,7 @@
 package main
 
 import (
+	"auth/internal/infrastructure"
 	"context"
 	"os"
 	"os/signal"
@@ -23,6 +24,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	infrastructure.Init()
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
