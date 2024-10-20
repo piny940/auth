@@ -1,0 +1,12 @@
+{
+  "printWidth": 80,
+  "endOfLine": "lf",
+  "tabWidth": 2,
+  "useTabs": false,
+  "semi": false,
+  "singleQuote": true,
+  "jsxSingleQuote": false,
+  "trailingComma": "es5",
+  "plugins": ["./node_modules/@typespec/prettier-plugin-typespec"],
+  "overrides": [{ "files": "*.tsp", "options": { "parser": "typespec" } }]
+}
