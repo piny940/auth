@@ -10,7 +10,7 @@ erDiagram
 
   clients {
     bigserial id PK
-    bigint user_id
+    bigint user_id FK
     varchar name
     varchar[] redirect_urls
   }
