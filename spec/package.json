@@ -2,6 +2,10 @@
   "name": "spec",
   "version": "0.1.0",
   "type": "module",
+  "scripts": {
+    "compile": "tsp compile .",
+    "dev": "tsp compile . --watch"
+  },
   "peerDependencies": {
     "@typespec/compiler": "latest",
     "@typespec/http": "latest",
