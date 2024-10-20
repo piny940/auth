@@ -2,6 +2,12 @@
 erDiagram
   blogs ||--o| qiita_articles : "Qiita記事"
 
+  users {
+    bigserial id PK
+    varchar name
+    varchar password
+  }
+
   clients {
     bigserial id PK
     bigint user_id
