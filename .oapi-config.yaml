@@ -1,0 +1,7 @@
+# yaml-language-server: ...
+package: api
+generate:
+  echo-server: true
+  strict-server: true
+  models: true
+output: internal/api/gen.go
