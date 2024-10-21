@@ -5,6 +5,9 @@ table "users" {
   column "id" {
     type = bigserial
   }
+  column "name" {
+    type = varchar(255)
+  }
   column "encrypted_password" {
     type = varchar(255)
   }
@@ -13,5 +16,9 @@ table "users" {
   }
   column "updated_at" {
     type = timestamptz
+  }
+  index "users_name" {
+    columns = [column.name]
+    unique = true
   }
 }

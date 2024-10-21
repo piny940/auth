@@ -30,10 +30,39 @@ op authorize(
   @query scope: string,
   @query state?: string,
 ): {
+  @statusCode statusCode: 204;
+} | {
   @statusCode statusCode: 302;
+  error: string;
+  error_description: string;
+  state?: string;
 } | {
   @statusCode statusCode: 400;
-  error: int32;
+  error: string;
+  error_description: string;
+  state?: string;
+};
+
+@route("/authorize")
+@post
+@summary("Authorization Request")
+op postAuthorize(
+  @header contentType: "multipart/form-data",
+  response_type: string,
+  client_id: string,
+  redirect_uri: string,
+  scope: string,
+  state?: string,
+): {
+  @statusCode statusCode: 204;
+} | {
+  @statusCode statusCode: 302;
+  error: string;
+  error_description: string;
+  state?: string;
+} | {
+  @statusCode statusCode: 400;
+  error: string;
   error_description: string;
   state?: string;
 };
@@ -60,7 +89,7 @@ op login(@body body: ReqLogin): {
   @statusCode statusCode: 204;
 } | {
   @statusCode statusCode: 400;
-  error: int32;
+  error: string;
   error_description: string;
 };
 

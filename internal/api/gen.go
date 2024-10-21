@@ -45,13 +45,22 @@ type ClientsUpdateClientJSONBody struct {
 	Client ClientCreate `json:"client"`
 }
 
-// V1AuthorizeParams defines parameters for V1Authorize.
-type V1AuthorizeParams struct {
+// AuthorizeParams defines parameters for Authorize.
+type AuthorizeParams struct {
 	ResponseType string  `form:"response_type" json:"response_type"`
 	ClientId     string  `form:"client_id" json:"client_id"`
 	RedirectUri  string  `form:"redirect_uri" json:"redirect_uri"`
 	Scope        string  `form:"scope" json:"scope"`
 	State        *string `form:"state,omitempty" json:"state,omitempty"`
+}
+
+// PostAuthorizeMultipartBody defines parameters for PostAuthorize.
+type PostAuthorizeMultipartBody struct {
+	ClientId     string  `json:"client_id"`
+	RedirectUri  string  `json:"redirect_uri"`
+	ResponseType string  `json:"response_type"`
+	Scope        string  `json:"scope"`
+	State        *string `json:"state,omitempty"`
 }
 
 // TokenGetTokenJSONBody defines parameters for TokenGetToken.
@@ -66,8 +75,11 @@ type ClientsCreateClientJSONRequestBody ClientsCreateClientJSONBody
 // ClientsUpdateClientJSONRequestBody defines body for ClientsUpdateClient for application/json ContentType.
 type ClientsUpdateClientJSONRequestBody ClientsUpdateClientJSONBody
 
-// V1LoginJSONRequestBody defines body for V1Login for application/json ContentType.
-type V1LoginJSONRequestBody = ReqLogin
+// PostAuthorizeMultipartRequestBody defines body for PostAuthorize for multipart/form-data ContentType.
+type PostAuthorizeMultipartRequestBody PostAuthorizeMultipartBody
+
+// LoginJSONRequestBody defines body for Login for application/json ContentType.
+type LoginJSONRequestBody = ReqLogin
 
 // TokenGetTokenJSONRequestBody defines body for TokenGetToken for application/json ContentType.
 type TokenGetTokenJSONRequestBody TokenGetTokenJSONBody
@@ -75,25 +87,28 @@ type TokenGetTokenJSONRequestBody TokenGetTokenJSONBody
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 	// Get all clients
-	// (GET /api/v1/account/clients/)
+	// (GET /account/clients/)
 	ClientsListClients(ctx echo.Context, params ClientsListClientsParams) error
 	// Create a new client
-	// (POST /api/v1/account/clients/)
+	// (POST /account/clients/)
 	ClientsCreateClient(ctx echo.Context) error
 	// Delete a client
-	// (DELETE /api/v1/account/clients/:id/{id})
+	// (DELETE /account/clients/:id/{id})
 	ClientsDeleteClient(ctx echo.Context, id int64) error
 	// Update a client
-	// (POST /api/v1/account/clients/:id/{id})
+	// (POST /account/clients/:id/{id})
 	ClientsUpdateClient(ctx echo.Context, id int64) error
 	// Authorization Request
-	// (GET /api/v1/authorize)
-	V1Authorize(ctx echo.Context, params V1AuthorizeParams) error
+	// (GET /authorize)
+	Authorize(ctx echo.Context, params AuthorizeParams) error
+	// Authorization Request
+	// (POST /authorize)
+	PostAuthorize(ctx echo.Context) error
 	// Login
-	// (POST /api/v1/login)
-	V1Login(ctx echo.Context) error
+	// (POST /login)
+	Login(ctx echo.Context) error
 	// Get a token
-	// (POST /api/v1/token/)
+	// (POST /token/)
 	TokenGetToken(ctx echo.Context) error
 }
 
@@ -174,12 +189,12 @@ func (w *ServerInterfaceWrapper) ClientsUpdateClient(ctx echo.Context) error {
 	return err
 }
 
-// V1Authorize converts echo context to params.
-func (w *ServerInterfaceWrapper) V1Authorize(ctx echo.Context) error {
+// Authorize converts echo context to params.
+func (w *ServerInterfaceWrapper) Authorize(ctx echo.Context) error {
 	var err error
 
 	// Parameter object where we will unmarshal all parameters from the context
-	var params V1AuthorizeParams
+	var params AuthorizeParams
 	// ------------- Required query parameter "response_type" -------------
 
 	err = runtime.BindQueryParameter("form", false, true, "response_type", ctx.QueryParams(), &params.ResponseType)
@@ -216,16 +231,25 @@ func (w *ServerInterfaceWrapper) V1Authorize(ctx echo.Context) error {
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.V1Authorize(ctx, params)
+	err = w.Handler.Authorize(ctx, params)
 	return err
 }
 
-// V1Login converts echo context to params.
-func (w *ServerInterfaceWrapper) V1Login(ctx echo.Context) error {
+// PostAuthorize converts echo context to params.
+func (w *ServerInterfaceWrapper) PostAuthorize(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.V1Login(ctx)
+	err = w.Handler.PostAuthorize(ctx)
+	return err
+}
+
+// Login converts echo context to params.
+func (w *ServerInterfaceWrapper) Login(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.Login(ctx)
 	return err
 }
 
@@ -266,12 +290,13 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 		Handler: si,
 	}
 
-	router.GET(baseURL+"/api/v1/account/clients/", wrapper.ClientsListClients)
-	router.POST(baseURL+"/api/v1/account/clients/", wrapper.ClientsCreateClient)
-	router.DELETE(baseURL+"/api/v1/account/clients/:id/:id", wrapper.ClientsDeleteClient)
-	router.POST(baseURL+"/api/v1/account/clients/:id/:id", wrapper.ClientsUpdateClient)
-	router.GET(baseURL+"/api/v1/authorize", wrapper.V1Authorize)
-	router.POST(baseURL+"/api/v1/login", wrapper.V1Login)
-	router.POST(baseURL+"/api/v1/token/", wrapper.TokenGetToken)
+	router.GET(baseURL+"/account/clients/", wrapper.ClientsListClients)
+	router.POST(baseURL+"/account/clients/", wrapper.ClientsCreateClient)
+	router.DELETE(baseURL+"/account/clients/:id/:id", wrapper.ClientsDeleteClient)
+	router.POST(baseURL+"/account/clients/:id/:id", wrapper.ClientsUpdateClient)
+	router.GET(baseURL+"/authorize", wrapper.Authorize)
+	router.POST(baseURL+"/authorize", wrapper.PostAuthorize)
+	router.POST(baseURL+"/login", wrapper.Login)
+	router.POST(baseURL+"/token/", wrapper.TokenGetToken)
 
 }

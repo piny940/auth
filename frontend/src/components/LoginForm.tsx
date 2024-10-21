@@ -13,11 +13,20 @@ export const LoginForm = (): JSX.Element => {
   const { control, handleSubmit, setError } = useForm<LoginInput>({
     defaultValues: { name: '', password: '' },
   })
-  const submit = useCallback(async (data: LoginInput) => {
-    const { error } = await client.POST('/login', {
-      body: { name: data.name, password: data.password },
-    })
-  }, [])
+  const submit = useCallback(
+    async (data: LoginInput) => {
+      const { error } = await client.POST('/login', {
+        body: { name: data.name, password: data.password },
+      })
+      if (!!error) {
+        console.log(error.error_description)
+        setError('name', { message: error.error_description })
+        setError('password', { message: error.error_description })
+        return
+      }
+    },
+    [setError]
+  )
   return (
     <Box
       component="form"
@@ -28,8 +37,15 @@ export const LoginForm = (): JSX.Element => {
         <Controller
           name="name"
           control={control}
-          render={({ field }) => (
-            <TextField {...field} label="Name" variant="outlined" fullWidth />
+          render={({ field, fieldState }) => (
+            <TextField
+              label="Name"
+              variant="outlined"
+              fullWidth
+              error={fieldState.invalid}
+              helperText={fieldState.error?.message}
+              {...field}
+            />
           )}
         />
       </Box>
@@ -37,13 +53,15 @@ export const LoginForm = (): JSX.Element => {
         <Controller
           name="password"
           control={control}
-          render={({ field }) => (
+          render={({ field, fieldState }) => (
             <TextField
               type="password"
               {...field}
               label="Password"
               variant="outlined"
               fullWidth
+              error={fieldState.invalid}
+              helperText={fieldState.error?.message}
             />
           )}
         />

@@ -50,7 +50,8 @@ export interface paths {
         /** Authorization Request */
         get: operations["authorize"];
         put?: never;
-        post?: never;
+        /** Authorization Request */
+        post: operations["postAuthorize"];
         delete?: never;
         options?: never;
         head?: never;
@@ -268,12 +269,25 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description There is no content to send for this request, but the headers may be useful.  */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             /** @description Redirection */
             302: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        error: string;
+                        error_description: string;
+                        state?: string;
+                    };
+                };
             };
             /** @description The server could not understand the request due to invalid syntax. */
             400: {
@@ -282,8 +296,61 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        /** Format: int32 */
-                        error: number;
+                        error: string;
+                        error_description: string;
+                        state?: string;
+                    };
+                };
+            };
+        };
+    };
+    postAuthorize: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    response_type: string;
+                    client_id: string;
+                    redirect_uri: string;
+                    scope: string;
+                    state?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description There is no content to send for this request, but the headers may be useful.  */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Redirection */
+            302: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: string;
+                        error_description: string;
+                        state?: string;
+                    };
+                };
+            };
+            /** @description The server could not understand the request due to invalid syntax. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: string;
                         error_description: string;
                         state?: string;
                     };
@@ -318,8 +385,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        /** Format: int32 */
-                        error: number;
+                        error: string;
                         error_description: string;
                     };
                 };
