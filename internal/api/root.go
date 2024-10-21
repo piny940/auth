@@ -18,5 +18,5 @@ func (s *Server) V1Login(ctx context.Context, request V1LoginRequestObject) (V1L
 	}
 
 	// TODO: login
-	return V1Login200Response{}, nil
+	return V1Login204Response{}, nil
 }

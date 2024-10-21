@@ -395,11 +395,11 @@ type V1LoginResponseObject interface {
 	VisitV1LoginResponse(w http.ResponseWriter) error
 }
 
-type V1Login200Response struct {
+type V1Login204Response struct {
 }
 
-func (response V1Login200Response) VisitV1LoginResponse(w http.ResponseWriter) error {
-	w.WriteHeader(200)
+func (response V1Login204Response) VisitV1LoginResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
 	return nil
 }
 
