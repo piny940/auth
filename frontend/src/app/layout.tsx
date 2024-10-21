@@ -3,6 +3,7 @@ import localFont from 'next/font/local'
 import './globals.css'
 import { AppBar, Box, Container, Toolbar, Typography } from '@mui/material'
 import Link from 'next/link'
+import { Header } from '@/components/Header'
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -28,15 +29,7 @@ export default function RootLayout({
     <html lang="ja">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <Box>
-          <AppBar position="sticky">
-            <Toolbar>
-              <Link href="/" className="unstyled">
-                <Typography variant="h5" fontWeight="bold">
-                  mikan
-                </Typography>
-              </Link>
-            </Toolbar>
-          </AppBar>
+          <Header />
           {children}
         </Box>
       </body>

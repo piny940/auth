@@ -75,6 +75,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get me */
+        get: operations["me"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/token/": {
         parameters: {
             query?: never;
@@ -109,6 +126,11 @@ export interface components {
         ReqLogin: {
             name: string;
             password: string;
+        };
+        User: {
+            /** Format: int64 */
+            id: number;
+            name: string;
         };
     };
     responses: never;
@@ -387,6 +409,28 @@ export interface operations {
                     "application/json": {
                         error: string;
                         error_description: string;
+                    };
+                };
+            };
+        };
+    };
+    me: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The request has succeeded. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        user: components["schemas"]["User"];
                     };
                 };
             };

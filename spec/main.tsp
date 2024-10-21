@@ -2,6 +2,8 @@ import "@typespec/http";
 import "@typespec/rest";
 import "@typespec/openapi3";
 
+import "./model.tsp";
+
 using TypeSpec.Http;
 @service({
   title: "Auth",
@@ -9,13 +11,6 @@ using TypeSpec.Http;
 @server("https://auth.piny940.com/api/v1", "Auth Server")
 namespace Auth;
 
-model Client {
-  @visibility("read", "update")
-  id: int64;
-
-  name: string;
-  redirect_urls: string[];
-}
 model ReqLogin {
   name: string;
   password: string;
@@ -91,6 +86,14 @@ op login(@body body: ReqLogin): {
   @statusCode statusCode: 400;
   error: string;
   error_description: string;
+};
+
+@route("/me")
+@get
+@summary("Get me")
+op me(): {
+  @statusCode statusCode: 200;
+  user: User;
 };
 
 @route("/account")

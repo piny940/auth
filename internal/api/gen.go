@@ -30,6 +30,12 @@ type ReqLogin struct {
 	Password string `json:"password"`
 }
 
+// User defines model for User.
+type User struct {
+	Id   int64  `json:"id"`
+	Name string `json:"name"`
+}
+
 // ClientsListClientsParams defines parameters for ClientsListClients.
 type ClientsListClientsParams struct {
 	Cookie string `json:"cookie"`
@@ -107,6 +113,9 @@ type ServerInterface interface {
 	// Login
 	// (POST /login)
 	Login(ctx echo.Context) error
+	// Get me
+	// (GET /me)
+	Me(ctx echo.Context) error
 	// Get a token
 	// (POST /token/)
 	TokenGetToken(ctx echo.Context) error
@@ -253,6 +262,15 @@ func (w *ServerInterfaceWrapper) Login(ctx echo.Context) error {
 	return err
 }
 
+// Me converts echo context to params.
+func (w *ServerInterfaceWrapper) Me(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.Me(ctx)
+	return err
+}
+
 // TokenGetToken converts echo context to params.
 func (w *ServerInterfaceWrapper) TokenGetToken(ctx echo.Context) error {
 	var err error
@@ -297,6 +315,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/authorize", wrapper.Authorize)
 	router.POST(baseURL+"/authorize", wrapper.PostAuthorize)
 	router.POST(baseURL+"/login", wrapper.Login)
+	router.GET(baseURL+"/me", wrapper.Me)
 	router.POST(baseURL+"/token/", wrapper.TokenGetToken)
 
 }

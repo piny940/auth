@@ -294,6 +294,23 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ReqLogin'
+  /me:
+    get:
+      operationId: me
+      summary: Get me
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+                required:
+                  - user
   /token/:
     post:
       operationId: Token_getToken
@@ -379,6 +396,17 @@ components:
         name:
           type: string
         password:
+          type: string
+    User:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
           type: string
 servers:
   - url: https://auth.piny940.com/api/v1

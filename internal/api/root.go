@@ -31,6 +31,17 @@ func (s *Server) Login(ctx echo.Context) error {
 	return ctx.JSON(http.StatusNoContent, nil)
 }
 
+// Me implements ServerInterface.
+func (s *Server) Me(ctx echo.Context) error {
+	user, err := CurrentUser(ctx.Request())
+	if err != nil {
+		return err
+	}
+	return ctx.JSON(http.StatusOK, echo.Map{
+		"user": user,
+	})
+}
+
 // Authorize implements ServerInterface.
 func (s *Server) Authorize(ctx echo.Context, params AuthorizeParams) error {
 	req := toDAuthParams(params)
