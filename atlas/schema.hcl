@@ -39,9 +39,6 @@ table "clients" {
   column "name" {
     type = varchar(255)
   }
-  column "redirect_uris" {
-    type = sql("varchar(255)[]")
-  }
   column "created_at" {
     type = timestamptz
   }
@@ -59,6 +56,33 @@ table "clients" {
   }
   index "user_id" {
     columns = [column.user_id]
+  }
+}
+table "redirect_uris" {
+  schema = schema.public
+  column "id" {
+    type = bigserial
+  }
+  column "client_id" {
+    type = varchar(16)
+  }
+  column "uri" {
+    type = varchar(255)
+  }
+  column "created_at" {
+    type = timestamptz
+  }
+  column "updated_at" {
+    type = timestamptz
+  }
+  primary_key {
+    columns = [column.id]
+  }
+  foreign_key "client_id" {
+    columns = [column.client_id]
+    ref_columns = [table.clients.column.id]
+    on_update = NO_ACTION
+    on_delete = CASCADE
   }
 }
 table "approvals" {
