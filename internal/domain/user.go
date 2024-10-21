@@ -6,8 +6,9 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type UserID int64
 type User struct {
-	ID                int64
+	ID                UserID
 	Name              string
 	EncryptedPassword string
 	CreatedAt         time.Time

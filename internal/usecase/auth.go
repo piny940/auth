@@ -1,9 +1,13 @@
 package usecase
 
-import "auth/internal/domain"
+import (
+	"auth/internal/domain"
+	"auth/internal/domain/oauth"
+)
 
 type AuthUsecase struct {
-	UserRepo domain.IUserRepo
+	UserRepo     domain.IUserRepo
+	ApprovalRepo oauth.IApprovalRepo
 }
 
 func NewAuthUsecase(userRepo domain.IUserRepo) *AuthUsecase {
@@ -31,4 +35,25 @@ type ErrInvalidPassword struct{}
 
 func (e ErrInvalidPassword) Error() string {
 	return "invalid password"
+}
+
+func (u *AuthUsecase) Request(user *domain.User, req *oauth.AuthRequest) error {
+	err := req.Validate()
+	if err != nil {
+		return err
+	}
+	ok, err := req.ApprovedBy(user)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return ErrNotApproved{}
+	}
+	return nil
+}
+
+type ErrNotApproved struct{}
+
+func (e ErrNotApproved) Error() string {
+	return "not approved"
 }

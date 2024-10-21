@@ -1,7 +1,9 @@
 package oauth
 
 import (
+	"auth/internal/domain"
 	"slices"
+	"time"
 )
 
 type TypeResponseType string
@@ -26,12 +28,27 @@ var AllScopes = []TypeScope{
 
 type AuthRequest struct {
 	ResponseType TypeResponseType
-	ClientID     string
+	ClientID     ClientID
 	RedirectURI  string
 	Scopes       []TypeScope
-	State        string
+	State        *string
 
-	ClientRepo ClientRepo
+	ClientRepo   ClientRepo
+	ApprovalRepo IApprovalRepo
+}
+
+type ApprovalID int64
+type Approval struct {
+	ID        ApprovalID
+	ClientID  ClientID
+	UserID    int64
+	Scopes    []TypeScope
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+type IApprovalRepo interface {
+	Find(clientID ClientID, userID domain.UserID) (*Approval, error)
 }
 
 func (r *AuthRequest) Validate() error {
@@ -52,6 +69,22 @@ func (r *AuthRequest) Validate() error {
 	}
 
 	return nil
+}
+
+func (r *AuthRequest) ApprovedBy(user *domain.User) (bool, error) {
+	approval, err := r.ApprovalRepo.Find(r.ClientID, user.ID)
+	if err != nil {
+		return false, err
+	}
+	if approval == nil {
+		return false, nil
+	}
+	for _, scope := range r.Scopes {
+		if !slices.Contains(approval.Scopes, scope) {
+			return false, nil
+		}
+	}
+	return true, nil
 }
 
 type ErrInvalidRequestType struct{}

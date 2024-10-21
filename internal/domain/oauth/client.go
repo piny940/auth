@@ -2,8 +2,9 @@ package oauth
 
 import "time"
 
+type ClientID string
 type Client struct {
-	ID              string
+	ID              ClientID
 	EncryptedSecret string
 	UserID          int64
 	Name            string
@@ -12,5 +13,5 @@ type Client struct {
 	UpdatedAt       time.Time
 }
 type ClientRepo interface {
-	FindByID(id string) (*Client, error)
+	FindByID(id ClientID) (*Client, error)
 }

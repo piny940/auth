@@ -38,7 +38,7 @@ erDiagram
     timestamp created_at
     timestamp updated_at
   }
-  allowances {
+  approvals {
     bigserial id PK
     bigint client_id FK
     bigint user_id FK
