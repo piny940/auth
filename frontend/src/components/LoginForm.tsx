@@ -2,6 +2,7 @@
 
 import { Controller, useForm } from 'react-hook-form'
 import { Box, Button, TextField } from '@mui/material'
+import { useCallback } from 'react'
 
 type LoginInput = {
   id: string
@@ -11,6 +12,7 @@ export const LoginForm = (): JSX.Element => {
   const { control, getValues, handleSubmit, setError } = useForm<LoginInput>({
     defaultValues: { id: '', password: '' },
   })
+  const submit = useCallback(async (data: LoginInput) => {}, [])
   return (
     <Box component="form" sx={{ '> *': { margin: 2 } }}>
       <Box>

@@ -4,7 +4,7 @@ info:
   version: 0.0.0
 tags: []
 paths:
-  /api/v1/account/clients/:
+  /account/clients/:
     get:
       operationId: Clients_listClients
       summary: Get all clients
@@ -66,7 +66,7 @@ paths:
                   $ref: '#/components/schemas/ClientCreate'
               required:
                 - client
-  /api/v1/account/clients/:id/{id}:
+  /account/clients/:id/{id}:
     post:
       operationId: Clients_updateClient
       summary: Update a client
@@ -135,9 +135,9 @@ paths:
                     type: string
                 required:
                   - error
-  /api/v1/authorize:
+  /authorize:
     get:
-      operationId: V1_authorize
+      operationId: authorize
       summary: Authorization Request
       parameters:
         - name: response_type
@@ -190,9 +190,9 @@ paths:
                 required:
                   - error
                   - error_description
-  /api/v1/login:
+  /login:
     post:
-      operationId: V1_login
+      operationId: login
       summary: Login
       parameters: []
       responses:
@@ -219,7 +219,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ReqLogin'
-  /api/v1/token/:
+  /token/:
     post:
       operationId: Token_getToken
       summary: Get a token
@@ -305,3 +305,7 @@ components:
           type: string
         password:
           type: string
+servers:
+  - url: https://auth.piny940.com/api/v1
+    description: Auth Server
+    variables: {}
