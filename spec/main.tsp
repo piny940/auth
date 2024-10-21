@@ -57,7 +57,6 @@ namespace Api {
     @summary("Login")
     op login(name: string, password: string): {
       @statusCode statusCode: 200;
-      token: string;
     } | {
       @statusCode statusCode: 400;
       error: string;

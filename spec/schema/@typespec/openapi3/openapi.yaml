@@ -193,15 +193,6 @@ paths:
       responses:
         '200':
           description: The request has succeeded.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  token:
-                    type: string
-                required:
-                  - token
         '400':
           description: The server could not understand the request due to invalid syntax.
           content:
