@@ -36,6 +36,9 @@ table "clients" {
   column "user_id" {
     type = bigint
   }
+  column "name" {
+    type = varchar(255)
+  }
   column "redirect_uris" {
     type = sql("varchar(255)[]")
   }
