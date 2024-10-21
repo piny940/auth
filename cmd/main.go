@@ -14,7 +14,8 @@ import (
 )
 
 type Config struct {
-	Port string
+	Port         string   `required:"true"`
+	AllowOrigins []string `split_words:"true" required:"true"`
 }
 
 func main() {
@@ -29,6 +30,9 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.Secure())
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: config.AllowOrigins,
+	}))
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
