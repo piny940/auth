@@ -4,14 +4,11 @@
 package api
 
 import (
-	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 	"github.com/oapi-codegen/runtime"
-	strictecho "github.com/oapi-codegen/runtime/strictmiddleware/echo"
 )
 
 // Client defines model for Client.
@@ -25,6 +22,17 @@ type Client struct {
 type ClientCreate struct {
 	Name         string   `json:"name"`
 	RedirectUrls []string `json:"redirect_urls"`
+}
+
+// ReqLogin defines model for ReqLogin.
+type ReqLogin struct {
+	Name     string `json:"name"`
+	Password string `json:"password"`
+}
+
+// ClientsListClientsParams defines parameters for ClientsListClients.
+type ClientsListClientsParams struct {
+	Cookie string `json:"cookie"`
 }
 
 // ClientsCreateClientJSONBody defines parameters for ClientsCreateClient.
@@ -46,12 +54,6 @@ type V1AuthorizeParams struct {
 	State        *string `form:"state,omitempty" json:"state,omitempty"`
 }
 
-// V1LoginJSONBody defines parameters for V1Login.
-type V1LoginJSONBody struct {
-	Name     string `json:"name"`
-	Password string `json:"password"`
-}
-
 // TokenGetTokenJSONBody defines parameters for TokenGetToken.
 type TokenGetTokenJSONBody struct {
 	ClientId     string `json:"client_id"`
@@ -65,7 +67,7 @@ type ClientsCreateClientJSONRequestBody ClientsCreateClientJSONBody
 type ClientsUpdateClientJSONRequestBody ClientsUpdateClientJSONBody
 
 // V1LoginJSONRequestBody defines body for V1Login for application/json ContentType.
-type V1LoginJSONRequestBody V1LoginJSONBody
+type V1LoginJSONRequestBody = ReqLogin
 
 // TokenGetTokenJSONRequestBody defines body for TokenGetToken for application/json ContentType.
 type TokenGetTokenJSONRequestBody TokenGetTokenJSONBody
@@ -74,7 +76,7 @@ type TokenGetTokenJSONRequestBody TokenGetTokenJSONBody
 type ServerInterface interface {
 	// Get all clients
 	// (GET /api/v1/account/clients/)
-	ClientsListClients(ctx echo.Context) error
+	ClientsListClients(ctx echo.Context, params ClientsListClientsParams) error
 	// Create a new client
 	// (POST /api/v1/account/clients/)
 	ClientsCreateClient(ctx echo.Context) error
@@ -104,8 +106,30 @@ type ServerInterfaceWrapper struct {
 func (w *ServerInterfaceWrapper) ClientsListClients(ctx echo.Context) error {
 	var err error
 
+	// Parameter object where we will unmarshal all parameters from the context
+	var params ClientsListClientsParams
+
+	headers := ctx.Request().Header
+	// ------------- Required header parameter "cookie" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("cookie")]; found {
+		var Cookie string
+		n := len(valueList)
+		if n != 1 {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Expected one value for cookie, got %d", n))
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "cookie", valueList[0], &Cookie, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: true})
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter cookie: %s", err))
+		}
+
+		params.Cookie = Cookie
+	} else {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Header parameter cookie is required, but not found"))
+	}
+
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.ClientsListClients(ctx)
+	err = w.Handler.ClientsListClients(ctx, params)
 	return err
 }
 
@@ -250,426 +274,4 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.POST(baseURL+"/api/v1/login", wrapper.V1Login)
 	router.POST(baseURL+"/api/v1/token/", wrapper.TokenGetToken)
 
-}
-
-type ClientsListClientsRequestObject struct {
-}
-
-type ClientsListClientsResponseObject interface {
-	VisitClientsListClientsResponse(w http.ResponseWriter) error
-}
-
-type ClientsListClients200JSONResponse struct {
-	Clients []Client `json:"clients"`
-}
-
-func (response ClientsListClients200JSONResponse) VisitClientsListClientsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type ClientsCreateClientRequestObject struct {
-	Body *ClientsCreateClientJSONRequestBody
-}
-
-type ClientsCreateClientResponseObject interface {
-	VisitClientsCreateClientResponse(w http.ResponseWriter) error
-}
-
-type ClientsCreateClient201JSONResponse struct {
-	Client Client `json:"client"`
-}
-
-func (response ClientsCreateClient201JSONResponse) VisitClientsCreateClientResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(201)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type ClientsCreateClient400JSONResponse struct {
-	Error string `json:"error"`
-}
-
-func (response ClientsCreateClient400JSONResponse) VisitClientsCreateClientResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type ClientsDeleteClientRequestObject struct {
-	Id int64 `json:"id"`
-}
-
-type ClientsDeleteClientResponseObject interface {
-	VisitClientsDeleteClientResponse(w http.ResponseWriter) error
-}
-
-type ClientsDeleteClient204Response struct {
-}
-
-func (response ClientsDeleteClient204Response) VisitClientsDeleteClientResponse(w http.ResponseWriter) error {
-	w.WriteHeader(204)
-	return nil
-}
-
-type ClientsDeleteClient400JSONResponse struct {
-	Error string `json:"error"`
-}
-
-func (response ClientsDeleteClient400JSONResponse) VisitClientsDeleteClientResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type ClientsUpdateClientRequestObject struct {
-	Id   int64 `json:"id"`
-	Body *ClientsUpdateClientJSONRequestBody
-}
-
-type ClientsUpdateClientResponseObject interface {
-	VisitClientsUpdateClientResponse(w http.ResponseWriter) error
-}
-
-type ClientsUpdateClient200JSONResponse struct {
-	Client Client `json:"client"`
-}
-
-func (response ClientsUpdateClient200JSONResponse) VisitClientsUpdateClientResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type ClientsUpdateClient400JSONResponse struct {
-	Error string `json:"error"`
-}
-
-func (response ClientsUpdateClient400JSONResponse) VisitClientsUpdateClientResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type V1AuthorizeRequestObject struct {
-	Params V1AuthorizeParams
-}
-
-type V1AuthorizeResponseObject interface {
-	VisitV1AuthorizeResponse(w http.ResponseWriter) error
-}
-
-type V1Authorize302Response struct {
-}
-
-func (response V1Authorize302Response) VisitV1AuthorizeResponse(w http.ResponseWriter) error {
-	w.WriteHeader(302)
-	return nil
-}
-
-type V1Authorize400JSONResponse struct {
-	Error            int32   `json:"error"`
-	ErrorDescription string  `json:"error_description"`
-	State            *string `json:"state,omitempty"`
-}
-
-func (response V1Authorize400JSONResponse) VisitV1AuthorizeResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type V1LoginRequestObject struct {
-	Body *V1LoginJSONRequestBody
-}
-
-type V1LoginResponseObject interface {
-	VisitV1LoginResponse(w http.ResponseWriter) error
-}
-
-type V1Login200Response struct {
-}
-
-func (response V1Login200Response) VisitV1LoginResponse(w http.ResponseWriter) error {
-	w.WriteHeader(200)
-	return nil
-}
-
-type V1Login400JSONResponse struct {
-	Error            int32  `json:"error"`
-	ErrorDescription string `json:"error_description"`
-}
-
-func (response V1Login400JSONResponse) VisitV1LoginResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type TokenGetTokenRequestObject struct {
-	Body *TokenGetTokenJSONRequestBody
-}
-
-type TokenGetTokenResponseObject interface {
-	VisitTokenGetTokenResponse(w http.ResponseWriter) error
-}
-
-type TokenGetToken200JSONResponse struct {
-	Token string `json:"token"`
-}
-
-func (response TokenGetToken200JSONResponse) VisitTokenGetTokenResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type TokenGetToken400JSONResponse struct {
-	Error            int32  `json:"error"`
-	ErrorDescription string `json:"error_description"`
-}
-
-func (response TokenGetToken400JSONResponse) VisitTokenGetTokenResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-// StrictServerInterface represents all server handlers.
-type StrictServerInterface interface {
-	// Get all clients
-	// (GET /api/v1/account/clients/)
-	ClientsListClients(ctx context.Context, request ClientsListClientsRequestObject) (ClientsListClientsResponseObject, error)
-	// Create a new client
-	// (POST /api/v1/account/clients/)
-	ClientsCreateClient(ctx context.Context, request ClientsCreateClientRequestObject) (ClientsCreateClientResponseObject, error)
-	// Delete a client
-	// (DELETE /api/v1/account/clients/:id/{id})
-	ClientsDeleteClient(ctx context.Context, request ClientsDeleteClientRequestObject) (ClientsDeleteClientResponseObject, error)
-	// Update a client
-	// (POST /api/v1/account/clients/:id/{id})
-	ClientsUpdateClient(ctx context.Context, request ClientsUpdateClientRequestObject) (ClientsUpdateClientResponseObject, error)
-	// Authorization Request
-	// (GET /api/v1/authorize)
-	V1Authorize(ctx context.Context, request V1AuthorizeRequestObject) (V1AuthorizeResponseObject, error)
-	// Login
-	// (POST /api/v1/login)
-	V1Login(ctx context.Context, request V1LoginRequestObject) (V1LoginResponseObject, error)
-	// Get a token
-	// (POST /api/v1/token/)
-	TokenGetToken(ctx context.Context, request TokenGetTokenRequestObject) (TokenGetTokenResponseObject, error)
-}
-
-type StrictHandlerFunc = strictecho.StrictEchoHandlerFunc
-type StrictMiddlewareFunc = strictecho.StrictEchoMiddlewareFunc
-
-func NewStrictHandler(ssi StrictServerInterface, middlewares []StrictMiddlewareFunc) ServerInterface {
-	return &strictHandler{ssi: ssi, middlewares: middlewares}
-}
-
-type strictHandler struct {
-	ssi         StrictServerInterface
-	middlewares []StrictMiddlewareFunc
-}
-
-// ClientsListClients operation middleware
-func (sh *strictHandler) ClientsListClients(ctx echo.Context) error {
-	var request ClientsListClientsRequestObject
-
-	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.ClientsListClients(ctx.Request().Context(), request.(ClientsListClientsRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "ClientsListClients")
-	}
-
-	response, err := handler(ctx, request)
-
-	if err != nil {
-		return err
-	} else if validResponse, ok := response.(ClientsListClientsResponseObject); ok {
-		return validResponse.VisitClientsListClientsResponse(ctx.Response())
-	} else if response != nil {
-		return fmt.Errorf("unexpected response type: %T", response)
-	}
-	return nil
-}
-
-// ClientsCreateClient operation middleware
-func (sh *strictHandler) ClientsCreateClient(ctx echo.Context) error {
-	var request ClientsCreateClientRequestObject
-
-	var body ClientsCreateClientJSONRequestBody
-	if err := ctx.Bind(&body); err != nil {
-		return err
-	}
-	request.Body = &body
-
-	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.ClientsCreateClient(ctx.Request().Context(), request.(ClientsCreateClientRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "ClientsCreateClient")
-	}
-
-	response, err := handler(ctx, request)
-
-	if err != nil {
-		return err
-	} else if validResponse, ok := response.(ClientsCreateClientResponseObject); ok {
-		return validResponse.VisitClientsCreateClientResponse(ctx.Response())
-	} else if response != nil {
-		return fmt.Errorf("unexpected response type: %T", response)
-	}
-	return nil
-}
-
-// ClientsDeleteClient operation middleware
-func (sh *strictHandler) ClientsDeleteClient(ctx echo.Context, id int64) error {
-	var request ClientsDeleteClientRequestObject
-
-	request.Id = id
-
-	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.ClientsDeleteClient(ctx.Request().Context(), request.(ClientsDeleteClientRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "ClientsDeleteClient")
-	}
-
-	response, err := handler(ctx, request)
-
-	if err != nil {
-		return err
-	} else if validResponse, ok := response.(ClientsDeleteClientResponseObject); ok {
-		return validResponse.VisitClientsDeleteClientResponse(ctx.Response())
-	} else if response != nil {
-		return fmt.Errorf("unexpected response type: %T", response)
-	}
-	return nil
-}
-
-// ClientsUpdateClient operation middleware
-func (sh *strictHandler) ClientsUpdateClient(ctx echo.Context, id int64) error {
-	var request ClientsUpdateClientRequestObject
-
-	request.Id = id
-
-	var body ClientsUpdateClientJSONRequestBody
-	if err := ctx.Bind(&body); err != nil {
-		return err
-	}
-	request.Body = &body
-
-	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.ClientsUpdateClient(ctx.Request().Context(), request.(ClientsUpdateClientRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "ClientsUpdateClient")
-	}
-
-	response, err := handler(ctx, request)
-
-	if err != nil {
-		return err
-	} else if validResponse, ok := response.(ClientsUpdateClientResponseObject); ok {
-		return validResponse.VisitClientsUpdateClientResponse(ctx.Response())
-	} else if response != nil {
-		return fmt.Errorf("unexpected response type: %T", response)
-	}
-	return nil
-}
-
-// V1Authorize operation middleware
-func (sh *strictHandler) V1Authorize(ctx echo.Context, params V1AuthorizeParams) error {
-	var request V1AuthorizeRequestObject
-
-	request.Params = params
-
-	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.V1Authorize(ctx.Request().Context(), request.(V1AuthorizeRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "V1Authorize")
-	}
-
-	response, err := handler(ctx, request)
-
-	if err != nil {
-		return err
-	} else if validResponse, ok := response.(V1AuthorizeResponseObject); ok {
-		return validResponse.VisitV1AuthorizeResponse(ctx.Response())
-	} else if response != nil {
-		return fmt.Errorf("unexpected response type: %T", response)
-	}
-	return nil
-}
-
-// V1Login operation middleware
-func (sh *strictHandler) V1Login(ctx echo.Context) error {
-	var request V1LoginRequestObject
-
-	var body V1LoginJSONRequestBody
-	if err := ctx.Bind(&body); err != nil {
-		return err
-	}
-	request.Body = &body
-
-	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.V1Login(ctx.Request().Context(), request.(V1LoginRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "V1Login")
-	}
-
-	response, err := handler(ctx, request)
-
-	if err != nil {
-		return err
-	} else if validResponse, ok := response.(V1LoginResponseObject); ok {
-		return validResponse.VisitV1LoginResponse(ctx.Response())
-	} else if response != nil {
-		return fmt.Errorf("unexpected response type: %T", response)
-	}
-	return nil
-}
-
-// TokenGetToken operation middleware
-func (sh *strictHandler) TokenGetToken(ctx echo.Context) error {
-	var request TokenGetTokenRequestObject
-
-	var body TokenGetTokenJSONRequestBody
-	if err := ctx.Bind(&body); err != nil {
-		return err
-	}
-	request.Body = &body
-
-	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.TokenGetToken(ctx.Request().Context(), request.(TokenGetTokenRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "TokenGetToken")
-	}
-
-	response, err := handler(ctx, request)
-
-	if err != nil {
-		return err
-	} else if validResponse, ok := response.(TokenGetTokenResponseObject); ok {
-		return validResponse.VisitTokenGetTokenResponse(ctx.Response())
-	} else if response != nil {
-		return fmt.Errorf("unexpected response type: %T", response)
-	}
-	return nil
 }

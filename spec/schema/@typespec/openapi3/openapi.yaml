@@ -4,11 +4,16 @@ info:
   version: 0.0.0
 tags: []
 paths:
-  /api/v1/account/clients/:
+  /account/clients/:
     get:
       operationId: Clients_listClients
       summary: Get all clients
-      parameters: []
+      parameters:
+        - name: cookie
+          in: header
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: The request has succeeded.
@@ -61,7 +66,7 @@ paths:
                   $ref: '#/components/schemas/ClientCreate'
               required:
                 - client
-  /api/v1/account/clients/:id/{id}:
+  /account/clients/:id/{id}:
     post:
       operationId: Clients_updateClient
       summary: Update a client
@@ -130,9 +135,9 @@ paths:
                     type: string
                 required:
                   - error
-  /api/v1/authorize:
+  /authorize:
     get:
-      operationId: V1_authorize
+      operationId: authorize
       summary: Authorization Request
       parameters:
         - name: response_type
@@ -185,14 +190,14 @@ paths:
                 required:
                   - error
                   - error_description
-  /api/v1/login:
+  /login:
     post:
-      operationId: V1_login
+      operationId: login
       summary: Login
       parameters: []
       responses:
-        '200':
-          description: The request has succeeded.
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
         '400':
           description: The server could not understand the request due to invalid syntax.
           content:
@@ -213,16 +218,8 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                password:
-                  type: string
-              required:
-                - name
-                - password
-  /api/v1/token/:
+              $ref: '#/components/schemas/ReqLogin'
+  /token/:
     post:
       operationId: Token_getToken
       summary: Get a token
@@ -298,3 +295,17 @@ components:
           type: array
           items:
             type: string
+    ReqLogin:
+      type: object
+      required:
+        - name
+        - password
+      properties:
+        name:
+          type: string
+        password:
+          type: string
+servers:
+  - url: https://auth.piny940.com/api/v1
+    description: Auth Server
+    variables: {}
