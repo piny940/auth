@@ -282,8 +282,7 @@ paths:
                 type: object
                 properties:
                   error:
-                    type: integer
-                    format: int32
+                    type: string
                   error_description:
                     type: string
                 required:

@@ -19,7 +19,10 @@ func (s *Server) Login(ctx echo.Context) error {
 
 	user, err := s.AuthUsecase.Login(body.Name, body.Password)
 	if err != nil {
-		return ctx.JSON(http.StatusBadRequest, "Invalid username or password")
+		return ctx.JSON(http.StatusBadRequest, echo.Map{
+			"error":             "invalid_request",
+			"error_description": "name or password is incorrect",
+		})
 	}
 	err = Login(ctx.Request(), ctx.Response().Writer, user)
 	if err != nil {

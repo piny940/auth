@@ -89,7 +89,7 @@ op login(@body body: ReqLogin): {
   @statusCode statusCode: 204;
 } | {
   @statusCode statusCode: 400;
-  error: int32;
+  error: string;
   error_description: string;
 };
 
