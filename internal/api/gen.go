@@ -54,6 +54,15 @@ type AuthorizeParams struct {
 	State        *string `form:"state,omitempty" json:"state,omitempty"`
 }
 
+// PostAuthorizeMultipartBody defines parameters for PostAuthorize.
+type PostAuthorizeMultipartBody struct {
+	ClientId     string  `json:"client_id"`
+	RedirectUri  string  `json:"redirect_uri"`
+	ResponseType string  `json:"response_type"`
+	Scope        string  `json:"scope"`
+	State        *string `json:"state,omitempty"`
+}
+
 // TokenGetTokenJSONBody defines parameters for TokenGetToken.
 type TokenGetTokenJSONBody struct {
 	ClientId     string `json:"client_id"`
@@ -65,6 +74,9 @@ type ClientsCreateClientJSONRequestBody ClientsCreateClientJSONBody
 
 // ClientsUpdateClientJSONRequestBody defines body for ClientsUpdateClient for application/json ContentType.
 type ClientsUpdateClientJSONRequestBody ClientsUpdateClientJSONBody
+
+// PostAuthorizeMultipartRequestBody defines body for PostAuthorize for multipart/form-data ContentType.
+type PostAuthorizeMultipartRequestBody PostAuthorizeMultipartBody
 
 // LoginJSONRequestBody defines body for Login for application/json ContentType.
 type LoginJSONRequestBody = ReqLogin
@@ -89,6 +101,9 @@ type ServerInterface interface {
 	// Authorization Request
 	// (GET /authorize)
 	Authorize(ctx echo.Context, params AuthorizeParams) error
+	// Authorization Request
+	// (POST /authorize)
+	PostAuthorize(ctx echo.Context) error
 	// Login
 	// (POST /login)
 	Login(ctx echo.Context) error
@@ -220,6 +235,15 @@ func (w *ServerInterfaceWrapper) Authorize(ctx echo.Context) error {
 	return err
 }
 
+// PostAuthorize converts echo context to params.
+func (w *ServerInterfaceWrapper) PostAuthorize(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PostAuthorize(ctx)
+	return err
+}
+
 // Login converts echo context to params.
 func (w *ServerInterfaceWrapper) Login(ctx echo.Context) error {
 	var err error
@@ -271,6 +295,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.DELETE(baseURL+"/account/clients/:id/:id", wrapper.ClientsDeleteClient)
 	router.POST(baseURL+"/account/clients/:id/:id", wrapper.ClientsUpdateClient)
 	router.GET(baseURL+"/authorize", wrapper.Authorize)
+	router.POST(baseURL+"/authorize", wrapper.PostAuthorize)
 	router.POST(baseURL+"/login", wrapper.Login)
 	router.POST(baseURL+"/token/", wrapper.TokenGetToken)
 

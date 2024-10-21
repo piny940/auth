@@ -23,7 +23,7 @@ model ReqLogin {
 @route("/authorize")
 @get
 @summary("Authorization Request")
-op request(
+op authorize(
   @query response_type: string,
   @query client_id: string,
   @query redirect_uri: string,
@@ -42,9 +42,11 @@ op request(
   error_description: string;
   state?: string;
 };
+
+@route("/authorize")
 @post
 @summary("Authorization Request")
-op authorize(
+op postAuthorize(
   @header contentType: "multipart/form-data",
   response_type: string,
   client_id: string,

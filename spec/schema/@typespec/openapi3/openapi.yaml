@@ -171,8 +171,24 @@ paths:
             type: string
           explode: false
       responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
         '302':
           description: Redirection
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  error_description:
+                    type: string
+                  state:
+                    type: string
+                required:
+                  - error
+                  - error_description
         '400':
           description: The server could not understand the request due to invalid syntax.
           content:
@@ -181,8 +197,7 @@ paths:
                 type: object
                 properties:
                   error:
-                    type: integer
-                    format: int32
+                    type: string
                   error_description:
                     type: string
                   state:
@@ -190,6 +205,67 @@ paths:
                 required:
                   - error
                   - error_description
+    post:
+      operationId: postAuthorize
+      summary: Authorization Request
+      parameters: []
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        '302':
+          description: Redirection
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  error_description:
+                    type: string
+                  state:
+                    type: string
+                required:
+                  - error
+                  - error_description
+        '400':
+          description: The server could not understand the request due to invalid syntax.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  error_description:
+                    type: string
+                  state:
+                    type: string
+                required:
+                  - error
+                  - error_description
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                response_type:
+                  type: string
+                client_id:
+                  type: string
+                redirect_uri:
+                  type: string
+                scope:
+                  type: string
+                state:
+                  type: string
+              required:
+                - response_type
+                - client_id
+                - redirect_uri
+                - scope
   /login:
     post:
       operationId: login

@@ -69,6 +69,11 @@ func (s *Server) Authorize(ctx echo.Context, params AuthorizeParams) error {
 	return ctx.Redirect(http.StatusFound, req.RedirectURI)
 }
 
+// PostAuthorize implements ServerInterface.
+func (s *Server) PostAuthorize(ctx echo.Context) error {
+	panic("unimplemented")
+}
+
 func toDAuthParams(params AuthorizeParams) *oauth.AuthRequest {
 	strScopes := strings.Split(params.Scope, " ")
 	scopes := make([]oauth.TypeScope, 0, len(strScopes))

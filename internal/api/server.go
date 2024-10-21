@@ -7,12 +7,12 @@ import (
 )
 
 type Server struct {
-	AuthUsecase usecase.AuthUsecase
+	AuthUsecase *usecase.AuthUsecase
 }
 
 var _ ServerInterface = &Server{}
 
-func NewServer(authUsecase usecase.AuthUsecase) *Server {
+func NewServer(authUsecase *usecase.AuthUsecase) *Server {
 	return &Server{
 		AuthUsecase: authUsecase,
 	}

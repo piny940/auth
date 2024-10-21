@@ -1,6 +1,8 @@
 package main
 
 import (
+	"auth/internal/api"
+	"auth/internal/di"
 	"auth/internal/infrastructure"
 	"context"
 	"os"
@@ -33,6 +35,7 @@ func main() {
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: config.AllowOrigins,
 	}))
+	api.RegisterHandlers(e.Group("/api/v1"), di.NewServer())
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
