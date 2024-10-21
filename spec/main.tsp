@@ -20,6 +20,24 @@ model Client {
 namespace Api {
   @route("/v1")
   namespace V1 {
+    @route("/authorize")
+    @get
+    @summary("Authorization Request")
+    op authorize(
+      @query response_type: string,
+      @query client_id: string,
+      @query redirect_uri: string,
+      @query scope: string,
+      @query state?: string,
+    ): {
+      @statusCode statusCode: 302;
+    } | {
+      @statusCode statusCode: 400;
+      error: int32;
+      error_description: string;
+      state?: string;
+    };
+
     @route("/token")
     namespace Token {
       @route("/")
@@ -27,10 +45,10 @@ namespace Api {
       @summary("Get a token")
       op getToken(client_id: string, client_secret: string): {
         @statusCode statusCode: 200;
-        @body token: string;
+        token: string;
       } | {
         @statusCode statusCode: 400;
-        @body error: string;
+        error: string;
       };
     }
 
@@ -43,7 +61,7 @@ namespace Api {
         @summary("Get all clients")
         op listClients(): {
           @statusCode statusCode: 200;
-          @body clients: Client[];
+          clients: Client[];
         };
 
         @route("/")
@@ -51,10 +69,10 @@ namespace Api {
         @summary("Create a new client")
         op createClient(client: Client): {
           @statusCode statusCode: 201;
-          @body client: Client;
+          client: Client;
         } | {
           @statusCode statusCode: 400;
-          @body error: string;
+          error: string;
         };
 
         @route("/:id")
@@ -62,10 +80,10 @@ namespace Api {
         @summary("Update a client")
         op updateClient(@path id: int64, client: Client): {
           @statusCode statusCode: 200;
-          @body client: Client;
+          client: Client;
         } | {
           @statusCode statusCode: 400;
-          @body error: string;
+          error: string;
         };
 
         @route("/:id")
@@ -75,7 +93,7 @@ namespace Api {
           @statusCode statusCode: 204;
         } | {
           @statusCode statusCode: 400;
-          @body error: string;
+          error: string;
         };
       }
     }

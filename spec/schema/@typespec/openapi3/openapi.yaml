@@ -15,9 +15,14 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Client'
+                type: object
+                properties:
+                  clients:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Client'
+                required:
+                  - clients
     post:
       operationId: Clients_createClient
       summary: Create a new client
@@ -28,13 +33,23 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Client'
+                type: object
+                properties:
+                  client:
+                    $ref: '#/components/schemas/Client'
+                required:
+                  - client
         '400':
           description: The server could not understand the request due to invalid syntax.
           content:
             application/json:
               schema:
-                type: string
+                type: object
+                properties:
+                  error:
+                    type: string
+                required:
+                  - error
       requestBody:
         required: true
         content:
@@ -63,13 +78,23 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Client'
+                type: object
+                properties:
+                  client:
+                    $ref: '#/components/schemas/Client'
+                required:
+                  - client
         '400':
           description: The server could not understand the request due to invalid syntax.
           content:
             application/json:
               schema:
-                type: string
+                type: object
+                properties:
+                  error:
+                    type: string
+                required:
+                  - error
       requestBody:
         required: true
         content:
@@ -99,7 +124,67 @@ paths:
           content:
             application/json:
               schema:
-                type: string
+                type: object
+                properties:
+                  error:
+                    type: string
+                required:
+                  - error
+  /api/v1/authorize:
+    get:
+      operationId: V1_authorize
+      summary: Authorization Request
+      parameters:
+        - name: response_type
+          in: query
+          required: true
+          schema:
+            type: string
+          explode: false
+        - name: client_id
+          in: query
+          required: true
+          schema:
+            type: string
+          explode: false
+        - name: redirect_uri
+          in: query
+          required: true
+          schema:
+            type: string
+          explode: false
+        - name: scope
+          in: query
+          required: true
+          schema:
+            type: string
+          explode: false
+        - name: state
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+      responses:
+        '302':
+          description: Redirection
+        '400':
+          description: The server could not understand the request due to invalid syntax.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: integer
+                    format: int32
+                  error_description:
+                    type: string
+                  state:
+                    type: string
+                required:
+                  - error
+                  - error_description
   /api/v1/token/:
     post:
       operationId: Token_getToken
@@ -111,13 +196,23 @@ paths:
           content:
             application/json:
               schema:
-                type: string
+                type: object
+                properties:
+                  token:
+                    type: string
+                required:
+                  - token
         '400':
           description: The server could not understand the request due to invalid syntax.
           content:
             application/json:
               schema:
-                type: string
+                type: object
+                properties:
+                  error:
+                    type: string
+                required:
+                  - error
       requestBody:
         required: true
         content:
