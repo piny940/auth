@@ -27,6 +27,7 @@ export const LoginForm = (): JSX.Element => {
     },
     [setError]
   )
+
   return (
     <Box
       component="form"

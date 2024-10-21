@@ -10,7 +10,5 @@ import (
 
 func Init() {
 	gob.Register(&domain.User{})
-	sessionStore = &typeSessionStore{
-		sessions.NewCookieStore([]byte(os.Getenv("SESSION_SECRET"))),
-	}
+	store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_SECRET")))
 }

@@ -37,7 +37,9 @@ func main() {
 	e.Use(middleware.Recover())
 	e.Use(middleware.Secure())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: config.AllowOrigins,
+		AllowOrigins:     config.AllowOrigins,
+		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+		AllowCredentials: true,
 	}))
 	api.RegisterHandlers(e.Group("/api/v1"), di.NewServer())
 

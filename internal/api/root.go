@@ -11,7 +11,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// V1Login implements ServerInterface.
 func (s *Server) Login(ctx echo.Context) error {
 	var body LoginJSONRequestBody
 	if err := ctx.Bind(&body); err != nil {
@@ -32,7 +31,6 @@ func (s *Server) Login(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusNoContent)
 }
 
-// Signup implements ServerInterface.
 func (s *Server) Signup(ctx echo.Context) error {
 	var body SignupJSONRequestBody
 	if err := ctx.Bind(&body); err != nil {
