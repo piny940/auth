@@ -8,7 +8,12 @@ paths:
     get:
       operationId: Clients_listClients
       summary: Get all clients
-      parameters: []
+      parameters:
+        - name: cookie
+          in: header
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: The request has succeeded.
@@ -213,15 +218,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                password:
-                  type: string
-              required:
-                - name
-                - password
+              $ref: '#/components/schemas/ReqLogin'
   /api/v1/token/:
     post:
       operationId: Token_getToken
@@ -298,3 +295,13 @@ components:
           type: array
           items:
             type: string
+    ReqLogin:
+      type: object
+      required:
+        - name
+        - password
+      properties:
+        name:
+          type: string
+        password:
+          type: string

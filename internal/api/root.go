@@ -1,22 +1,25 @@
 package api
 
 import (
-	"context"
-	"fmt"
-	"log/slog"
+	"net/http"
+
+	"github.com/labstack/echo/v4"
 )
 
-// V1Login implements StrictServerInterface.
-func (s *Server) V1Login(ctx context.Context, request V1LoginRequestObject) (V1LoginResponseObject, error) {
-	_, err := s.AuthUsecase.Login(request.Body.Name, request.Body.Password)
-	if err != nil {
-		slog.Info(fmt.Sprintf("login failed: %s", err.Error()))
-		return V1Login400JSONResponse{
-			Error:            400,
-			ErrorDescription: "usename or password is incorrect",
-		}, nil
+// V1Login implements ServerInterface.
+func (s *Server) V1Login(ctx echo.Context) error {
+	var body V1LoginJSONRequestBody
+	if err := ctx.Bind(&body); err != nil {
+		return err
 	}
 
-	// TODO: login
-	return V1Login204Response{}, nil
+	user, err := s.AuthUsecase.Login(body.Name, body.Password)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, "Invalid username or password")
+	}
+	err = Login(ctx.Request(), ctx.Response().Writer, user)
+	if err != nil {
+		return err
+	}
+	return ctx.JSON(http.StatusNoContent, nil)
 }

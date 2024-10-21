@@ -15,6 +15,10 @@ model Client {
   name: string;
   redirect_urls: string[];
 }
+model ReqLogin {
+  name: string;
+  password: string;
+}
 
 @route("/api")
 namespace Api {
@@ -56,7 +60,7 @@ namespace Api {
     @route("/login")
     @post
     @summary("Login")
-    op login(name: string, password: string): {
+    op login(@body body: ReqLogin): {
       @statusCode statusCode: 204;
     } | {
       @statusCode statusCode: 400;
@@ -71,7 +75,7 @@ namespace Api {
         @route("/")
         @get
         @summary("Get all clients")
-        op listClients(): {
+        op listClients(@header cookie: string): {
           @statusCode statusCode: 200;
           clients: Client[];
         };

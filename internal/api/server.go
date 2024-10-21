@@ -2,14 +2,15 @@ package api
 
 import (
 	"auth/internal/usecase"
-	"context"
+
+	"github.com/labstack/echo/v4"
 )
 
 type Server struct {
 	AuthUsecase usecase.AuthUsecase
 }
 
-var _ StrictServerInterface = &Server{}
+var _ ServerInterface = &Server{}
 
 func NewServer(authUsecase usecase.AuthUsecase) *Server {
 	return &Server{
@@ -17,32 +18,37 @@ func NewServer(authUsecase usecase.AuthUsecase) *Server {
 	}
 }
 
-// ClientsCreateClient implements StrictServerInterface.
-func (s *Server) ClientsCreateClient(ctx context.Context, request ClientsCreateClientRequestObject) (ClientsCreateClientResponseObject, error) {
+// ClientsCreateClient implements ServerInterface.
+func (s *Server) ClientsCreateClient(ctx echo.Context) error {
 	panic("unimplemented")
 }
 
-// ClientsDeleteClient implements StrictServerInterface.
-func (s *Server) ClientsDeleteClient(ctx context.Context, request ClientsDeleteClientRequestObject) (ClientsDeleteClientResponseObject, error) {
+// ClientsDeleteClient implements ServerInterface.
+func (s *Server) ClientsDeleteClient(ctx echo.Context, id int64) error {
 	panic("unimplemented")
 }
 
-// ClientsListClients implements StrictServerInterface.
-func (s *Server) ClientsListClients(ctx context.Context, request ClientsListClientsRequestObject) (ClientsListClientsResponseObject, error) {
+// ClientsListClients implements ServerInterface.
+func (s *Server) ClientsListClients(ctx echo.Context, params ClientsListClientsParams) error {
 	panic("unimplemented")
 }
 
-// ClientsUpdateClient implements StrictServerInterface.
-func (s *Server) ClientsUpdateClient(ctx context.Context, request ClientsUpdateClientRequestObject) (ClientsUpdateClientResponseObject, error) {
+// ClientsUpdateClient implements ServerInterface.
+func (s *Server) ClientsUpdateClient(ctx echo.Context, id int64) error {
 	panic("unimplemented")
 }
 
-// TokenGetToken implements StrictServerInterface.
-func (s *Server) TokenGetToken(ctx context.Context, request TokenGetTokenRequestObject) (TokenGetTokenResponseObject, error) {
+// TokenGetToken implements ServerInterface.
+func (s *Server) TokenGetToken(ctx echo.Context) error {
 	panic("unimplemented")
 }
 
-// V1Authorize implements StrictServerInterface.
-func (s *Server) V1Authorize(ctx context.Context, request V1AuthorizeRequestObject) (V1AuthorizeResponseObject, error) {
+// V1Authorize implements ServerInterface.
+func (s *Server) V1Authorize(ctx echo.Context, params V1AuthorizeParams) error {
+	panic("unimplemented")
+}
+
+// V1Login implements ServerInterface.
+func (s *Server) V1Login(ctx echo.Context) error {
 	panic("unimplemented")
 }
