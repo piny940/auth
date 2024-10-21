@@ -52,6 +52,17 @@ namespace Api {
       };
     }
 
+    @route("/login")
+    @post
+    @summary("Login")
+    op login(name: string, password: string): {
+      @statusCode statusCode: 200;
+      token: string;
+    } | {
+      @statusCode statusCode: 400;
+      error: string;
+    };
+
     @route("/account")
     namespace Account {
       @route("/clients")
