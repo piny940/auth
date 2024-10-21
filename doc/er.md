@@ -11,16 +11,25 @@ erDiagram
   }
 
   clients {
-    bigserial id PK
+    uuid id PK
+    varchar encrypted_secret
     bigint user_id FK
     varchar name
     varchar[] redirect_urls
     timestamp created_at
     timestamp updated_at
   }
+  auth_codes {
+    varchar value PK
+    bigint client_id FK
+    bigint user_id FK
+    timestamp expires_at
+    timestamp created_at
+    timestamp updated_at
+  }
   tokens {
     bigserial id PK
-    bigint client_id
+    bigint client_id FK
     varchar value
     varchar refresh_token
     timestamp expires_at
