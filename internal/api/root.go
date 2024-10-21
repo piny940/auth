@@ -21,7 +21,7 @@ func (s *Server) Login(ctx echo.Context) error {
 	user, err := s.AuthUsecase.Login(body.Name, body.Password)
 	if err != nil {
 		return ctx.JSON(http.StatusBadRequest, echo.Map{
-			"error":             "invalid_request",
+			"error":             "invalid_name_or_password",
 			"error_description": "name or password is incorrect",
 		})
 	}
@@ -39,21 +39,27 @@ func (s *Server) Signup(ctx echo.Context) error {
 		return err
 	}
 	err := s.AuthUsecase.SignUp(body.Name, body.Password, body.PasswordConfirmation)
+	if errors.Is(err, domain.ErrNameLengthNotEnough{}) {
+		return ctx.JSON(http.StatusBadRequest, echo.Map{
+			"error":             "name_length_not_enough",
+			"error_description": err.Error(),
+		})
+	}
 	if errors.Is(err, domain.ErrNameAlreadyUsed{}) {
 		return ctx.JSON(http.StatusBadRequest, echo.Map{
-			"error":             "invalid_request",
+			"error":             "name_already_used",
 			"error_description": err.Error(),
 		})
 	}
 	if errors.Is(err, domain.ErrPasswordLengthNotEnough{}) {
 		return ctx.JSON(http.StatusBadRequest, echo.Map{
-			"error":             "invalid_request",
+			"error":             "password_length_not_enough",
 			"error_description": err.Error(),
 		})
 	}
 	if errors.Is(err, domain.ErrPasswordConfirmation{}) {
 		return ctx.JSON(http.StatusBadRequest, echo.Map{
-			"error":             "invalid_request",
+			"error":             "password_confirmation",
 			"error_description": err.Error(),
 		})
 	}

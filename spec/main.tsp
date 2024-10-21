@@ -84,7 +84,7 @@ op login(@body body: ReqLogin): {
   @statusCode statusCode: 204;
 } | {
   @statusCode statusCode: 400;
-  error: string;
+  error: "invalid_name_or_password";
   error_description: string;
 };
 
@@ -100,7 +100,11 @@ op signup(@body body: User): {
   @statusCode statusCode: 204;
 } | {
   @statusCode statusCode: 400;
-  error: string;
+  error:
+    | "name_already_used"
+    | "name_length_not_enough"
+    | "password_length_not_enough"
+    | "password_confirmation";
   error_description: string;
 };
 

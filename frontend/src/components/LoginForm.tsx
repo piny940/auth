@@ -42,6 +42,7 @@ export const LoginForm = (): JSX.Element => {
               label="Name"
               variant="outlined"
               fullWidth
+              required
               error={fieldState.invalid}
               helperText={fieldState.error?.message}
               {...field}
@@ -60,6 +61,7 @@ export const LoginForm = (): JSX.Element => {
               label="Password"
               variant="outlined"
               fullWidth
+              required
               error={fieldState.invalid}
               helperText={fieldState.error?.message}
             />

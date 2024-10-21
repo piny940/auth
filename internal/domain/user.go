@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -25,7 +26,10 @@ type UserService struct {
 	UserRepo IUserRepo
 }
 
-const MIN_PASSWORD_LENGTH = 8
+const (
+	MIN_NAME_LENGTH     = 3
+	MIN_PASSWORD_LENGTH = 8
+)
 
 func NewUserService(userRepo IUserRepo) *UserService {
 	return &UserService{
@@ -42,12 +46,14 @@ func (u *User) PasswordMatch(password string) (bool, error) {
 }
 
 func (s *UserService) Validate(name, password, passwordConfirmation string) error {
-	existing, err := s.UserRepo.FindByName(name)
-	if err != nil {
-		return err
+	if len(name) < MIN_NAME_LENGTH {
+		return ErrNameLengthNotEnough{}
 	}
-	if existing != nil {
+	_, err := s.UserRepo.FindByName(name)
+	if err == nil {
 		return ErrNameAlreadyUsed{}
+	} else if !errors.Is(err, ErrRecordNotFound{}) {
+		return err
 	}
 	if !passwordStrong(password) {
 		return ErrPasswordLengthNotEnough{}
@@ -77,6 +83,12 @@ type ErrNameAlreadyUsed struct{}
 
 func (e ErrNameAlreadyUsed) Error() string {
 	return "this name is already used"
+}
+
+type ErrNameLengthNotEnough struct{}
+
+func (e ErrNameLengthNotEnough) Error() string {
+	return fmt.Sprintf("name length must be at least %d", MIN_NAME_LENGTH)
 }
 
 type ErrPasswordLengthNotEnough struct{}

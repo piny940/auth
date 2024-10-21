@@ -24,8 +24,20 @@ export const SignupForm = (): JSX.Element => {
         },
       })
       if (!!error) {
-        setError('name', { message: error.error_description })
-        setError('password', { message: error.error_description })
+        if (error.error === 'name_already_used') {
+          setError('name', { message: error.error_description })
+        } else if (error.error === 'password_length_not_enough') {
+          setError('password', { message: error.error_description })
+        } else if (error.error === 'password_confirmation') {
+          setError('password', { message: error.error_description })
+          setError('passwordConfirmation', { message: error.error_description })
+        } else if (error.error === 'name_length_not_enough') {
+          setError('name', { message: error.error_description })
+        } else {
+          setError('name', { message: error.error_description })
+          setError('password', { message: error.error_description })
+          setError('passwordConfirmation', { message: error.error_description })
+        }
         return
       }
     },
@@ -46,6 +58,7 @@ export const SignupForm = (): JSX.Element => {
               label="Name"
               variant="outlined"
               fullWidth
+              required
               error={fieldState.invalid}
               helperText={fieldState.error?.message}
               {...field}
@@ -64,6 +77,7 @@ export const SignupForm = (): JSX.Element => {
               label="Password"
               variant="outlined"
               fullWidth
+              required
               error={fieldState.invalid}
               helperText={fieldState.error?.message}
             />
@@ -81,6 +95,7 @@ export const SignupForm = (): JSX.Element => {
               label="Password Confirmation"
               variant="outlined"
               fullWidth
+              required
               error={fieldState.invalid}
               helperText={fieldState.error?.message}
             />

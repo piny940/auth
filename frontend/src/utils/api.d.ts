@@ -434,7 +434,8 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        error: string;
+                        /** @enum {string} */
+                        error: "invalid_name_or_password";
                         error_description: string;
                     };
                 };

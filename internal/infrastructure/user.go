@@ -4,6 +4,9 @@ import (
 	"auth/internal/domain"
 	"auth/internal/infrastructure/model"
 	"auth/internal/infrastructure/query"
+	"errors"
+
+	"gorm.io/gorm"
 )
 
 type userRepo struct {
@@ -23,6 +26,9 @@ func NewUserRepo(db *DB) domain.IUserRepo {
 
 func (u *userRepo) FindByID(id int64) (*domain.User, error) {
 	user, err := u.query.User.Where(u.query.User.ID.Eq(id)).First()
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, domain.ErrRecordNotFound{}
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -31,6 +37,9 @@ func (u *userRepo) FindByID(id int64) (*domain.User, error) {
 
 func (u *userRepo) FindByName(name string) (*domain.User, error) {
 	user, err := u.query.User.Where(u.query.User.Name.Eq(name)).First()
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, domain.ErrRecordNotFound{}
+	}
 	if err != nil {
 		return nil, err
 	}
