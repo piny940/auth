@@ -37,6 +37,21 @@ type ClientsUpdateClientJSONBody struct {
 	Client ClientCreate `json:"client"`
 }
 
+// V1AuthorizeParams defines parameters for V1Authorize.
+type V1AuthorizeParams struct {
+	ResponseType string  `form:"response_type" json:"response_type"`
+	ClientId     string  `form:"client_id" json:"client_id"`
+	RedirectUri  string  `form:"redirect_uri" json:"redirect_uri"`
+	Scope        string  `form:"scope" json:"scope"`
+	State        *string `form:"state,omitempty" json:"state,omitempty"`
+}
+
+// V1LoginJSONBody defines parameters for V1Login.
+type V1LoginJSONBody struct {
+	Name     string `json:"name"`
+	Password string `json:"password"`
+}
+
 // TokenGetTokenJSONBody defines parameters for TokenGetToken.
 type TokenGetTokenJSONBody struct {
 	ClientId     string `json:"client_id"`
@@ -48,6 +63,9 @@ type ClientsCreateClientJSONRequestBody ClientsCreateClientJSONBody
 
 // ClientsUpdateClientJSONRequestBody defines body for ClientsUpdateClient for application/json ContentType.
 type ClientsUpdateClientJSONRequestBody ClientsUpdateClientJSONBody
+
+// V1LoginJSONRequestBody defines body for V1Login for application/json ContentType.
+type V1LoginJSONRequestBody V1LoginJSONBody
 
 // TokenGetTokenJSONRequestBody defines body for TokenGetToken for application/json ContentType.
 type TokenGetTokenJSONRequestBody TokenGetTokenJSONBody
@@ -66,6 +84,12 @@ type ServerInterface interface {
 	// Update a client
 	// (POST /api/v1/account/clients/:id/{id})
 	ClientsUpdateClient(ctx echo.Context, id int64) error
+	// Authorization Request
+	// (GET /api/v1/authorize)
+	V1Authorize(ctx echo.Context, params V1AuthorizeParams) error
+	// Login
+	// (POST /api/v1/login)
+	V1Login(ctx echo.Context) error
 	// Get a token
 	// (POST /api/v1/token/)
 	TokenGetToken(ctx echo.Context) error
@@ -126,6 +150,61 @@ func (w *ServerInterfaceWrapper) ClientsUpdateClient(ctx echo.Context) error {
 	return err
 }
 
+// V1Authorize converts echo context to params.
+func (w *ServerInterfaceWrapper) V1Authorize(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params V1AuthorizeParams
+	// ------------- Required query parameter "response_type" -------------
+
+	err = runtime.BindQueryParameter("form", false, true, "response_type", ctx.QueryParams(), &params.ResponseType)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter response_type: %s", err))
+	}
+
+	// ------------- Required query parameter "client_id" -------------
+
+	err = runtime.BindQueryParameter("form", false, true, "client_id", ctx.QueryParams(), &params.ClientId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter client_id: %s", err))
+	}
+
+	// ------------- Required query parameter "redirect_uri" -------------
+
+	err = runtime.BindQueryParameter("form", false, true, "redirect_uri", ctx.QueryParams(), &params.RedirectUri)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter redirect_uri: %s", err))
+	}
+
+	// ------------- Required query parameter "scope" -------------
+
+	err = runtime.BindQueryParameter("form", false, true, "scope", ctx.QueryParams(), &params.Scope)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter scope: %s", err))
+	}
+
+	// ------------- Optional query parameter "state" -------------
+
+	err = runtime.BindQueryParameter("form", false, false, "state", ctx.QueryParams(), &params.State)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter state: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.V1Authorize(ctx, params)
+	return err
+}
+
+// V1Login converts echo context to params.
+func (w *ServerInterfaceWrapper) V1Login(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.V1Login(ctx)
+	return err
+}
+
 // TokenGetToken converts echo context to params.
 func (w *ServerInterfaceWrapper) TokenGetToken(ctx echo.Context) error {
 	var err error
@@ -167,6 +246,8 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.POST(baseURL+"/api/v1/account/clients/", wrapper.ClientsCreateClient)
 	router.DELETE(baseURL+"/api/v1/account/clients/:id/:id", wrapper.ClientsDeleteClient)
 	router.POST(baseURL+"/api/v1/account/clients/:id/:id", wrapper.ClientsUpdateClient)
+	router.GET(baseURL+"/api/v1/authorize", wrapper.V1Authorize)
+	router.POST(baseURL+"/api/v1/login", wrapper.V1Login)
 	router.POST(baseURL+"/api/v1/token/", wrapper.TokenGetToken)
 
 }
@@ -178,7 +259,9 @@ type ClientsListClientsResponseObject interface {
 	VisitClientsListClientsResponse(w http.ResponseWriter) error
 }
 
-type ClientsListClients200JSONResponse []Client
+type ClientsListClients200JSONResponse struct {
+	Clients []Client `json:"clients"`
+}
 
 func (response ClientsListClients200JSONResponse) VisitClientsListClientsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -195,7 +278,9 @@ type ClientsCreateClientResponseObject interface {
 	VisitClientsCreateClientResponse(w http.ResponseWriter) error
 }
 
-type ClientsCreateClient201JSONResponse Client
+type ClientsCreateClient201JSONResponse struct {
+	Client Client `json:"client"`
+}
 
 func (response ClientsCreateClient201JSONResponse) VisitClientsCreateClientResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -204,7 +289,9 @@ func (response ClientsCreateClient201JSONResponse) VisitClientsCreateClientRespo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ClientsCreateClient400JSONResponse string
+type ClientsCreateClient400JSONResponse struct {
+	Error string `json:"error"`
+}
 
 func (response ClientsCreateClient400JSONResponse) VisitClientsCreateClientResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -229,7 +316,9 @@ func (response ClientsDeleteClient204Response) VisitClientsDeleteClientResponse(
 	return nil
 }
 
-type ClientsDeleteClient400JSONResponse string
+type ClientsDeleteClient400JSONResponse struct {
+	Error string `json:"error"`
+}
 
 func (response ClientsDeleteClient400JSONResponse) VisitClientsDeleteClientResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -247,7 +336,9 @@ type ClientsUpdateClientResponseObject interface {
 	VisitClientsUpdateClientResponse(w http.ResponseWriter) error
 }
 
-type ClientsUpdateClient200JSONResponse Client
+type ClientsUpdateClient200JSONResponse struct {
+	Client Client `json:"client"`
+}
 
 func (response ClientsUpdateClient200JSONResponse) VisitClientsUpdateClientResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -256,9 +347,68 @@ func (response ClientsUpdateClient200JSONResponse) VisitClientsUpdateClientRespo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ClientsUpdateClient400JSONResponse string
+type ClientsUpdateClient400JSONResponse struct {
+	Error string `json:"error"`
+}
 
 func (response ClientsUpdateClient400JSONResponse) VisitClientsUpdateClientResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type V1AuthorizeRequestObject struct {
+	Params V1AuthorizeParams
+}
+
+type V1AuthorizeResponseObject interface {
+	VisitV1AuthorizeResponse(w http.ResponseWriter) error
+}
+
+type V1Authorize302Response struct {
+}
+
+func (response V1Authorize302Response) VisitV1AuthorizeResponse(w http.ResponseWriter) error {
+	w.WriteHeader(302)
+	return nil
+}
+
+type V1Authorize400JSONResponse struct {
+	Error            int32   `json:"error"`
+	ErrorDescription string  `json:"error_description"`
+	State            *string `json:"state,omitempty"`
+}
+
+func (response V1Authorize400JSONResponse) VisitV1AuthorizeResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type V1LoginRequestObject struct {
+	Body *V1LoginJSONRequestBody
+}
+
+type V1LoginResponseObject interface {
+	VisitV1LoginResponse(w http.ResponseWriter) error
+}
+
+type V1Login200Response struct {
+}
+
+func (response V1Login200Response) VisitV1LoginResponse(w http.ResponseWriter) error {
+	w.WriteHeader(200)
+	return nil
+}
+
+type V1Login400JSONResponse struct {
+	Error            int32  `json:"error"`
+	ErrorDescription string `json:"error_description"`
+}
+
+func (response V1Login400JSONResponse) VisitV1LoginResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(400)
 
@@ -273,7 +423,9 @@ type TokenGetTokenResponseObject interface {
 	VisitTokenGetTokenResponse(w http.ResponseWriter) error
 }
 
-type TokenGetToken200JSONResponse string
+type TokenGetToken200JSONResponse struct {
+	Token string `json:"token"`
+}
 
 func (response TokenGetToken200JSONResponse) VisitTokenGetTokenResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -282,7 +434,10 @@ func (response TokenGetToken200JSONResponse) VisitTokenGetTokenResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type TokenGetToken400JSONResponse string
+type TokenGetToken400JSONResponse struct {
+	Error            int32  `json:"error"`
+	ErrorDescription string `json:"error_description"`
+}
 
 func (response TokenGetToken400JSONResponse) VisitTokenGetTokenResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -305,6 +460,12 @@ type StrictServerInterface interface {
 	// Update a client
 	// (POST /api/v1/account/clients/:id/{id})
 	ClientsUpdateClient(ctx context.Context, request ClientsUpdateClientRequestObject) (ClientsUpdateClientResponseObject, error)
+	// Authorization Request
+	// (GET /api/v1/authorize)
+	V1Authorize(ctx context.Context, request V1AuthorizeRequestObject) (V1AuthorizeResponseObject, error)
+	// Login
+	// (POST /api/v1/login)
+	V1Login(ctx context.Context, request V1LoginRequestObject) (V1LoginResponseObject, error)
 	// Get a token
 	// (POST /api/v1/token/)
 	TokenGetToken(ctx context.Context, request TokenGetTokenRequestObject) (TokenGetTokenResponseObject, error)
@@ -424,6 +585,60 @@ func (sh *strictHandler) ClientsUpdateClient(ctx echo.Context, id int64) error {
 		return err
 	} else if validResponse, ok := response.(ClientsUpdateClientResponseObject); ok {
 		return validResponse.VisitClientsUpdateClientResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// V1Authorize operation middleware
+func (sh *strictHandler) V1Authorize(ctx echo.Context, params V1AuthorizeParams) error {
+	var request V1AuthorizeRequestObject
+
+	request.Params = params
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.V1Authorize(ctx.Request().Context(), request.(V1AuthorizeRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "V1Authorize")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(V1AuthorizeResponseObject); ok {
+		return validResponse.VisitV1AuthorizeResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// V1Login operation middleware
+func (sh *strictHandler) V1Login(ctx echo.Context) error {
+	var request V1LoginRequestObject
+
+	var body V1LoginJSONRequestBody
+	if err := ctx.Bind(&body); err != nil {
+		return err
+	}
+	request.Body = &body
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.V1Login(ctx.Request().Context(), request.(V1LoginRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "V1Login")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(V1LoginResponseObject); ok {
+		return validResponse.VisitV1LoginResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
