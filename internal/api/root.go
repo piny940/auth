@@ -7,8 +7,8 @@ import (
 )
 
 // V1Login implements ServerInterface.
-func (s *Server) V1Login(ctx echo.Context) error {
-	var body V1LoginJSONRequestBody
+func (s *Server) Login(ctx echo.Context) error {
+	var body LoginJSONRequestBody
 	if err := ctx.Bind(&body); err != nil {
 		return err
 	}
@@ -22,4 +22,9 @@ func (s *Server) V1Login(ctx echo.Context) error {
 		return err
 	}
 	return ctx.JSON(http.StatusNoContent, nil)
+}
+
+// Authorize implements ServerInterface.
+func (s *Server) Authorize(ctx echo.Context, params AuthorizeParams) error {
+	panic("unimplemented")
 }

@@ -23,17 +23,44 @@ model ReqLogin {
 @route("/authorize")
 @get
 @summary("Authorization Request")
-op authorize(
+op request(
   @query response_type: string,
   @query client_id: string,
   @query redirect_uri: string,
   @query scope: string,
   @query state?: string,
 ): {
+  @statusCode statusCode: 204;
+} | {
   @statusCode statusCode: 302;
+  error: string;
+  error_description: string;
+  state?: string;
 } | {
   @statusCode statusCode: 400;
-  error: int32;
+  error: string;
+  error_description: string;
+  state?: string;
+};
+@post
+@summary("Authorization Request")
+op authorize(
+  @header contentType: "multipart/form-data",
+  response_type: string,
+  client_id: string,
+  redirect_uri: string,
+  scope: string,
+  state?: string,
+): {
+  @statusCode statusCode: 204;
+} | {
+  @statusCode statusCode: 302;
+  error: string;
+  error_description: string;
+  state?: string;
+} | {
+  @statusCode statusCode: 400;
+  error: string;
   error_description: string;
   state?: string;
 };

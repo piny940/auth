@@ -42,13 +42,3 @@ func (s *Server) ClientsUpdateClient(ctx echo.Context, id int64) error {
 func (s *Server) TokenGetToken(ctx echo.Context) error {
 	panic("unimplemented")
 }
-
-// V1Authorize implements ServerInterface.
-func (s *Server) V1Authorize(ctx echo.Context, params V1AuthorizeParams) error {
-	panic("unimplemented")
-}
-
-// V1Login implements ServerInterface.
-func (s *Server) V1Login(ctx echo.Context) error {
-	panic("unimplemented")
-}

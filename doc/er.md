@@ -38,5 +38,13 @@ erDiagram
     timestamp created_at
     timestamp updated_at
   }
+  allowances {
+    bigserial id PK
+    bigint client_id FK
+    bigint user_id FK
+    int[] scopes
+    timestamp created_at
+    timestamp updated_at
+  }
 
 ```
