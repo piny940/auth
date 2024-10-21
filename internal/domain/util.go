@@ -1,7 +1,5 @@
 package domain
 
-type ErrRecordNotFound struct{}
+import "errors"
 
-func (e ErrRecordNotFound) Error() string {
-	return "record not found"
-}
+var ErrRecordNotFound = errors.New("record not found")

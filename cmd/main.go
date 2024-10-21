@@ -31,6 +31,7 @@ func main() {
 		panic(err)
 	}
 	infrastructure.Init()
+	api.Init()
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())

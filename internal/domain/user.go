@@ -38,28 +38,31 @@ func NewUserService(userRepo IUserRepo) *UserService {
 }
 
 func (u *User) PasswordMatch(password string) (bool, error) {
-	hash, err := EncryptPassword(password)
+	err := bcrypt.CompareHashAndPassword([]byte(u.EncryptedPassword), []byte(password))
+	if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+		return false, nil
+	}
 	if err != nil {
 		return false, err
 	}
-	return u.EncryptedPassword == hash, nil
+	return true, nil
 }
 
 func (s *UserService) Validate(name, password, passwordConfirmation string) error {
 	if len(name) < MIN_NAME_LENGTH {
-		return ErrNameLengthNotEnough{}
+		return ErrNameLengthNotEnough
 	}
 	_, err := s.UserRepo.FindByName(name)
 	if err == nil {
-		return ErrNameAlreadyUsed{}
-	} else if !errors.Is(err, ErrRecordNotFound{}) {
+		return ErrNameAlreadyUsed
+	} else if !errors.Is(err, ErrRecordNotFound) {
 		return err
 	}
 	if !passwordStrong(password) {
-		return ErrPasswordLengthNotEnough{}
+		return ErrPasswordLengthNotEnough
 	}
 	if password != passwordConfirmation {
-		return ErrPasswordConfirmation{}
+		return ErrPasswordConfirmation
 	}
 	return nil
 }
@@ -73,26 +76,9 @@ func passwordStrong(password string) bool {
 	return len(password) >= MIN_PASSWORD_LENGTH
 }
 
-type ErrPasswordConfirmation struct{}
-
-func (e ErrPasswordConfirmation) Error() string {
-	return "password and password confirmation do not match"
-}
-
-type ErrNameAlreadyUsed struct{}
-
-func (e ErrNameAlreadyUsed) Error() string {
-	return "this name is already used"
-}
-
-type ErrNameLengthNotEnough struct{}
-
-func (e ErrNameLengthNotEnough) Error() string {
-	return fmt.Sprintf("name length must be at least %d", MIN_NAME_LENGTH)
-}
-
-type ErrPasswordLengthNotEnough struct{}
-
-func (e ErrPasswordLengthNotEnough) Error() string {
-	return fmt.Sprintf("password length must be at least %d", MIN_PASSWORD_LENGTH)
-}
+var (
+	ErrPasswordConfirmation    = errors.New("password and password confirmation do not match")
+	ErrNameAlreadyUsed         = errors.New("this name is already used")
+	ErrNameLengthNotEnough     = errors.New(fmt.Sprintf("name length must be at least %d", MIN_NAME_LENGTH))
+	ErrPasswordLengthNotEnough = errors.New(fmt.Sprintf("password length must be at least %d", MIN_PASSWORD_LENGTH))
+)

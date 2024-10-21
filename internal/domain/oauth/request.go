@@ -2,6 +2,7 @@ package oauth
 
 import (
 	"auth/internal/domain"
+	"errors"
 	"slices"
 	"time"
 )
@@ -53,18 +54,18 @@ type IApprovalRepo interface {
 
 func (r *AuthRequest) Validate() error {
 	if !slices.Contains(AllResponseTypes, r.ResponseType) {
-		return ErrInvalidRequestType{}
+		return ErrInvalidRequestType
 	}
 	client, err := r.ClientRepo.FindByID(r.ClientID)
 	if err != nil {
 		return err
 	}
 	if !slices.Contains(client.RedirectURIs, r.RedirectURI) {
-		return ErrInvalidRedirectURI{}
+		return ErrInvalidRedirectURI
 	}
 	for _, scope := range r.Scopes {
 		if !slices.Contains(AllScopes, scope) {
-			return ErrInvalidScope{}
+			return ErrInvalidScope
 		}
 	}
 
@@ -87,20 +88,8 @@ func (r *AuthRequest) ApprovedBy(user *domain.User) (bool, error) {
 	return true, nil
 }
 
-type ErrInvalidRequestType struct{}
-
-func (e ErrInvalidRequestType) Error() string {
-	return "invalid request type"
-}
-
-type ErrInvalidRedirectURI struct{}
-
-func (e ErrInvalidRedirectURI) Error() string {
-	return "invalid redirect uri"
-}
-
-type ErrInvalidScope struct{}
-
-func (e ErrInvalidScope) Error() string {
-	return "invalid scope"
-}
+var (
+	ErrInvalidRequestType = errors.New("invalid request type")
+	ErrInvalidRedirectURI = errors.New("invalid redirect uri")
+	ErrInvalidScope       = errors.New("invalid scope")
+)

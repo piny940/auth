@@ -3,6 +3,7 @@ package usecase
 import (
 	"auth/internal/domain"
 	"auth/internal/domain/oauth"
+	"errors"
 )
 
 type AuthUsecase struct {
@@ -33,15 +34,9 @@ func (u *AuthUsecase) Login(username, password string) (*domain.User, error) {
 		return nil, err
 	}
 	if !ok {
-		return nil, ErrPasswordNotMatch{}
+		return nil, ErrPasswordNotMatch
 	}
 	return user, nil
-}
-
-type ErrPasswordNotMatch struct{}
-
-func (e ErrPasswordNotMatch) Error() string {
-	return "invalid password"
 }
 
 func (u *AuthUsecase) SignUp(username, password, passwordConfirmation string) error {
@@ -69,13 +64,12 @@ func (u *AuthUsecase) Request(user *domain.User, req *oauth.AuthRequest) error {
 		return err
 	}
 	if !ok {
-		return ErrNotApproved{}
+		return ErrNotApproved
 	}
 	return nil
 }
 
-type ErrNotApproved struct{}
-
-func (e ErrNotApproved) Error() string {
-	return "not approved"
-}
+var (
+	ErrPasswordNotMatch = errors.New("invalid password")
+	ErrNotApproved      = errors.New("not approved")
+)
