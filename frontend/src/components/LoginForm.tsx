@@ -3,24 +3,33 @@
 import { Controller, useForm } from 'react-hook-form'
 import { Box, Button, TextField } from '@mui/material'
 import { useCallback } from 'react'
+import { client } from '@/utils/client'
 
 type LoginInput = {
-  id: string
+  name: string
   password: string
 }
 export const LoginForm = (): JSX.Element => {
-  const { control, getValues, handleSubmit, setError } = useForm<LoginInput>({
-    defaultValues: { id: '', password: '' },
+  const { control, handleSubmit, setError } = useForm<LoginInput>({
+    defaultValues: { name: '', password: '' },
   })
-  const submit = useCallback(async (data: LoginInput) => {}, [])
+  const submit = useCallback(async (data: LoginInput) => {
+    const { error } = await client.POST('/login', {
+      body: { name: data.name, password: data.password },
+    })
+  }, [])
   return (
-    <Box component="form" sx={{ '> *': { margin: 2 } }}>
+    <Box
+      component="form"
+      onSubmit={handleSubmit(submit)}
+      sx={{ '> *': { margin: 2 } }}
+    >
       <Box>
         <Controller
-          name="id"
+          name="name"
           control={control}
           render={({ field }) => (
-            <TextField {...field} label="ID" variant="outlined" fullWidth />
+            <TextField {...field} label="Name" variant="outlined" fullWidth />
           )}
         />
       </Box>
@@ -30,6 +39,7 @@ export const LoginForm = (): JSX.Element => {
           control={control}
           render={({ field }) => (
             <TextField
+              type="password"
               {...field}
               label="Password"
               variant="outlined"
