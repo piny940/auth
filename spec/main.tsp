@@ -48,7 +48,8 @@ namespace Api {
         token: string;
       } | {
         @statusCode statusCode: 400;
-        error: string;
+        error: int32;
+        error_description: string;
       };
     }
 
@@ -59,7 +60,8 @@ namespace Api {
       @statusCode statusCode: 200;
     } | {
       @statusCode statusCode: 400;
-      error: string;
+      error: int32;
+      error_description: string;
     };
 
     @route("/account")

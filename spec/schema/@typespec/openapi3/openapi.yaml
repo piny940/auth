@@ -201,9 +201,13 @@ paths:
                 type: object
                 properties:
                   error:
+                    type: integer
+                    format: int32
+                  error_description:
                     type: string
                 required:
                   - error
+                  - error_description
       requestBody:
         required: true
         content:
@@ -243,9 +247,13 @@ paths:
                 type: object
                 properties:
                   error:
+                    type: integer
+                    format: int32
+                  error_description:
                     type: string
                 required:
                   - error
+                  - error_description
       requestBody:
         required: true
         content:
