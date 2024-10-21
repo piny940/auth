@@ -1,23 +1,27 @@
 'use client'
-
-import { Controller, useForm } from 'react-hook-form'
-import { Box, Button, TextField, Typography } from '@mui/material'
-import { useCallback } from 'react'
 import { client } from '@/utils/client'
+import { Box, Button, TextField, Typography } from '@mui/material'
 import Link from 'next/link'
+import { useCallback } from 'react'
+import { Controller, useForm } from 'react-hook-form'
 
-type LoginInput = {
+type SignupInput = {
   name: string
   password: string
+  passwordConfirmation: string
 }
-export const LoginForm = (): JSX.Element => {
-  const { control, handleSubmit, setError } = useForm<LoginInput>({
+export const SignupForm = (): JSX.Element => {
+  const { control, handleSubmit, setError } = useForm<SignupInput>({
     defaultValues: { name: '', password: '' },
   })
   const submit = useCallback(
-    async (data: LoginInput) => {
-      const { error } = await client.POST('/login', {
-        body: { name: data.name, password: data.password },
+    async (data: SignupInput) => {
+      const { error } = await client.POST('/signup', {
+        body: {
+          name: data.name,
+          password: data.password,
+          password_confirmation: data.passwordConfirmation,
+        },
       })
       if (!!error) {
         setError('name', { message: error.error_description })
@@ -66,9 +70,26 @@ export const LoginForm = (): JSX.Element => {
           )}
         />
       </Box>
-      <Link href="/signup">
+      <Box>
+        <Controller
+          name="passwordConfirmation"
+          control={control}
+          render={({ field, fieldState }) => (
+            <TextField
+              type="password"
+              {...field}
+              label="Password Confirmation"
+              variant="outlined"
+              fullWidth
+              error={fieldState.invalid}
+              helperText={fieldState.error?.message}
+            />
+          )}
+        />
+      </Box>
+      <Link href="/">
         <Typography component="span" color="primary">
-          新規アカウント登録
+          すでにアカウントをお持ちの方はこちら
         </Typography>
       </Link>
       <Box>

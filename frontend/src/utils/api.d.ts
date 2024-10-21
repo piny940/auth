@@ -92,6 +92,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/signup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Signup */
+        post: operations["signup"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/token/": {
         parameters: {
             query?: never;
@@ -127,10 +144,20 @@ export interface components {
             name: string;
             password: string;
         };
+        ReqSignup: {
+            name: string;
+            password: string;
+            password_confirmation: string;
+        };
         User: {
             /** Format: int64 */
             id: number;
             name: string;
+        };
+        UserCreate: {
+            name: string;
+            password: string;
+            password_confirmation: string;
         };
     };
     responses: never;
@@ -431,6 +458,40 @@ export interface operations {
                 content: {
                     "application/json": {
                         user: components["schemas"]["User"];
+                    };
+                };
+            };
+        };
+    };
+    signup: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserCreate"];
+            };
+        };
+        responses: {
+            /** @description There is no content to send for this request, but the headers may be useful.  */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The server could not understand the request due to invalid syntax. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: string;
+                        error_description: string;
                     };
                 };
             };
