@@ -16,34 +16,49 @@ import (
 )
 
 var (
-	Q    = new(Query)
-	User *user
+	Q           = new(Query)
+	Approval    *approval
+	Client      *client
+	RedirectURI *redirectURI
+	User        *user
 )
 
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	*Q = *Use(db, opts...)
+	Approval = &Q.Approval
+	Client = &Q.Client
+	RedirectURI = &Q.RedirectURI
 	User = &Q.User
 }
 
 func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 	return &Query{
-		db:   db,
-		User: newUser(db, opts...),
+		db:          db,
+		Approval:    newApproval(db, opts...),
+		Client:      newClient(db, opts...),
+		RedirectURI: newRedirectURI(db, opts...),
+		User:        newUser(db, opts...),
 	}
 }
 
 type Query struct {
 	db *gorm.DB
 
-	User user
+	Approval    approval
+	Client      client
+	RedirectURI redirectURI
+	User        user
 }
 
 func (q *Query) Available() bool { return q.db != nil }
 
 func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
-		db:   db,
-		User: q.User.clone(db),
+		db:          db,
+		Approval:    q.Approval.clone(db),
+		Client:      q.Client.clone(db),
+		RedirectURI: q.RedirectURI.clone(db),
+		User:        q.User.clone(db),
 	}
 }
 
@@ -57,18 +72,27 @@ func (q *Query) WriteDB() *Query {
 
 func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 	return &Query{
-		db:   db,
-		User: q.User.replaceDB(db),
+		db:          db,
+		Approval:    q.Approval.replaceDB(db),
+		Client:      q.Client.replaceDB(db),
+		RedirectURI: q.RedirectURI.replaceDB(db),
+		User:        q.User.replaceDB(db),
 	}
 }
 
 type queryCtx struct {
-	User IUserDo
+	Approval    IApprovalDo
+	Client      IClientDo
+	RedirectURI IRedirectURIDo
+	User        IUserDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
-		User: q.User.WithContext(ctx),
+		Approval:    q.Approval.WithContext(ctx),
+		Client:      q.Client.WithContext(ctx),
+		RedirectURI: q.RedirectURI.WithContext(ctx),
+		User:        q.User.WithContext(ctx),
 	}
 }
 

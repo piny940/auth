@@ -5,6 +5,7 @@ package di
 import (
 	"auth/internal/api"
 	"auth/internal/domain"
+	"auth/internal/domain/oauth"
 	"auth/internal/infrastructure"
 	"auth/internal/usecase"
 
@@ -18,6 +19,8 @@ func (r *registry) NewServer() *api.Server {
 		infrastructure.NewApprovalRepo,
 		infrastructure.NewUserRepo,
 		domain.NewUserService,
+		oauth.NewAuthService,
+		infrastructure.NewClientRepo,
 		infrastructure.GetDB,
 	)
 	return nil
@@ -29,6 +32,8 @@ func (r *registry) NewAuthUsecase() *usecase.AuthUsecase {
 		infrastructure.NewApprovalRepo,
 		domain.NewUserService,
 		infrastructure.NewUserRepo,
+		oauth.NewAuthService,
+		infrastructure.NewClientRepo,
 		infrastructure.GetDB,
 	)
 	return nil

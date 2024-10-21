@@ -33,9 +33,6 @@ type AuthRequest struct {
 	RedirectURI  string
 	Scopes       []TypeScope
 	State        *string
-
-	ClientRepo   ClientRepo
-	ApprovalRepo IApprovalRepo
 }
 
 type ApprovalID int64
@@ -52,11 +49,23 @@ type IApprovalRepo interface {
 	Find(clientID ClientID, userID domain.UserID) (*Approval, error)
 }
 
-func (r *AuthRequest) Validate() error {
+type AuthService struct {
+	ClientRepo   IClientRepo
+	ApprovalRepo IApprovalRepo
+}
+
+func NewAuthService(clientRepo IClientRepo, approvalRepo IApprovalRepo) *AuthService {
+	return &AuthService{
+		ClientRepo:   clientRepo,
+		ApprovalRepo: approvalRepo,
+	}
+}
+
+func (s *AuthService) Validate(r *AuthRequest) error {
 	if !slices.Contains(AllResponseTypes, r.ResponseType) {
 		return ErrInvalidRequestType
 	}
-	client, err := r.ClientRepo.FindByID(r.ClientID)
+	client, err := s.ClientRepo.FindByID(r.ClientID)
 	if err != nil {
 		return err
 	}
@@ -72,8 +81,8 @@ func (r *AuthRequest) Validate() error {
 	return nil
 }
 
-func (r *AuthRequest) ApprovedBy(user *domain.User) (bool, error) {
-	approval, err := r.ApprovalRepo.Find(r.ClientID, user.ID)
+func (s *AuthService) Approved(r *AuthRequest, user *domain.User) (bool, error) {
+	approval, err := s.ApprovalRepo.Find(r.ClientID, user.ID)
 	if err != nil {
 		return false, err
 	}

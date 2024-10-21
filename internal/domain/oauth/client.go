@@ -12,6 +12,6 @@ type Client struct {
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
 }
-type ClientRepo interface {
+type IClientRepo interface {
 	FindByID(id ClientID) (*Client, error)
 }
