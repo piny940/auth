@@ -8,6 +8,7 @@ package di
 
 import (
 	"auth/internal/api"
+	"auth/internal/domain"
 	"auth/internal/infrastructure"
 	"auth/internal/usecase"
 )
@@ -17,7 +18,9 @@ import (
 func NewServer() *api.Server {
 	db := infrastructure.GetDB()
 	iUserRepo := infrastructure.NewUserRepo(db)
-	authUsecase := usecase.NewAuthUsecase(iUserRepo)
+	iApprovalRepo := infrastructure.NewApprovalRepo(db)
+	userService := domain.NewUserService(iUserRepo)
+	authUsecase := usecase.NewAuthUsecase(iUserRepo, iApprovalRepo, userService)
 	server := api.NewServer(authUsecase)
 	return server
 }
@@ -25,6 +28,8 @@ func NewServer() *api.Server {
 func NewAuthUsecase() *usecase.AuthUsecase {
 	db := infrastructure.GetDB()
 	iUserRepo := infrastructure.NewUserRepo(db)
-	authUsecase := usecase.NewAuthUsecase(iUserRepo)
+	iApprovalRepo := infrastructure.NewApprovalRepo(db)
+	userService := domain.NewUserService(iUserRepo)
+	authUsecase := usecase.NewAuthUsecase(iUserRepo, iApprovalRepo, userService)
 	return authUsecase
 }

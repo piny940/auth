@@ -1,9 +1,10 @@
 'use client'
 
 import { Controller, useForm } from 'react-hook-form'
-import { Box, Button, TextField } from '@mui/material'
+import { Box, Button, TextField, Typography } from '@mui/material'
 import { useCallback } from 'react'
 import { client } from '@/utils/client'
+import Link from 'next/link'
 
 type LoginInput = {
   name: string
@@ -19,7 +20,6 @@ export const LoginForm = (): JSX.Element => {
         body: { name: data.name, password: data.password },
       })
       if (!!error) {
-        console.log(error.error_description)
         setError('name', { message: error.error_description })
         setError('password', { message: error.error_description })
         return
@@ -27,6 +27,7 @@ export const LoginForm = (): JSX.Element => {
     },
     [setError]
   )
+
   return (
     <Box
       component="form"
@@ -42,6 +43,7 @@ export const LoginForm = (): JSX.Element => {
               label="Name"
               variant="outlined"
               fullWidth
+              required
               error={fieldState.invalid}
               helperText={fieldState.error?.message}
               {...field}
@@ -60,12 +62,18 @@ export const LoginForm = (): JSX.Element => {
               label="Password"
               variant="outlined"
               fullWidth
+              required
               error={fieldState.invalid}
               helperText={fieldState.error?.message}
             />
           )}
         />
       </Box>
+      <Link href="/signup">
+        <Typography component="span" color="primary">
+          新規アカウント登録
+        </Typography>
+      </Link>
       <Box>
         <Button type="submit" fullWidth variant="contained">
           送信

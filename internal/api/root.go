@@ -1,6 +1,7 @@
 package api
 
 import (
+	"auth/internal/domain"
 	"auth/internal/domain/oauth"
 	"auth/internal/usecase"
 	"errors"
@@ -10,7 +11,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// V1Login implements ServerInterface.
 func (s *Server) Login(ctx echo.Context) error {
 	var body LoginJSONRequestBody
 	if err := ctx.Bind(&body); err != nil {
@@ -20,7 +20,7 @@ func (s *Server) Login(ctx echo.Context) error {
 	user, err := s.AuthUsecase.Login(body.Name, body.Password)
 	if err != nil {
 		return ctx.JSON(http.StatusBadRequest, echo.Map{
-			"error":             "invalid_request",
+			"error":             "invalid_name_or_password",
 			"error_description": "name or password is incorrect",
 		})
 	}
@@ -28,7 +28,54 @@ func (s *Server) Login(ctx echo.Context) error {
 	if err != nil {
 		return err
 	}
-	return ctx.JSON(http.StatusNoContent, nil)
+	return ctx.NoContent(http.StatusNoContent)
+}
+
+func (s *Server) Signup(ctx echo.Context) error {
+	var body SignupJSONRequestBody
+	if err := ctx.Bind(&body); err != nil {
+		return err
+	}
+	err := s.AuthUsecase.SignUp(body.Name, body.Password, body.PasswordConfirmation)
+	if errors.Is(err, domain.ErrNameLengthNotEnough) {
+		return ctx.JSON(http.StatusBadRequest, echo.Map{
+			"error":             "name_length_not_enough",
+			"error_description": err.Error(),
+		})
+	}
+	if errors.Is(err, domain.ErrNameAlreadyUsed) {
+		return ctx.JSON(http.StatusBadRequest, echo.Map{
+			"error":             "name_already_used",
+			"error_description": err.Error(),
+		})
+	}
+	if errors.Is(err, domain.ErrPasswordLengthNotEnough) {
+		return ctx.JSON(http.StatusBadRequest, echo.Map{
+			"error":             "password_length_not_enough",
+			"error_description": err.Error(),
+		})
+	}
+	if errors.Is(err, domain.ErrPasswordConfirmation) {
+		return ctx.JSON(http.StatusBadRequest, echo.Map{
+			"error":             "password_confirmation",
+			"error_description": err.Error(),
+		})
+	}
+	if err != nil {
+		return err
+	}
+	return ctx.NoContent(http.StatusNoContent)
+}
+
+// Me implements ServerInterface.
+func (s *Server) Me(ctx echo.Context) error {
+	user, err := CurrentUser(ctx.Request())
+	if err != nil {
+		return err
+	}
+	return ctx.JSON(http.StatusOK, echo.Map{
+		"user": user,
+	})
 }
 
 // Authorize implements ServerInterface.
@@ -42,25 +89,25 @@ func (s *Server) Authorize(ctx echo.Context, params AuthorizeParams) error {
 		return ctx.Redirect(http.StatusFound, "/?error=unauthorized_client")
 	}
 	err = s.AuthUsecase.Request(user, req)
-	if errors.Is(err, oauth.ErrInvalidRequestType{}) {
+	if errors.Is(err, oauth.ErrInvalidRequestType) {
 		return ctx.JSON(http.StatusBadRequest, echo.Map{
 			"error":             "unsupported_response_type",
 			"error_description": "unsupported_response_type",
 		})
 	}
-	if errors.Is(err, usecase.ErrNotApproved{}) {
+	if errors.Is(err, usecase.ErrNotApproved) {
 		return ctx.JSON(http.StatusUnauthorized, echo.Map{
 			"error":             "access_denied",
 			"error_description": "access_denied",
 		})
 	}
-	if errors.Is(err, oauth.ErrInvalidScope{}) {
+	if errors.Is(err, oauth.ErrInvalidScope) {
 		return ctx.JSON(http.StatusBadRequest, echo.Map{
 			"error":             "invalid_scope",
 			"error_description": "invalid_scope",
 		})
 	}
-	if errors.Is(err, oauth.ErrInvalidRedirectURI{}) {
+	if errors.Is(err, oauth.ErrInvalidRedirectURI) {
 		return ctx.JSON(http.StatusBadRequest, echo.Map{
 			"error":             "invalid_request",
 			"error_description": "invalid_request",

@@ -2,6 +2,8 @@ import "@typespec/http";
 import "@typespec/rest";
 import "@typespec/openapi3";
 
+import "./model.tsp";
+
 using TypeSpec.Http;
 @service({
   title: "Auth",
@@ -9,13 +11,6 @@ using TypeSpec.Http;
 @server("https://auth.piny940.com/api/v1", "Auth Server")
 namespace Auth;
 
-model Client {
-  @visibility("read", "update")
-  id: int64;
-
-  name: string;
-  redirect_urls: string[];
-}
 model ReqLogin {
   name: string;
   password: string;
@@ -89,8 +84,36 @@ op login(@body body: ReqLogin): {
   @statusCode statusCode: 204;
 } | {
   @statusCode statusCode: 400;
-  error: string;
+  error: "invalid_name_or_password";
   error_description: string;
+};
+
+model ReqSignup {
+  name: string;
+  password: string;
+  password_confirmation: string;
+}
+@route("/signup")
+@post
+@summary("Signup")
+op signup(@body body: User): {
+  @statusCode statusCode: 204;
+} | {
+  @statusCode statusCode: 400;
+  error:
+    | "name_already_used"
+    | "name_length_not_enough"
+    | "password_length_not_enough"
+    | "password_confirmation";
+  error_description: string;
+};
+
+@route("/me")
+@get
+@summary("Get me")
+op me(): {
+  @statusCode statusCode: 200;
+  user: User;
 };
 
 @route("/account")
