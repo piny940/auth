@@ -57,7 +57,7 @@ namespace Api {
     @post
     @summary("Login")
     op login(name: string, password: string): {
-      @statusCode statusCode: 200;
+      @statusCode statusCode: 204;
     } | {
       @statusCode statusCode: 400;
       error: int32;
