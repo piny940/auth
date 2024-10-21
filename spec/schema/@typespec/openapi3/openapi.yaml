@@ -311,6 +311,34 @@ paths:
                     $ref: '#/components/schemas/User'
                 required:
                   - user
+  /signup:
+    post:
+      operationId: signup
+      summary: Signup
+      parameters: []
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        '400':
+          description: The server could not understand the request due to invalid syntax.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  error_description:
+                    type: string
+                required:
+                  - error
+                  - error_description
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
   /token/:
     post:
       operationId: Token_getToken
@@ -397,6 +425,19 @@ components:
           type: string
         password:
           type: string
+    ReqSignup:
+      type: object
+      required:
+        - name
+        - password
+        - password_confirmation
+      properties:
+        name:
+          type: string
+        password:
+          type: string
+        password_confirmation:
+          type: string
     User:
       type: object
       required:
@@ -407,6 +448,19 @@ components:
           type: integer
           format: int64
         name:
+          type: string
+    UserCreate:
+      type: object
+      required:
+        - name
+        - password
+        - password_confirmation
+      properties:
+        name:
+          type: string
+        password:
+          type: string
+        password_confirmation:
           type: string
 servers:
   - url: https://auth.piny940.com/api/v1

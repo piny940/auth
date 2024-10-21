@@ -1,6 +1,7 @@
 package api
 
 import (
+	"auth/internal/domain"
 	"auth/internal/domain/oauth"
 	"auth/internal/usecase"
 	"errors"
@@ -25,6 +26,37 @@ func (s *Server) Login(ctx echo.Context) error {
 		})
 	}
 	err = Login(ctx.Request(), ctx.Response().Writer, user)
+	if err != nil {
+		return err
+	}
+	return ctx.JSON(http.StatusNoContent, nil)
+}
+
+// Signup implements ServerInterface.
+func (s *Server) Signup(ctx echo.Context) error {
+	var body SignupJSONRequestBody
+	if err := ctx.Bind(&body); err != nil {
+		return err
+	}
+	err := s.AuthUsecase.SignUp(body.Name, body.Password, body.PasswordConfirmation)
+	if errors.Is(err, domain.ErrNameAlreadyUsed{}) {
+		return ctx.JSON(http.StatusBadRequest, echo.Map{
+			"error":             "invalid_request",
+			"error_description": err.Error(),
+		})
+	}
+	if errors.Is(err, domain.ErrPasswordLengthNotEnough{}) {
+		return ctx.JSON(http.StatusBadRequest, echo.Map{
+			"error":             "invalid_request",
+			"error_description": err.Error(),
+		})
+	}
+	if errors.Is(err, domain.ErrPasswordConfirmation{}) {
+		return ctx.JSON(http.StatusBadRequest, echo.Map{
+			"error":             "invalid_request",
+			"error_description": err.Error(),
+		})
+	}
 	if err != nil {
 		return err
 	}

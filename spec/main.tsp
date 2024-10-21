@@ -88,6 +88,22 @@ op login(@body body: ReqLogin): {
   error_description: string;
 };
 
+model ReqSignup {
+  name: string;
+  password: string;
+  password_confirmation: string;
+}
+@route("/signup")
+@post
+@summary("Signup")
+op signup(@body body: User): {
+  @statusCode statusCode: 204;
+} | {
+  @statusCode statusCode: 400;
+  error: string;
+  error_description: string;
+};
+
 @route("/me")
 @get
 @summary("Get me")

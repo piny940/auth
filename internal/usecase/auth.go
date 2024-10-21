@@ -8,11 +8,18 @@ import (
 type AuthUsecase struct {
 	UserRepo     domain.IUserRepo
 	ApprovalRepo oauth.IApprovalRepo
+	UserService  *domain.UserService
 }
 
-func NewAuthUsecase(userRepo domain.IUserRepo) *AuthUsecase {
+func NewAuthUsecase(
+	userRepo domain.IUserRepo,
+	approvalRepo oauth.IApprovalRepo,
+	userSvc *domain.UserService,
+) *AuthUsecase {
 	return &AuthUsecase{
-		UserRepo: userRepo,
+		UserRepo:     userRepo,
+		ApprovalRepo: approvalRepo,
+		UserService:  userSvc,
 	}
 }
 
@@ -21,20 +28,35 @@ func (u *AuthUsecase) Login(username, password string) (*domain.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	ok, err := user.ValidPassword(password)
+	ok, err := user.PasswordMatch(password)
 	if err != nil {
 		return nil, err
 	}
 	if !ok {
-		return nil, ErrInvalidPassword{}
+		return nil, ErrPasswordNotMatch{}
 	}
 	return user, nil
 }
 
-type ErrInvalidPassword struct{}
+type ErrPasswordNotMatch struct{}
 
-func (e ErrInvalidPassword) Error() string {
+func (e ErrPasswordNotMatch) Error() string {
 	return "invalid password"
+}
+
+func (u *AuthUsecase) SignUp(username, password, passwordConfirmation string) error {
+	if err := u.UserService.Validate(username, password, passwordConfirmation); err != nil {
+		return err
+	}
+	hash, err := domain.EncryptPassword(password)
+	if err != nil {
+		return err
+	}
+	err = u.UserRepo.Create(username, hash)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (u *AuthUsecase) Request(user *domain.User, req *oauth.AuthRequest) error {

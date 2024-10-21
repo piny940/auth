@@ -3,6 +3,12 @@ model User {
   id: int64;
 
   name: string;
+
+  @visibility("create")
+  password: string;
+
+  @visibility("create")
+  password_confirmation: string;
 }
 model Client {
   @visibility("read", "update")

@@ -36,6 +36,13 @@ type User struct {
 	Name string `json:"name"`
 }
 
+// UserCreate defines model for UserCreate.
+type UserCreate struct {
+	Name                 string `json:"name"`
+	Password             string `json:"password"`
+	PasswordConfirmation string `json:"password_confirmation"`
+}
+
 // ClientsListClientsParams defines parameters for ClientsListClients.
 type ClientsListClientsParams struct {
 	Cookie string `json:"cookie"`
@@ -87,6 +94,9 @@ type PostAuthorizeMultipartRequestBody PostAuthorizeMultipartBody
 // LoginJSONRequestBody defines body for Login for application/json ContentType.
 type LoginJSONRequestBody = ReqLogin
 
+// SignupJSONRequestBody defines body for Signup for application/json ContentType.
+type SignupJSONRequestBody = UserCreate
+
 // TokenGetTokenJSONRequestBody defines body for TokenGetToken for application/json ContentType.
 type TokenGetTokenJSONRequestBody TokenGetTokenJSONBody
 
@@ -116,6 +126,9 @@ type ServerInterface interface {
 	// Get me
 	// (GET /me)
 	Me(ctx echo.Context) error
+	// Signup
+	// (POST /signup)
+	Signup(ctx echo.Context) error
 	// Get a token
 	// (POST /token/)
 	TokenGetToken(ctx echo.Context) error
@@ -271,6 +284,15 @@ func (w *ServerInterfaceWrapper) Me(ctx echo.Context) error {
 	return err
 }
 
+// Signup converts echo context to params.
+func (w *ServerInterfaceWrapper) Signup(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.Signup(ctx)
+	return err
+}
+
 // TokenGetToken converts echo context to params.
 func (w *ServerInterfaceWrapper) TokenGetToken(ctx echo.Context) error {
 	var err error
@@ -316,6 +338,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.POST(baseURL+"/authorize", wrapper.PostAuthorize)
 	router.POST(baseURL+"/login", wrapper.Login)
 	router.GET(baseURL+"/me", wrapper.Me)
+	router.POST(baseURL+"/signup", wrapper.Signup)
 	router.POST(baseURL+"/token/", wrapper.TokenGetToken)
 
 }
