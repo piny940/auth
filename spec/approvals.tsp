@@ -24,8 +24,5 @@ interface ApprovalsInterface {
   } | {
     @statusCode statusCode: 400;
     @body body: Res4xx;
-  } | {
-    @statusCode statusCode: 401;
-    @body body: Res4xx;
   };
 }

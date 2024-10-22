@@ -4,4 +4,7 @@ generate:
   strict-server: true
   echo-server: true
   models: true
+  embedded-spec: true
 output: internal/api/gen.go
+output-options:
+  skip-prune: true

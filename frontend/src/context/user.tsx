@@ -38,7 +38,7 @@ const UserProvider = ({ children }: UserProviderProps): JSX.Element => {
 
   const refresh = useCallback(async () => {
     setLoading(true)
-    const res = await client.GET('/me')
+    const res = await client.GET('/session')
     setUser(res.data?.user || null)
     setLoading(false)
   }, [setLoading, setUser])

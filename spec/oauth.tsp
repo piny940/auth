@@ -47,7 +47,7 @@ interface OAuthInterface {
   ): {
     @statusCode statusCode: 204;
   } | {
-    @statusCode statusCode: 302 | 400 | 401;
+    @statusCode statusCode: 302 | 400;
     error: AuthorizeErr;
     error_description: string;
     state?: string;

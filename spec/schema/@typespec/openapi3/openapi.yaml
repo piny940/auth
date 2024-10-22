@@ -18,12 +18,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Approvals.Res4xx'
-        '401':
-          description: Access is unauthorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Approvals.Res4xx'
       requestBody:
         required: true
         content:
@@ -246,22 +240,6 @@ paths:
                 required:
                   - error
                   - error_description
-        '401':
-          description: Access is unauthorized.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    $ref: '#/components/schemas/OAuth.AuthorizeErr'
-                  error_description:
-                    type: string
-                  state:
-                    type: string
-                required:
-                  - error
-                  - error_description
       requestBody:
         required: true
         content:
@@ -314,7 +292,7 @@ paths:
               required:
                 - client_id
                 - client_secret
-  /session/:
+  /session:
     get:
       operationId: SessionInterface_me
       summary: Get session
@@ -326,6 +304,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Session.MeRes'
+      security:
+        - ApiKeyAuth: []
     post:
       operationId: SessionInterface_login
       summary: Login
@@ -563,6 +543,11 @@ components:
           type: string
         password_confirmation:
           type: string
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: cookie
+      name: AUTH
 servers:
   - url: https://auth.piny940.com/api/v1
     description: Auth Server

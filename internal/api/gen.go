@@ -4,15 +4,26 @@
 package api
 
 import (
+	"bytes"
+	"compress/gzip"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"mime/multipart"
 	"net/http"
+	"net/url"
+	"path"
+	"strings"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/labstack/echo/v4"
 	"github.com/oapi-codegen/runtime"
 	strictecho "github.com/oapi-codegen/runtime/strictmiddleware/echo"
+)
+
+const (
+	ApiKeyAuthScopes = "ApiKeyAuth.Scopes"
 )
 
 // Defines values for OAuthAuthorizeErr.
@@ -80,6 +91,13 @@ type OAuthAuthorizeReqMultiPart struct {
 	ResponseType string  `json:"response_type"`
 	Scope        string  `json:"scope"`
 	State        *string `json:"state,omitempty"`
+}
+
+// ReqSignup defines model for ReqSignup.
+type ReqSignup struct {
+	Name                 string `json:"name"`
+	Password             string `json:"password"`
+	PasswordConfirmation string `json:"password_confirmation"`
 }
 
 // SessionLoginErr defines model for Session.LoginErr.
@@ -186,13 +204,13 @@ type ServerInterface interface {
 	// (POST /oauth/token)
 	OAuthInterfaceGetToken(ctx echo.Context) error
 	// Logout
-	// (DELETE /session/)
+	// (DELETE /session)
 	SessionInterfaceLogout(ctx echo.Context) error
 	// Get session
-	// (GET /session/)
+	// (GET /session)
 	SessionInterfaceMe(ctx echo.Context) error
 	// Login
-	// (POST /session/)
+	// (POST /session)
 	SessionInterfaceLogin(ctx echo.Context) error
 	// Signup
 	// (POST /signup)
@@ -334,6 +352,8 @@ func (w *ServerInterfaceWrapper) SessionInterfaceLogout(ctx echo.Context) error 
 func (w *ServerInterfaceWrapper) SessionInterfaceMe(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(ApiKeyAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.SessionInterfaceMe(ctx)
 	return err
@@ -393,9 +413,9 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/oauth/authorize", wrapper.OAuthInterfaceAuthorize)
 	router.POST(baseURL+"/oauth/authorize", wrapper.OAuthInterfacePostAuthorize)
 	router.POST(baseURL+"/oauth/token", wrapper.OAuthInterfaceGetToken)
-	router.DELETE(baseURL+"/session/", wrapper.SessionInterfaceLogout)
-	router.GET(baseURL+"/session/", wrapper.SessionInterfaceMe)
-	router.POST(baseURL+"/session/", wrapper.SessionInterfaceLogin)
+	router.DELETE(baseURL+"/session", wrapper.SessionInterfaceLogout)
+	router.GET(baseURL+"/session", wrapper.SessionInterfaceMe)
+	router.POST(baseURL+"/session", wrapper.SessionInterfaceLogin)
 	router.POST(baseURL+"/signup", wrapper.Signup)
 
 }
@@ -795,13 +815,13 @@ type StrictServerInterface interface {
 	// (POST /oauth/token)
 	OAuthInterfaceGetToken(ctx context.Context, request OAuthInterfaceGetTokenRequestObject) (OAuthInterfaceGetTokenResponseObject, error)
 	// Logout
-	// (DELETE /session/)
+	// (DELETE /session)
 	SessionInterfaceLogout(ctx context.Context, request SessionInterfaceLogoutRequestObject) (SessionInterfaceLogoutResponseObject, error)
 	// Get session
-	// (GET /session/)
+	// (GET /session)
 	SessionInterfaceMe(ctx context.Context, request SessionInterfaceMeRequestObject) (SessionInterfaceMeResponseObject, error)
 	// Login
-	// (POST /session/)
+	// (POST /session)
 	SessionInterfaceLogin(ctx context.Context, request SessionInterfaceLoginRequestObject) (SessionInterfaceLoginResponseObject, error)
 	// Signup
 	// (POST /signup)
@@ -1144,4 +1164,107 @@ func (sh *strictHandler) Signup(ctx echo.Context) error {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
 	return nil
+}
+
+// Base64 encoded, gzipped, json marshaled Swagger object
+var swaggerSpec = []string{
+
+	"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",
+	"AA==",
+}
+
+// GetSwagger returns the content of the embedded swagger specification file
+// or error if failed to decode
+func decodeSpec() ([]byte, error) {
+	zipped, err := base64.StdEncoding.DecodeString(strings.Join(swaggerSpec, ""))
+	if err != nil {
+		return nil, fmt.Errorf("error base64 decoding spec: %w", err)
+	}
+	zr, err := gzip.NewReader(bytes.NewReader(zipped))
+	if err != nil {
+		return nil, fmt.Errorf("error decompressing spec: %w", err)
+	}
+	var buf bytes.Buffer
+	_, err = buf.ReadFrom(zr)
+	if err != nil {
+		return nil, fmt.Errorf("error decompressing spec: %w", err)
+	}
+
+	return buf.Bytes(), nil
+}
+
+var rawSpec = decodeSpecCached()
+
+// a naive cached of a decoded swagger spec
+func decodeSpecCached() func() ([]byte, error) {
+	data, err := decodeSpec()
+	return func() ([]byte, error) {
+		return data, err
+	}
+}
+
+// Constructs a synthetic filesystem for resolving external references when loading openapi specifications.
+func PathToRawSpec(pathToFile string) map[string]func() ([]byte, error) {
+	res := make(map[string]func() ([]byte, error))
+	if len(pathToFile) > 0 {
+		res[pathToFile] = rawSpec
+	}
+
+	return res
+}
+
+// GetSwagger returns the Swagger specification corresponding to the generated code
+// in this file. The external references of Swagger specification are resolved.
+// The logic of resolving external references is tightly connected to "import-mapping" feature.
+// Externally referenced files must be embedded in the corresponding golang packages.
+// Urls can be supported but this task was out of the scope.
+func GetSwagger() (swagger *openapi3.T, err error) {
+	resolvePath := PathToRawSpec("")
+
+	loader := openapi3.NewLoader()
+	loader.IsExternalRefsAllowed = true
+	loader.ReadFromURIFunc = func(loader *openapi3.Loader, url *url.URL) ([]byte, error) {
+		pathToFile := url.String()
+		pathToFile = path.Clean(pathToFile)
+		getSpec, ok := resolvePath[pathToFile]
+		if !ok {
+			err1 := fmt.Errorf("path not found: %s", pathToFile)
+			return nil, err1
+		}
+		return getSpec()
+	}
+	var specData []byte
+	specData, err = rawSpec()
+	if err != nil {
+		return
+	}
+	swagger, err = loader.LoadFromData(specData)
+	if err != nil {
+		return
+	}
+	return
 }

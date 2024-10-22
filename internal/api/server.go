@@ -12,22 +12,6 @@ type Server struct {
 	Conf        *Config
 }
 
-// SessionInterfaceLogin implements StrictServerInterface.
-func (s *Server) SessionInterfaceLogin(ctx context.Context, request SessionInterfaceLoginRequestObject) (SessionInterfaceLoginResponseObject, error) {
-	panic("unimplemented")
-}
-
-// SessionInterfaceLogout implements StrictServerInterface.
-func (s *Server) SessionInterfaceLogout(ctx context.Context, request SessionInterfaceLogoutRequestObject) (SessionInterfaceLogoutResponseObject, error) {
-	panic("unimplemented")
-}
-
-// SessionInterfaceMe implements StrictServerInterface.
-func (s *Server) SessionInterfaceMe(ctx context.Context, request SessionInterfaceMeRequestObject) (SessionInterfaceMeResponseObject, error) {
-	panic("unimplemented")
-}
-
-// Signup implements StrictServerInterface.
 func (s *Server) Signup(ctx context.Context, request SignupRequestObject) (SignupResponseObject, error) {
 	panic("unimplemented")
 }
@@ -126,25 +110,6 @@ func NewServer(authUsecase *usecase.AuthUsecase) *Server {
 // 		return err
 // 	}
 // 	return ctx.NoContent(http.StatusNoContent)
-// }
-
-// // Me implements ServerInterface.
-// func (s *Server) Me(ctx echo.Context) error {
-// 	user, err := CurrentUser(ctx.Request())
-// 	if err != nil {
-// 		return err
-// 	}
-// 	if user == nil {
-// 		return ctx.JSON(http.StatusOK, echo.Map{
-// 			"user": nil,
-// 		})
-// 	}
-// 	return ctx.JSON(http.StatusOK, echo.Map{
-// 		"user": echo.Map{
-// 			"id":   user.ID,
-// 			"name": user.Name,
-// 		},
-// 	})
 // }
 
 // // Authorize implements ServerInterface.

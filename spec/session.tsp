@@ -22,15 +22,16 @@ enum LogoutErr {
 }
 @route("/session")
 interface SessionInterface {
-  @route("/")
+  @route("")
   @get
   @summary("Get session")
+  @useAuth(ApiKeyAuth<ApiKeyLocation.cookie, "AUTH">)
   me(): {
     @statusCode statusCode: 200;
     @body body: MeRes;
   };
 
-  @route("/")
+  @route("")
   @post
   @summary("Login")
   login(@body body: LoginReq): {
@@ -41,7 +42,7 @@ interface SessionInterface {
     error_description: string;
   };
 
-  @route("/")
+  @route("")
   @delete
   @summary("Logout")
   logout(): {

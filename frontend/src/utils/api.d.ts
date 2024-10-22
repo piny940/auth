@@ -92,7 +92,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/session/": {
+    "/session": {
         parameters: {
             query?: never;
             header?: never;

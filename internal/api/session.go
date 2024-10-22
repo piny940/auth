@@ -1,56 +1,31 @@
 package api
 
 import (
-	"auth/internal/domain"
-	"net/http"
-
-	"github.com/gorilla/sessions"
+	"context"
 )
 
-const SESSION_NAME = "auth_piny940"
+const CTX_COOKIE_KEY = "cookie"
 
-var sessionsOptions = &sessions.Options{
-	HttpOnly: true,
-	Secure:   true,
-	MaxAge:   60 * 60 * 24 * 7,
+// SessionInterfaceLogin implements StrictServerInterface.
+func (s *Server) SessionInterfaceLogin(ctx context.Context, request SessionInterfaceLoginRequestObject) (SessionInterfaceLoginResponseObject, error) {
+	panic("unimplemented")
 }
 
-var store sessions.Store
+// SessionInterfaceLogout implements StrictServerInterface.
+func (s *Server) SessionInterfaceLogout(ctx context.Context, request SessionInterfaceLogoutRequestObject) (SessionInterfaceLogoutResponseObject, error) {
+	panic("unimplemented")
+}
 
-func getFromSession(r *http.Request, key string) (interface{}, error) {
-	session, err := store.Get(r, SESSION_NAME)
+// SessionInterfaceMe implements StrictServerInterface.
+func (s *Server) SessionInterfaceMe(ctx context.Context, request SessionInterfaceMeRequestObject) (SessionInterfaceMeResponseObject, error) {
+	user, err := CurrentUser(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return session.Values[key], nil
-}
-
-func setToSession(r *http.Request, w http.ResponseWriter, key string, value interface{}) error {
-	session, err := store.Get(r, SESSION_NAME)
-	if err != nil {
-		return err
-	}
-	session.Options = sessionsOptions
-	session.Values[key] = value
-	return session.Save(r, w)
-}
-
-const SESSION_USER_KEY = "user"
-
-func Login(r *http.Request, w http.ResponseWriter, user *domain.User) error {
-	return setToSession(r, w, SESSION_USER_KEY, user)
-}
-func Logout(r *http.Request, w http.ResponseWriter) error {
-	return setToSession(r, w, SESSION_USER_KEY, nil)
-}
-func CurrentUser(r *http.Request) (*domain.User, error) {
-	user, err := getFromSession(r, SESSION_USER_KEY)
-	if err != nil {
-		return nil, err
-	}
-	u, ok := user.(*domain.User)
-	if !ok {
-		return nil, nil
-	}
-	return u, nil
+	return &SessionInterfaceMe200JSONResponse{
+		User: &User{
+			Id:   int64(user.ID),
+			Name: user.Name,
+		},
+	}, nil
 }
