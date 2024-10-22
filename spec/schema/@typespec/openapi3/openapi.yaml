@@ -4,6 +4,30 @@ info:
   version: 0.0.0
 tags: []
 paths:
+  /:
+    delete:
+      operationId: logout
+      summary: Logout
+      parameters: []
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        '400':
+          description: The server could not understand the request due to invalid syntax.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    enum:
+                      - not_logged_in
+                  error_description:
+                    type: string
+                required:
+                  - error
+                  - error_description
   /account/clients/:
     get:
       operationId: Clients_listClients
@@ -266,7 +290,24 @@ paths:
                 - client_id
                 - redirect_uri
                 - scope
-  /login:
+  /me:
+    get:
+      operationId: me
+      summary: Get me
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+                required:
+                  - user
+  /session:
     post:
       operationId: login
       summary: Login
@@ -296,23 +337,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ReqLogin'
-  /me:
-    get:
-      operationId: me
-      summary: Get me
-      parameters: []
-      responses:
-        '200':
-          description: The request has succeeded.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  user:
-                    $ref: '#/components/schemas/User'
-                required:
-                  - user
   /signup:
     post:
       operationId: signup
