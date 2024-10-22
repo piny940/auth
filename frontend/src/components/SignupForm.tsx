@@ -20,7 +20,7 @@ export const SignupForm = ({ next }: SignupFormProps): JSX.Element => {
   const router = useRouter()
   const query = useSearchParams()
   const { control, handleSubmit, setError } = useForm<SignupInput>({
-    defaultValues: { name: '', password: '' },
+    defaultValues: { name: '', password: '', passwordConfirmation: '' },
   })
   const submit = useCallback(
     async (data: SignupInput) => {

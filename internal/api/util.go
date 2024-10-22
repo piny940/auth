@@ -14,8 +14,9 @@ const SESSION_NAME = "auth"
 
 var sessionsOptions = &sessions.Options{
 	HttpOnly: true,
-	Secure:   true,
-	MaxAge:   60 * 60 * 24 * 7,
+	SameSite: http.SameSiteLaxMode,
+	// Secure:   true,
+	MaxAge: 60 * 60 * 24 * 7,
 }
 
 var store *sessions.CookieStore
