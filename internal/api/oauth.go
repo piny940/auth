@@ -10,8 +10,8 @@ import (
 )
 
 func (s *Server) OAuthInterfaceAuthorize(ctx context.Context, request OAuthInterfaceAuthorizeRequestObject) (OAuthInterfaceAuthorizeResponseObject, error) {
-	user, err := CurrentUser(ctx)
-	if errors.Is(err, ErrUnauthorized) {
+	var this string
+	{
 		query := map[string]string{
 			"error":         "unauthorized_client",
 			"redirect_uri":  request.Params.RedirectUri,
@@ -26,9 +26,11 @@ func (s *Server) OAuthInterfaceAuthorize(ctx context.Context, request OAuthInter
 		if err != nil {
 			return nil, err
 		}
-		next := authorizeUrl + "?" + toQueryString(query)
-		url := s.Conf.LoginUrl + "?" + toQueryString(map[string]string{"next": next})
-
+		this = authorizeUrl + "?" + toQueryString(query)
+	}
+	user, err := CurrentUser(ctx)
+	if errors.Is(err, ErrUnauthorized) {
+		url := s.Conf.LoginUrl + "?" + toQueryString(map[string]string{"next": this})
 		return OAuthInterfaceAuthorize302Response{
 			Headers: OAuthInterfaceAuthorize302ResponseHeaders{
 				Location: url,
@@ -46,10 +48,17 @@ func (s *Server) OAuthInterfaceAuthorize(ctx context.Context, request OAuthInter
 		}, nil
 	}
 	if errors.Is(err, usecase.ErrNotApproved) {
-		// TODO: redirect to approve page
-		return OAuthInterfaceAuthorize400JSONResponse{
-			Error:            AccessDenied,
-			ErrorDescription: "access_denied",
+		url := s.Conf.ApproveUrl + "?" + toQueryString(map[string]string{
+			"next":              this,
+			"client_id":         request.Params.ClientId,
+			"scope":             request.Params.Scope,
+			"error":             string(AccessDenied),
+			"error_description": "access_denied",
+		})
+		return OAuthInterfaceAuthorize302Response{
+			Headers: OAuthInterfaceAuthorize302ResponseHeaders{
+				Location: url,
+			},
 		}, nil
 	}
 	if errors.Is(err, oauth.ErrInvalidScope) {

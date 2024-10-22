@@ -26,6 +26,9 @@ export default async function Page({ searchParams: query }: Props) {
       >
         {data.client.name} にアクセスを許可しますか？
       </Typography>
+      <Typography component="p" mt={2}>
+        Scope: {query.scope}
+      </Typography>
     </Container>
   )
 }
