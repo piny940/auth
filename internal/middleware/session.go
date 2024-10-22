@@ -12,7 +12,7 @@ func Session() echo.MiddlewareFunc {
 
 func SetCurrentUser(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		api.SetCurrentUserToCtx(c)
+		api.SetSessionRegistry(c.Request())
 		return next(c)
 	}
 }

@@ -9,6 +9,8 @@ import (
 	middleware "github.com/oapi-codegen/echo-middleware"
 )
 
+// IMPORTANT: This middleware is dependent on the session middleware.
+// Make sure to add the session middleware before this middleware.
 func AuthMiddleware() echo.MiddlewareFunc {
 	spec, err := api.GetSwagger()
 	if err != nil {
@@ -25,7 +27,7 @@ func AuthMiddleware() echo.MiddlewareFunc {
 }
 
 func Authenticate(ctx context.Context, input *openapi3filter.AuthenticationInput) error {
-	_, err := api.UserFromReq(input.RequestValidationInput.Request)
+	_, err := api.CurrentUser(input.RequestValidationInput.Request.Context())
 	if err != nil {
 		return err
 	}
