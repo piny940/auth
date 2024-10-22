@@ -4,6 +4,23 @@
  */
 
 export interface paths {
+    "/account/approvals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Approve a auth request */
+        post: operations["ApprovalsInterface_approve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/account/clients/": {
         parameters: {
             query?: never;
@@ -12,10 +29,10 @@ export interface paths {
             cookie?: never;
         };
         /** Get all clients */
-        get: operations["Clients_listClients"];
+        get: operations["ClientInterface_listClients"];
         put?: never;
         /** Create a new client */
-        post: operations["Clients_createClient"];
+        post: operations["ClientInterface_createClient"];
         delete?: never;
         options?: never;
         head?: never;
@@ -32,9 +49,9 @@ export interface paths {
         get?: never;
         put?: never;
         /** Update a client */
-        post: operations["Clients_updateClient"];
+        post: operations["ClientInterface_updateClient"];
         /** Delete a client */
-        delete: operations["Clients_deleteClient"];
+        delete: operations["ClientInterface_deleteClient"];
         options?: never;
         head?: never;
         patch?: never;
@@ -131,6 +148,14 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        "Approvals.ApproveReq": {
+            client_id: string;
+            scope: string;
+        };
+        "Approvals.Res4xx": {
+            error: string;
+            error_description: string;
+        };
         Client: {
             /** Format: int64 */
             id: number;
@@ -169,7 +194,47 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    Clients_listClients: {
+    ApprovalsInterface_approve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Approvals.ApproveReq"];
+            };
+        };
+        responses: {
+            /** @description There is no content to send for this request, but the headers may be useful.  */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The server could not understand the request due to invalid syntax. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Approvals.Res4xx"];
+                };
+            };
+            /** @description Access is unauthorized. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Approvals.Res4xx"];
+                };
+            };
+        };
+    };
+    ClientInterface_listClients: {
         parameters: {
             query?: never;
             header: {
@@ -193,7 +258,7 @@ export interface operations {
             };
         };
     };
-    Clients_createClient: {
+    ClientInterface_createClient: {
         parameters: {
             query?: never;
             header?: never;
@@ -232,7 +297,7 @@ export interface operations {
             };
         };
     };
-    Clients_updateClient: {
+    ClientInterface_updateClient: {
         parameters: {
             query?: never;
             header?: never;
@@ -273,7 +338,7 @@ export interface operations {
             };
         };
     };
-    Clients_deleteClient: {
+    ClientInterface_deleteClient: {
         parameters: {
             query?: never;
             header?: never;
@@ -470,8 +535,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        /** @enum {string} */
-                        error: "invalid_name_or_password";
+                        error: string;
                         error_description: string;
                     };
                 };
@@ -501,8 +565,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        /** @enum {string} */
-                        error: "not_logged_in";
+                        error: string;
                         error_description: string;
                     };
                 };
@@ -536,8 +599,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        /** @enum {string} */
-                        error: "name_already_used" | "name_length_not_enough" | "password_length_not_enough" | "password_confirmation";
+                        error: string;
                         error_description: string;
                     };
                 };

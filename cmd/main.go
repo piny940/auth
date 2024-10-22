@@ -41,7 +41,7 @@ func main() {
 		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
 		AllowCredentials: true,
 	}))
-	api.RegisterHandlers(e.Group("/api/v1"), di.NewServer())
+	api.RegisterHandlers(e.Group("/api/v1"), api.NewStrictHandler(di.NewServer(), nil))
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()

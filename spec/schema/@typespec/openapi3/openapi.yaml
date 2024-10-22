@@ -342,8 +342,6 @@ paths:
                 properties:
                   error:
                     type: string
-                    enum:
-                      - invalid_name_or_password
                   error_description:
                     type: string
                 required:
@@ -371,8 +369,6 @@ paths:
                 properties:
                   error:
                     type: string
-                    enum:
-                      - not_logged_in
                   error_description:
                     type: string
                 required:
@@ -395,11 +391,6 @@ paths:
                 properties:
                   error:
                     type: string
-                    enum:
-                      - name_already_used
-                      - name_length_not_enough
-                      - password_length_not_enough
-                      - password_confirmation
                   error_description:
                     type: string
                 required:
