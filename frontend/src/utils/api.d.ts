@@ -575,18 +575,6 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description The server could not understand the request due to invalid syntax. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        error: components["schemas"]["Session.LogoutErr"];
-                        error_description: string;
-                    };
-                };
-            };
         };
     };
     signup: {

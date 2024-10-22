@@ -46,12 +46,9 @@ interface SessionInterface {
   @route("")
   @delete
   @summary("Logout")
+  @useAuth(ApiKeyAuth<ApiKeyLocation.cookie, "AUTH">)
   logout(): {
     @statusCode statusCode: 204;
     @header setCookie: string;
-  } | {
-    @statusCode statusCode: 400;
-    error: LogoutErr;
-    error_description: string;
   };
 }

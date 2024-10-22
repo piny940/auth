@@ -350,20 +350,8 @@ paths:
               required: true
               schema:
                 type: string
-        '400':
-          description: The server could not understand the request due to invalid syntax.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    $ref: '#/components/schemas/Session.LogoutErr'
-                  error_description:
-                    type: string
-                required:
-                  - error
-                  - error_description
+      security:
+        - ApiKeyAuth: []
   /signup:
     post:
       operationId: signup

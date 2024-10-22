@@ -2,6 +2,8 @@ package api
 
 import (
 	"context"
+
+	"github.com/labstack/echo/v4"
 )
 
 const CTX_COOKIE_KEY = "cookie"
@@ -27,7 +29,22 @@ func (s *Server) SessionInterfaceLogin(ctx context.Context, request SessionInter
 
 // SessionInterfaceLogout implements StrictServerInterface.
 func (s *Server) SessionInterfaceLogout(ctx context.Context, request SessionInterfaceLogoutRequestObject) (SessionInterfaceLogoutResponseObject, error) {
-	panic("unimplemented")
+	user, err := CurrentUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil {
+		return nil, echo.ErrUnauthorized
+	}
+	cookie, err := Logout(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return &SessionInterfaceLogout204Response{
+		Headers: SessionInterfaceLogout204ResponseHeaders{
+			SetCookie: cookie.String(),
+		},
+	}, nil
 }
 
 // SessionInterfaceMe implements StrictServerInterface.

@@ -75,23 +75,6 @@ func NewServer(authUsecase *usecase.AuthUsecase) *Server {
 // 	return ctx.NoContent(http.StatusNoContent)
 // }
 
-// func (s *Server) Logout(ctx echo.Context) error {
-// 	user, err := CurrentUser(ctx.Request())
-// 	if err != nil {
-// 		return err
-// 	}
-// 	if user == nil {
-// 		return ctx.JSON(http.StatusBadRequest, echo.Map{
-// 			"error":             "not_logged_in",
-// 			"error_description": "not logged in",
-// 		})
-// 	}
-// 	if err := Logout(ctx.Request(), ctx.Response().Writer); err != nil {
-// 		return err
-// 	}
-// 	return ctx.NoContent(http.StatusNoContent)
-// }
-
 // // Authorize implements ServerInterface.
 // func (s *Server) Authorize(ctx echo.Context, params AuthorizeParams) error {
 // 	req := toDAuthParams(params)
