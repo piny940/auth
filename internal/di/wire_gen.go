@@ -9,7 +9,9 @@ package di
 import (
 	"auth/internal/api"
 	"auth/internal/domain"
+	"auth/internal/domain/oauth"
 	"auth/internal/infrastructure"
+	"auth/internal/infrastructure/gateway"
 	"auth/internal/usecase"
 )
 
@@ -17,19 +19,23 @@ import (
 
 func NewServer() *api.Server {
 	db := infrastructure.GetDB()
-	iUserRepo := infrastructure.NewUserRepo(db)
-	iApprovalRepo := infrastructure.NewApprovalRepo(db)
+	iUserRepo := gateway.NewUserRepo(db)
+	iApprovalRepo := gateway.NewApprovalRepo(db)
 	userService := domain.NewUserService(iUserRepo)
-	authUsecase := usecase.NewAuthUsecase(iUserRepo, iApprovalRepo, userService)
+	iClientRepo := gateway.NewClientRepo(db)
+	authService := oauth.NewAuthService(iClientRepo, iApprovalRepo)
+	authUsecase := usecase.NewAuthUsecase(iUserRepo, iApprovalRepo, userService, authService)
 	server := api.NewServer(authUsecase)
 	return server
 }
 
 func NewAuthUsecase() *usecase.AuthUsecase {
 	db := infrastructure.GetDB()
-	iUserRepo := infrastructure.NewUserRepo(db)
-	iApprovalRepo := infrastructure.NewApprovalRepo(db)
+	iUserRepo := gateway.NewUserRepo(db)
+	iApprovalRepo := gateway.NewApprovalRepo(db)
 	userService := domain.NewUserService(iUserRepo)
-	authUsecase := usecase.NewAuthUsecase(iUserRepo, iApprovalRepo, userService)
+	iClientRepo := gateway.NewClientRepo(db)
+	authService := oauth.NewAuthService(iClientRepo, iApprovalRepo)
+	authUsecase := usecase.NewAuthUsecase(iUserRepo, iApprovalRepo, userService, authService)
 	return authUsecase
 }

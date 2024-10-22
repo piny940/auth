@@ -10,17 +10,20 @@ type AuthUsecase struct {
 	UserRepo     domain.IUserRepo
 	ApprovalRepo oauth.IApprovalRepo
 	UserService  *domain.UserService
+	AuthService  *oauth.AuthService
 }
 
 func NewAuthUsecase(
 	userRepo domain.IUserRepo,
 	approvalRepo oauth.IApprovalRepo,
 	userSvc *domain.UserService,
+	authSvc *oauth.AuthService,
 ) *AuthUsecase {
 	return &AuthUsecase{
 		UserRepo:     userRepo,
 		ApprovalRepo: approvalRepo,
 		UserService:  userSvc,
+		AuthService:  authSvc,
 	}
 }
 
@@ -55,11 +58,11 @@ func (u *AuthUsecase) SignUp(username, password, passwordConfirmation string) er
 }
 
 func (u *AuthUsecase) Request(user *domain.User, req *oauth.AuthRequest) error {
-	err := req.Validate()
+	err := u.AuthService.Validate(req)
 	if err != nil {
 		return err
 	}
-	ok, err := req.ApprovedBy(user)
+	ok, err := u.AuthService.Approved(req, user)
 	if err != nil {
 		return err
 	}
