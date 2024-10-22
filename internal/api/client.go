@@ -2,22 +2,27 @@ package api
 
 import "context"
 
-// ClientInterfaceCreateClient implements StrictServerInterface.
-func (s *Server) ClientInterfaceCreateClient(ctx context.Context, request ClientInterfaceCreateClientRequestObject) (ClientInterfaceCreateClientResponseObject, error) {
+// ClientsInterfaceGetClient implements StrictServerInterface.
+func (s *Server) ClientsInterfaceGetClient(ctx context.Context, request ClientsInterfaceGetClientRequestObject) (ClientsInterfaceGetClientResponseObject, error) {
 	panic("unimplemented")
 }
 
-// ClientInterfaceDeleteClient implements StrictServerInterface.
-func (s *Server) ClientInterfaceDeleteClient(ctx context.Context, request ClientInterfaceDeleteClientRequestObject) (ClientInterfaceDeleteClientResponseObject, error) {
+// AccountClientsCreateClient implements StrictServerInterface.
+func (s *Server) AccountClientsCreateClient(ctx context.Context, request AccountClientsCreateClientRequestObject) (AccountClientsCreateClientResponseObject, error) {
 	panic("unimplemented")
 }
 
-// ClientInterfaceListClients implements StrictServerInterface.
-func (s *Server) ClientInterfaceListClients(ctx context.Context, request ClientInterfaceListClientsRequestObject) (ClientInterfaceListClientsResponseObject, error) {
+// AccountClientsDeleteClient implements StrictServerInterface.
+func (s *Server) AccountClientsDeleteClient(ctx context.Context, request AccountClientsDeleteClientRequestObject) (AccountClientsDeleteClientResponseObject, error) {
 	panic("unimplemented")
 }
 
-// ClientInterfaceUpdateClient implements StrictServerInterface.
-func (s *Server) ClientInterfaceUpdateClient(ctx context.Context, request ClientInterfaceUpdateClientRequestObject) (ClientInterfaceUpdateClientResponseObject, error) {
+// AccountClientsListClients implements StrictServerInterface.
+func (s *Server) AccountClientsListClients(ctx context.Context, request AccountClientsListClientsRequestObject) (AccountClientsListClientsResponseObject, error) {
+	panic("unimplemented")
+}
+
+// AccountClientsUpdateClient implements StrictServerInterface.
+func (s *Server) AccountClientsUpdateClient(ctx context.Context, request AccountClientsUpdateClientRequestObject) (AccountClientsUpdateClientResponseObject, error) {
 	panic("unimplemented")
 }

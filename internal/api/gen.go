@@ -26,6 +26,11 @@ const (
 	ApiKeyAuthScopes = "ApiKeyAuth.Scopes"
 )
 
+// Defines values for ClientsGetClientErr.
+const (
+	ClientNotFound ClientsGetClientErr = "client_not_found"
+)
+
 // Defines values for OAuthAuthorizeErr.
 const (
 	AccessDenied            OAuthAuthorizeErr = "access_denied"
@@ -80,6 +85,9 @@ type ClientCreate struct {
 	RedirectUrls []string `json:"redirect_urls"`
 }
 
+// ClientsGetClientErr defines model for Clients.GetClientErr.
+type ClientsGetClientErr string
+
 // OAuthAuthorizeErr defines model for OAuth.AuthorizeErr.
 type OAuthAuthorizeErr string
 
@@ -125,18 +133,18 @@ type UsersReqSignup struct {
 // UsersSignupErr defines model for Users.SignupErr.
 type UsersSignupErr string
 
-// ClientInterfaceListClientsParams defines parameters for ClientInterfaceListClients.
-type ClientInterfaceListClientsParams struct {
+// AccountClientsListClientsParams defines parameters for AccountClientsListClients.
+type AccountClientsListClientsParams struct {
 	Cookie string `json:"cookie"`
 }
 
-// ClientInterfaceCreateClientJSONBody defines parameters for ClientInterfaceCreateClient.
-type ClientInterfaceCreateClientJSONBody struct {
+// AccountClientsCreateClientJSONBody defines parameters for AccountClientsCreateClient.
+type AccountClientsCreateClientJSONBody struct {
 	Client ClientCreate `json:"client"`
 }
 
-// ClientInterfaceUpdateClientJSONBody defines parameters for ClientInterfaceUpdateClient.
-type ClientInterfaceUpdateClientJSONBody struct {
+// AccountClientsUpdateClientJSONBody defines parameters for AccountClientsUpdateClient.
+type AccountClientsUpdateClientJSONBody struct {
 	Client ClientCreate `json:"client"`
 }
 
@@ -158,11 +166,11 @@ type OAuthInterfaceGetTokenJSONBody struct {
 // ApprovalsInterfaceApproveJSONRequestBody defines body for ApprovalsInterfaceApprove for application/json ContentType.
 type ApprovalsInterfaceApproveJSONRequestBody = ApprovalsApproveReq
 
-// ClientInterfaceCreateClientJSONRequestBody defines body for ClientInterfaceCreateClient for application/json ContentType.
-type ClientInterfaceCreateClientJSONRequestBody ClientInterfaceCreateClientJSONBody
+// AccountClientsCreateClientJSONRequestBody defines body for AccountClientsCreateClient for application/json ContentType.
+type AccountClientsCreateClientJSONRequestBody AccountClientsCreateClientJSONBody
 
-// ClientInterfaceUpdateClientJSONRequestBody defines body for ClientInterfaceUpdateClient for application/json ContentType.
-type ClientInterfaceUpdateClientJSONRequestBody ClientInterfaceUpdateClientJSONBody
+// AccountClientsUpdateClientJSONRequestBody defines body for AccountClientsUpdateClient for application/json ContentType.
+type AccountClientsUpdateClientJSONRequestBody AccountClientsUpdateClientJSONBody
 
 // OAuthInterfacePostAuthorizeMultipartRequestBody defines body for OAuthInterfacePostAuthorize for multipart/form-data ContentType.
 type OAuthInterfacePostAuthorizeMultipartRequestBody = OAuthAuthorizeReqMultiPart
@@ -182,17 +190,20 @@ type ServerInterface interface {
 	// (POST /account/approvals)
 	ApprovalsInterfaceApprove(ctx echo.Context) error
 	// Get all clients
-	// (GET /account/clients/)
-	ClientInterfaceListClients(ctx echo.Context, params ClientInterfaceListClientsParams) error
+	// (GET /account/clients)
+	AccountClientsListClients(ctx echo.Context, params AccountClientsListClientsParams) error
 	// Create a new client
-	// (POST /account/clients/)
-	ClientInterfaceCreateClient(ctx echo.Context) error
+	// (POST /account/clients)
+	AccountClientsCreateClient(ctx echo.Context) error
 	// Delete a client
-	// (DELETE /account/clients/:id/{id})
-	ClientInterfaceDeleteClient(ctx echo.Context, id int64) error
+	// (DELETE /account/clients:id/{id})
+	AccountClientsDeleteClient(ctx echo.Context, id int64) error
 	// Update a client
-	// (POST /account/clients/:id/{id})
-	ClientInterfaceUpdateClient(ctx echo.Context, id int64) error
+	// (POST /account/clients:id/{id})
+	AccountClientsUpdateClient(ctx echo.Context, id int64) error
+	// Get a client
+	// (GET /clients:id/{id})
+	ClientsInterfaceGetClient(ctx echo.Context, id string) error
 	// Authorization Request
 	// (GET /oauth/authorize)
 	OAuthInterfaceAuthorize(ctx echo.Context, params OAuthInterfaceAuthorizeParams) error
@@ -230,12 +241,12 @@ func (w *ServerInterfaceWrapper) ApprovalsInterfaceApprove(ctx echo.Context) err
 	return err
 }
 
-// ClientInterfaceListClients converts echo context to params.
-func (w *ServerInterfaceWrapper) ClientInterfaceListClients(ctx echo.Context) error {
+// AccountClientsListClients converts echo context to params.
+func (w *ServerInterfaceWrapper) AccountClientsListClients(ctx echo.Context) error {
 	var err error
 
 	// Parameter object where we will unmarshal all parameters from the context
-	var params ClientInterfaceListClientsParams
+	var params AccountClientsListClientsParams
 
 	headers := ctx.Request().Header
 	// ------------- Required header parameter "cookie" -------------
@@ -257,37 +268,21 @@ func (w *ServerInterfaceWrapper) ClientInterfaceListClients(ctx echo.Context) er
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.ClientInterfaceListClients(ctx, params)
+	err = w.Handler.AccountClientsListClients(ctx, params)
 	return err
 }
 
-// ClientInterfaceCreateClient converts echo context to params.
-func (w *ServerInterfaceWrapper) ClientInterfaceCreateClient(ctx echo.Context) error {
+// AccountClientsCreateClient converts echo context to params.
+func (w *ServerInterfaceWrapper) AccountClientsCreateClient(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.ClientInterfaceCreateClient(ctx)
+	err = w.Handler.AccountClientsCreateClient(ctx)
 	return err
 }
 
-// ClientInterfaceDeleteClient converts echo context to params.
-func (w *ServerInterfaceWrapper) ClientInterfaceDeleteClient(ctx echo.Context) error {
-	var err error
-	// ------------- Path parameter "id" -------------
-	var id int64
-
-	err = runtime.BindStyledParameterWithOptions("simple", "id", ctx.Param("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
-	}
-
-	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.ClientInterfaceDeleteClient(ctx, id)
-	return err
-}
-
-// ClientInterfaceUpdateClient converts echo context to params.
-func (w *ServerInterfaceWrapper) ClientInterfaceUpdateClient(ctx echo.Context) error {
+// AccountClientsDeleteClient converts echo context to params.
+func (w *ServerInterfaceWrapper) AccountClientsDeleteClient(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "id" -------------
 	var id int64
@@ -298,7 +293,39 @@ func (w *ServerInterfaceWrapper) ClientInterfaceUpdateClient(ctx echo.Context) e
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.ClientInterfaceUpdateClient(ctx, id)
+	err = w.Handler.AccountClientsDeleteClient(ctx, id)
+	return err
+}
+
+// AccountClientsUpdateClient converts echo context to params.
+func (w *ServerInterfaceWrapper) AccountClientsUpdateClient(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", ctx.Param("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AccountClientsUpdateClient(ctx, id)
+	return err
+}
+
+// ClientsInterfaceGetClient converts echo context to params.
+func (w *ServerInterfaceWrapper) ClientsInterfaceGetClient(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", ctx.Param("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.ClientsInterfaceGetClient(ctx, id)
 	return err
 }
 
@@ -435,10 +462,11 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	}
 
 	router.POST(baseURL+"/account/approvals", wrapper.ApprovalsInterfaceApprove)
-	router.GET(baseURL+"/account/clients/", wrapper.ClientInterfaceListClients)
-	router.POST(baseURL+"/account/clients/", wrapper.ClientInterfaceCreateClient)
-	router.DELETE(baseURL+"/account/clients/:id/:id", wrapper.ClientInterfaceDeleteClient)
-	router.POST(baseURL+"/account/clients/:id/:id", wrapper.ClientInterfaceUpdateClient)
+	router.GET(baseURL+"/account/clients", wrapper.AccountClientsListClients)
+	router.POST(baseURL+"/account/clients", wrapper.AccountClientsCreateClient)
+	router.DELETE(baseURL+"/account/clients:id/:id", wrapper.AccountClientsDeleteClient)
+	router.POST(baseURL+"/account/clients:id/:id", wrapper.AccountClientsUpdateClient)
+	router.GET(baseURL+"/clients:id/:id", wrapper.ClientsInterfaceGetClient)
 	router.GET(baseURL+"/oauth/authorize", wrapper.OAuthInterfaceAuthorize)
 	router.POST(baseURL+"/oauth/authorize", wrapper.OAuthInterfacePostAuthorize)
 	router.POST(baseURL+"/oauth/token", wrapper.OAuthInterfaceGetToken)
@@ -474,107 +502,138 @@ func (response ApprovalsInterfaceApprove400JSONResponse) VisitApprovalsInterface
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ClientInterfaceListClientsRequestObject struct {
-	Params ClientInterfaceListClientsParams
+type AccountClientsListClientsRequestObject struct {
+	Params AccountClientsListClientsParams
 }
 
-type ClientInterfaceListClientsResponseObject interface {
-	VisitClientInterfaceListClientsResponse(w http.ResponseWriter) error
+type AccountClientsListClientsResponseObject interface {
+	VisitAccountClientsListClientsResponse(w http.ResponseWriter) error
 }
 
-type ClientInterfaceListClients200JSONResponse struct {
+type AccountClientsListClients200JSONResponse struct {
 	Clients []Client `json:"clients"`
 }
 
-func (response ClientInterfaceListClients200JSONResponse) VisitClientInterfaceListClientsResponse(w http.ResponseWriter) error {
+func (response AccountClientsListClients200JSONResponse) VisitAccountClientsListClientsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ClientInterfaceCreateClientRequestObject struct {
-	Body *ClientInterfaceCreateClientJSONRequestBody
+type AccountClientsCreateClientRequestObject struct {
+	Body *AccountClientsCreateClientJSONRequestBody
 }
 
-type ClientInterfaceCreateClientResponseObject interface {
-	VisitClientInterfaceCreateClientResponse(w http.ResponseWriter) error
+type AccountClientsCreateClientResponseObject interface {
+	VisitAccountClientsCreateClientResponse(w http.ResponseWriter) error
 }
 
-type ClientInterfaceCreateClient201JSONResponse struct {
+type AccountClientsCreateClient201JSONResponse struct {
 	Client Client `json:"client"`
 }
 
-func (response ClientInterfaceCreateClient201JSONResponse) VisitClientInterfaceCreateClientResponse(w http.ResponseWriter) error {
+func (response AccountClientsCreateClient201JSONResponse) VisitAccountClientsCreateClientResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(201)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ClientInterfaceCreateClient400JSONResponse struct {
+type AccountClientsCreateClient400JSONResponse struct {
 	Error string `json:"error"`
 }
 
-func (response ClientInterfaceCreateClient400JSONResponse) VisitClientInterfaceCreateClientResponse(w http.ResponseWriter) error {
+func (response AccountClientsCreateClient400JSONResponse) VisitAccountClientsCreateClientResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(400)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ClientInterfaceDeleteClientRequestObject struct {
+type AccountClientsDeleteClientRequestObject struct {
 	Id int64 `json:"id"`
 }
 
-type ClientInterfaceDeleteClientResponseObject interface {
-	VisitClientInterfaceDeleteClientResponse(w http.ResponseWriter) error
+type AccountClientsDeleteClientResponseObject interface {
+	VisitAccountClientsDeleteClientResponse(w http.ResponseWriter) error
 }
 
-type ClientInterfaceDeleteClient204Response struct {
+type AccountClientsDeleteClient204Response struct {
 }
 
-func (response ClientInterfaceDeleteClient204Response) VisitClientInterfaceDeleteClientResponse(w http.ResponseWriter) error {
+func (response AccountClientsDeleteClient204Response) VisitAccountClientsDeleteClientResponse(w http.ResponseWriter) error {
 	w.WriteHeader(204)
 	return nil
 }
 
-type ClientInterfaceDeleteClient400JSONResponse struct {
+type AccountClientsDeleteClient400JSONResponse struct {
 	Error string `json:"error"`
 }
 
-func (response ClientInterfaceDeleteClient400JSONResponse) VisitClientInterfaceDeleteClientResponse(w http.ResponseWriter) error {
+func (response AccountClientsDeleteClient400JSONResponse) VisitAccountClientsDeleteClientResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(400)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ClientInterfaceUpdateClientRequestObject struct {
+type AccountClientsUpdateClientRequestObject struct {
 	Id   int64 `json:"id"`
-	Body *ClientInterfaceUpdateClientJSONRequestBody
+	Body *AccountClientsUpdateClientJSONRequestBody
 }
 
-type ClientInterfaceUpdateClientResponseObject interface {
-	VisitClientInterfaceUpdateClientResponse(w http.ResponseWriter) error
+type AccountClientsUpdateClientResponseObject interface {
+	VisitAccountClientsUpdateClientResponse(w http.ResponseWriter) error
 }
 
-type ClientInterfaceUpdateClient200JSONResponse struct {
+type AccountClientsUpdateClient200JSONResponse struct {
 	Client Client `json:"client"`
 }
 
-func (response ClientInterfaceUpdateClient200JSONResponse) VisitClientInterfaceUpdateClientResponse(w http.ResponseWriter) error {
+func (response AccountClientsUpdateClient200JSONResponse) VisitAccountClientsUpdateClientResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ClientInterfaceUpdateClient400JSONResponse struct {
+type AccountClientsUpdateClient400JSONResponse struct {
 	Error string `json:"error"`
 }
 
-func (response ClientInterfaceUpdateClient400JSONResponse) VisitClientInterfaceUpdateClientResponse(w http.ResponseWriter) error {
+func (response AccountClientsUpdateClient400JSONResponse) VisitAccountClientsUpdateClientResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ClientsInterfaceGetClientRequestObject struct {
+	Id string `json:"id"`
+}
+
+type ClientsInterfaceGetClientResponseObject interface {
+	VisitClientsInterfaceGetClientResponse(w http.ResponseWriter) error
+}
+
+type ClientsInterfaceGetClient200JSONResponse struct {
+	Client Client `json:"client"`
+}
+
+func (response ClientsInterfaceGetClient200JSONResponse) VisitClientsInterfaceGetClientResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ClientsInterfaceGetClient400JSONResponse struct {
+	Error            ClientsGetClientErr `json:"error"`
+	ErrorDescription string              `json:"error_description"`
+}
+
+func (response ClientsInterfaceGetClient400JSONResponse) VisitClientsInterfaceGetClientResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(400)
 
@@ -809,17 +868,20 @@ type StrictServerInterface interface {
 	// (POST /account/approvals)
 	ApprovalsInterfaceApprove(ctx context.Context, request ApprovalsInterfaceApproveRequestObject) (ApprovalsInterfaceApproveResponseObject, error)
 	// Get all clients
-	// (GET /account/clients/)
-	ClientInterfaceListClients(ctx context.Context, request ClientInterfaceListClientsRequestObject) (ClientInterfaceListClientsResponseObject, error)
+	// (GET /account/clients)
+	AccountClientsListClients(ctx context.Context, request AccountClientsListClientsRequestObject) (AccountClientsListClientsResponseObject, error)
 	// Create a new client
-	// (POST /account/clients/)
-	ClientInterfaceCreateClient(ctx context.Context, request ClientInterfaceCreateClientRequestObject) (ClientInterfaceCreateClientResponseObject, error)
+	// (POST /account/clients)
+	AccountClientsCreateClient(ctx context.Context, request AccountClientsCreateClientRequestObject) (AccountClientsCreateClientResponseObject, error)
 	// Delete a client
-	// (DELETE /account/clients/:id/{id})
-	ClientInterfaceDeleteClient(ctx context.Context, request ClientInterfaceDeleteClientRequestObject) (ClientInterfaceDeleteClientResponseObject, error)
+	// (DELETE /account/clients:id/{id})
+	AccountClientsDeleteClient(ctx context.Context, request AccountClientsDeleteClientRequestObject) (AccountClientsDeleteClientResponseObject, error)
 	// Update a client
-	// (POST /account/clients/:id/{id})
-	ClientInterfaceUpdateClient(ctx context.Context, request ClientInterfaceUpdateClientRequestObject) (ClientInterfaceUpdateClientResponseObject, error)
+	// (POST /account/clients:id/{id})
+	AccountClientsUpdateClient(ctx context.Context, request AccountClientsUpdateClientRequestObject) (AccountClientsUpdateClientResponseObject, error)
+	// Get a client
+	// (GET /clients:id/{id})
+	ClientsInterfaceGetClient(ctx context.Context, request ClientsInterfaceGetClientRequestObject) (ClientsInterfaceGetClientResponseObject, error)
 	// Authorization Request
 	// (GET /oauth/authorize)
 	OAuthInterfaceAuthorize(ctx context.Context, request OAuthInterfaceAuthorizeRequestObject) (OAuthInterfaceAuthorizeResponseObject, error)
@@ -884,110 +946,135 @@ func (sh *strictHandler) ApprovalsInterfaceApprove(ctx echo.Context) error {
 	return nil
 }
 
-// ClientInterfaceListClients operation middleware
-func (sh *strictHandler) ClientInterfaceListClients(ctx echo.Context, params ClientInterfaceListClientsParams) error {
-	var request ClientInterfaceListClientsRequestObject
+// AccountClientsListClients operation middleware
+func (sh *strictHandler) AccountClientsListClients(ctx echo.Context, params AccountClientsListClientsParams) error {
+	var request AccountClientsListClientsRequestObject
 
 	request.Params = params
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.ClientInterfaceListClients(ctx.Request().Context(), request.(ClientInterfaceListClientsRequestObject))
+		return sh.ssi.AccountClientsListClients(ctx.Request().Context(), request.(AccountClientsListClientsRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "ClientInterfaceListClients")
+		handler = middleware(handler, "AccountClientsListClients")
 	}
 
 	response, err := handler(ctx, request)
 
 	if err != nil {
 		return err
-	} else if validResponse, ok := response.(ClientInterfaceListClientsResponseObject); ok {
-		return validResponse.VisitClientInterfaceListClientsResponse(ctx.Response())
+	} else if validResponse, ok := response.(AccountClientsListClientsResponseObject); ok {
+		return validResponse.VisitAccountClientsListClientsResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
 	return nil
 }
 
-// ClientInterfaceCreateClient operation middleware
-func (sh *strictHandler) ClientInterfaceCreateClient(ctx echo.Context) error {
-	var request ClientInterfaceCreateClientRequestObject
+// AccountClientsCreateClient operation middleware
+func (sh *strictHandler) AccountClientsCreateClient(ctx echo.Context) error {
+	var request AccountClientsCreateClientRequestObject
 
-	var body ClientInterfaceCreateClientJSONRequestBody
+	var body AccountClientsCreateClientJSONRequestBody
 	if err := ctx.Bind(&body); err != nil {
 		return err
 	}
 	request.Body = &body
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.ClientInterfaceCreateClient(ctx.Request().Context(), request.(ClientInterfaceCreateClientRequestObject))
+		return sh.ssi.AccountClientsCreateClient(ctx.Request().Context(), request.(AccountClientsCreateClientRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "ClientInterfaceCreateClient")
+		handler = middleware(handler, "AccountClientsCreateClient")
 	}
 
 	response, err := handler(ctx, request)
 
 	if err != nil {
 		return err
-	} else if validResponse, ok := response.(ClientInterfaceCreateClientResponseObject); ok {
-		return validResponse.VisitClientInterfaceCreateClientResponse(ctx.Response())
+	} else if validResponse, ok := response.(AccountClientsCreateClientResponseObject); ok {
+		return validResponse.VisitAccountClientsCreateClientResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
 	return nil
 }
 
-// ClientInterfaceDeleteClient operation middleware
-func (sh *strictHandler) ClientInterfaceDeleteClient(ctx echo.Context, id int64) error {
-	var request ClientInterfaceDeleteClientRequestObject
+// AccountClientsDeleteClient operation middleware
+func (sh *strictHandler) AccountClientsDeleteClient(ctx echo.Context, id int64) error {
+	var request AccountClientsDeleteClientRequestObject
 
 	request.Id = id
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.ClientInterfaceDeleteClient(ctx.Request().Context(), request.(ClientInterfaceDeleteClientRequestObject))
+		return sh.ssi.AccountClientsDeleteClient(ctx.Request().Context(), request.(AccountClientsDeleteClientRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "ClientInterfaceDeleteClient")
+		handler = middleware(handler, "AccountClientsDeleteClient")
 	}
 
 	response, err := handler(ctx, request)
 
 	if err != nil {
 		return err
-	} else if validResponse, ok := response.(ClientInterfaceDeleteClientResponseObject); ok {
-		return validResponse.VisitClientInterfaceDeleteClientResponse(ctx.Response())
+	} else if validResponse, ok := response.(AccountClientsDeleteClientResponseObject); ok {
+		return validResponse.VisitAccountClientsDeleteClientResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
 	return nil
 }
 
-// ClientInterfaceUpdateClient operation middleware
-func (sh *strictHandler) ClientInterfaceUpdateClient(ctx echo.Context, id int64) error {
-	var request ClientInterfaceUpdateClientRequestObject
+// AccountClientsUpdateClient operation middleware
+func (sh *strictHandler) AccountClientsUpdateClient(ctx echo.Context, id int64) error {
+	var request AccountClientsUpdateClientRequestObject
 
 	request.Id = id
 
-	var body ClientInterfaceUpdateClientJSONRequestBody
+	var body AccountClientsUpdateClientJSONRequestBody
 	if err := ctx.Bind(&body); err != nil {
 		return err
 	}
 	request.Body = &body
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.ClientInterfaceUpdateClient(ctx.Request().Context(), request.(ClientInterfaceUpdateClientRequestObject))
+		return sh.ssi.AccountClientsUpdateClient(ctx.Request().Context(), request.(AccountClientsUpdateClientRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "ClientInterfaceUpdateClient")
+		handler = middleware(handler, "AccountClientsUpdateClient")
 	}
 
 	response, err := handler(ctx, request)
 
 	if err != nil {
 		return err
-	} else if validResponse, ok := response.(ClientInterfaceUpdateClientResponseObject); ok {
-		return validResponse.VisitClientInterfaceUpdateClientResponse(ctx.Response())
+	} else if validResponse, ok := response.(AccountClientsUpdateClientResponseObject); ok {
+		return validResponse.VisitAccountClientsUpdateClientResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// ClientsInterfaceGetClient operation middleware
+func (sh *strictHandler) ClientsInterfaceGetClient(ctx echo.Context, id string) error {
+	var request ClientsInterfaceGetClientRequestObject
+
+	request.Id = id
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.ClientsInterfaceGetClient(ctx.Request().Context(), request.(ClientsInterfaceGetClientRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ClientsInterfaceGetClient")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(ClientsInterfaceGetClientResponseObject); ok {
+		return validResponse.VisitClientsInterfaceGetClientResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
@@ -1184,32 +1271,33 @@ func (sh *strictHandler) UsersInterfaceSignup(ctx echo.Context) error {
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
+	"MpvkopySik6vn+P1xfqfAAAA//8XeNpbyCkAAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

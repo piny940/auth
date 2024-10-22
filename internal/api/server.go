@@ -7,8 +7,9 @@ import (
 )
 
 type Server struct {
-	AuthUsecase *usecase.AuthUsecase
-	Conf        *Config
+	AuthUsecase   *usecase.AuthUsecase
+	ClientUsecase usecase.IClientUsecase
+	Conf          *Config
 }
 
 type Config struct {
@@ -19,19 +20,15 @@ type Config struct {
 
 var _ StrictServerInterface = &Server{}
 
-func NewServer(authUsecase *usecase.AuthUsecase) *Server {
+func NewServer(authUsecase *usecase.AuthUsecase, clientUC usecase.IClientUsecase) *Server {
 	conf := &Config{}
 	err := envconfig.Process("api", conf)
 	if err != nil {
 		panic(err)
 	}
 	return &Server{
-		AuthUsecase: authUsecase,
-		Conf:        conf,
+		AuthUsecase:   authUsecase,
+		ClientUsecase: clientUC,
+		Conf:          conf,
 	}
 }
-
-// // PostAuthorize implements ServerInterface.
-// func (s *Server) PostAuthorize(ctx echo.Context) error {
-// 	panic("unimplemented")
-// }
