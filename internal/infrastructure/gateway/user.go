@@ -1,7 +1,8 @@
-package infrastructure
+package gateway
 
 import (
 	"auth/internal/domain"
+	"auth/internal/infrastructure"
 	"auth/internal/infrastructure/model"
 	"auth/internal/infrastructure/query"
 	"errors"
@@ -10,13 +11,13 @@ import (
 )
 
 type userRepo struct {
-	db    *DB
+	db    *infrastructure.DB
 	query *query.Query
 }
 
 var _ domain.IUserRepo = &userRepo{}
 
-func NewUserRepo(db *DB) domain.IUserRepo {
+func NewUserRepo(db *infrastructure.DB) domain.IUserRepo {
 	query := query.Use(db.Client)
 	return &userRepo{
 		db:    db,

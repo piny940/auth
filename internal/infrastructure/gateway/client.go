@@ -1,13 +1,14 @@
-package infrastructure
+package gateway
 
 import (
 	"auth/internal/domain/oauth"
+	"auth/internal/infrastructure"
 	"auth/internal/infrastructure/query"
 	"time"
 )
 
 type ClientRepo struct {
-	db    *DB
+	db    *infrastructure.DB
 	query *query.Query
 }
 
@@ -18,10 +19,10 @@ type ClientResult struct {
 	Name            string
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
-	RedirectURI     string
+	URI             string
 }
 
-func NewClientRepo(db *DB) oauth.IClientRepo {
+func NewClientRepo(db *infrastructure.DB) oauth.IClientRepo {
 	query := query.Use(db.Client)
 	return &ClientRepo{
 		db:    db,
@@ -46,7 +47,7 @@ func (c *ClientRepo) FindByID(id oauth.ClientID) (*oauth.Client, error) {
 func toDomainClient(results []*ClientResult) *oauth.Client {
 	uris := make([]string, 0, len(results))
 	for _, r := range results {
-		uris = append(uris, r.RedirectURI)
+		uris = append(uris, r.URI)
 	}
 	return &oauth.Client{
 		ID:              oauth.ClientID(results[0].ID),
