@@ -7,6 +7,7 @@ import "./approvals.tsp";
 import "./clients.tsp";
 import "./oauth.tsp";
 import "./session.tsp";
+import "./users.tsp";
 
 using TypeSpec.Http;
 @service({
@@ -14,19 +15,3 @@ using TypeSpec.Http;
 })
 @server("https://auth.piny940.com/api/v1", "Auth Server")
 namespace Auth;
-
-model ReqSignup {
-  name: string;
-  password: string;
-  password_confirmation: string;
-}
-@route("/signup")
-@post
-@summary("Signup")
-op signup(@body body: User): {
-  @statusCode statusCode: 204;
-} | {
-  @statusCode statusCode: 400;
-  error: string;
-  error_description: string;
-};

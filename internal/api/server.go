@@ -2,7 +2,6 @@ package api
 
 import (
 	"auth/internal/usecase"
-	"context"
 
 	"github.com/kelseyhightower/envconfig"
 )
@@ -10,10 +9,6 @@ import (
 type Server struct {
 	AuthUsecase *usecase.AuthUsecase
 	Conf        *Config
-}
-
-func (s *Server) Signup(ctx context.Context, request SignupRequestObject) (SignupResponseObject, error) {
-	panic("unimplemented")
 }
 
 type Config struct {
@@ -35,45 +30,6 @@ func NewServer(authUsecase *usecase.AuthUsecase) *Server {
 		Conf:        conf,
 	}
 }
-
-// func (s *Server) Signup(ctx echo.Context) error {
-// 	var body SignupJSONRequestBody
-// 	if err := ctx.Bind(&body); err != nil {
-// 		return err
-// 	}
-// 	user, err := s.AuthUsecase.SignUp(body.Name, body.Password, body.PasswordConfirmation)
-// 	if errors.Is(err, domain.ErrNameLengthNotEnough) {
-// 		return ctx.JSON(http.StatusBadRequest, echo.Map{
-// 			"error":             "name_length_not_enough",
-// 			"error_description": err.Error(),
-// 		})
-// 	}
-// 	if errors.Is(err, domain.ErrNameAlreadyUsed) {
-// 		return ctx.JSON(http.StatusBadRequest, echo.Map{
-// 			"error":             "name_already_used",
-// 			"error_description": err.Error(),
-// 		})
-// 	}
-// 	if errors.Is(err, domain.ErrPasswordLengthNotEnough) {
-// 		return ctx.JSON(http.StatusBadRequest, echo.Map{
-// 			"error":             "password_length_not_enough",
-// 			"error_description": err.Error(),
-// 		})
-// 	}
-// 	if errors.Is(err, domain.ErrPasswordConfirmation) {
-// 		return ctx.JSON(http.StatusBadRequest, echo.Map{
-// 			"error":             "password_confirmation",
-// 			"error_description": err.Error(),
-// 		})
-// 	}
-// 	if err != nil {
-// 		return err
-// 	}
-// 	if err := Login(ctx.Request(), ctx.Response().Writer, user); err != nil {
-// 		return err
-// 	}
-// 	return ctx.NoContent(http.StatusNoContent)
-// }
 
 // // Authorize implements ServerInterface.
 // func (s *Server) Authorize(ctx echo.Context, params AuthorizeParams) error {

@@ -24,7 +24,7 @@ export const SignupForm = ({ next }: SignupFormProps): JSX.Element => {
   })
   const submit = useCallback(
     async (data: SignupInput) => {
-      const { error } = await client.POST('/signup', {
+      const { error } = await client.POST('/users/signup', {
         body: {
           name: data.name,
           password: data.password,
@@ -33,10 +33,10 @@ export const SignupForm = ({ next }: SignupFormProps): JSX.Element => {
       })
       if (!!error) {
         if (error.error === 'name_already_used') {
-          setError('name', { message: error.error_description })
+          setError('name', { message: error.error })
         } else if (error.error === 'password_length_not_enough') {
           setError('password', { message: error.error_description })
-        } else if (error.error === 'password_confirmation') {
+        } else if (error.error === 'password_confirmation_not_match') {
           setError('password', { message: error.error_description })
           setError('passwordConfirmation', { message: error.error_description })
         } else if (error.error === 'name_length_not_enough') {

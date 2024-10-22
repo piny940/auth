@@ -352,14 +352,19 @@ paths:
                 type: string
       security:
         - ApiKeyAuth: []
-  /signup:
+  /users/signup:
     post:
-      operationId: signup
+      operationId: UsersInterface_signup
       summary: Signup
       parameters: []
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
+          headers:
+            set-cookie:
+              required: true
+              schema:
+                type: string
         '400':
           description: The server could not understand the request due to invalid syntax.
           content:
@@ -368,7 +373,7 @@ paths:
                 type: object
                 properties:
                   error:
-                    type: string
+                    $ref: '#/components/schemas/Users.SignupErr'
                   error_description:
                     type: string
                 required:
@@ -379,7 +384,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserCreate'
+              $ref: '#/components/schemas/Users.ReqSignup'
 components:
   schemas:
     Approvals.ApproveReq:
@@ -476,19 +481,6 @@ components:
           type: string
         state:
           type: string
-    ReqSignup:
-      type: object
-      required:
-        - name
-        - password
-        - password_confirmation
-      properties:
-        name:
-          type: string
-        password:
-          type: string
-        password_confirmation:
-          type: string
     Session.LoginErr:
       type: string
       enum:
@@ -528,7 +520,7 @@ components:
           format: int64
         name:
           type: string
-    UserCreate:
+    Users.ReqSignup:
       type: object
       required:
         - name
@@ -541,6 +533,13 @@ components:
           type: string
         password_confirmation:
           type: string
+    Users.SignupErr:
+      type: string
+      enum:
+        - name_length_not_enough
+        - name_already_used
+        - password_length_not_enough
+        - password_confirmation_not_match
   securitySchemes:
     ApiKeyAuth:
       type: apiKey

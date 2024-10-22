@@ -47,6 +47,14 @@ const (
 	NotLoggedIn SessionLogoutErr = "not_logged_in"
 )
 
+// Defines values for UsersSignupErr.
+const (
+	NameAlreadyUsed              UsersSignupErr = "name_already_used"
+	NameLengthNotEnough          UsersSignupErr = "name_length_not_enough"
+	PasswordConfirmationNotMatch UsersSignupErr = "password_confirmation_not_match"
+	PasswordLengthNotEnough      UsersSignupErr = "password_length_not_enough"
+)
+
 // ApprovalsApproveReq defines model for Approvals.ApproveReq.
 type ApprovalsApproveReq struct {
 	ClientId string `json:"client_id"`
@@ -93,13 +101,6 @@ type OAuthAuthorizeReqMultiPart struct {
 	State        *string `json:"state,omitempty"`
 }
 
-// ReqSignup defines model for ReqSignup.
-type ReqSignup struct {
-	Name                 string `json:"name"`
-	Password             string `json:"password"`
-	PasswordConfirmation string `json:"password_confirmation"`
-}
-
 // SessionLoginErr defines model for Session.LoginErr.
 type SessionLoginErr string
 
@@ -123,12 +124,15 @@ type User struct {
 	Name string `json:"name"`
 }
 
-// UserCreate defines model for UserCreate.
-type UserCreate struct {
+// UsersReqSignup defines model for Users.ReqSignup.
+type UsersReqSignup struct {
 	Name                 string `json:"name"`
 	Password             string `json:"password"`
 	PasswordConfirmation string `json:"password_confirmation"`
 }
+
+// UsersSignupErr defines model for Users.SignupErr.
+type UsersSignupErr string
 
 // ClientInterfaceListClientsParams defines parameters for ClientInterfaceListClients.
 type ClientInterfaceListClientsParams struct {
@@ -174,8 +178,8 @@ type OAuthInterfaceGetTokenJSONRequestBody OAuthInterfaceGetTokenJSONBody
 // SessionInterfaceLoginJSONRequestBody defines body for SessionInterfaceLogin for application/json ContentType.
 type SessionInterfaceLoginJSONRequestBody = SessionLoginReq
 
-// SignupJSONRequestBody defines body for Signup for application/json ContentType.
-type SignupJSONRequestBody = UserCreate
+// UsersInterfaceSignupJSONRequestBody defines body for UsersInterfaceSignup for application/json ContentType.
+type UsersInterfaceSignupJSONRequestBody = UsersReqSignup
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
@@ -213,8 +217,8 @@ type ServerInterface interface {
 	// (POST /session)
 	SessionInterfaceLogin(ctx echo.Context) error
 	// Signup
-	// (POST /signup)
-	Signup(ctx echo.Context) error
+	// (POST /users/signup)
+	UsersInterfaceSignup(ctx echo.Context) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -370,12 +374,12 @@ func (w *ServerInterfaceWrapper) SessionInterfaceLogin(ctx echo.Context) error {
 	return err
 }
 
-// Signup converts echo context to params.
-func (w *ServerInterfaceWrapper) Signup(ctx echo.Context) error {
+// UsersInterfaceSignup converts echo context to params.
+func (w *ServerInterfaceWrapper) UsersInterfaceSignup(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.Signup(ctx)
+	err = w.Handler.UsersInterfaceSignup(ctx)
 	return err
 }
 
@@ -418,7 +422,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.DELETE(baseURL+"/session", wrapper.SessionInterfaceLogout)
 	router.GET(baseURL+"/session", wrapper.SessionInterfaceMe)
 	router.POST(baseURL+"/session", wrapper.SessionInterfaceLogin)
-	router.POST(baseURL+"/signup", wrapper.Signup)
+	router.POST(baseURL+"/users/signup", wrapper.UsersInterfaceSignup)
 
 }
 
@@ -740,28 +744,34 @@ func (response SessionInterfaceLogin400JSONResponse) VisitSessionInterfaceLoginR
 	return json.NewEncoder(w).Encode(response)
 }
 
-type SignupRequestObject struct {
-	Body *SignupJSONRequestBody
+type UsersInterfaceSignupRequestObject struct {
+	Body *UsersInterfaceSignupJSONRequestBody
 }
 
-type SignupResponseObject interface {
-	VisitSignupResponse(w http.ResponseWriter) error
+type UsersInterfaceSignupResponseObject interface {
+	VisitUsersInterfaceSignupResponse(w http.ResponseWriter) error
 }
 
-type Signup204Response struct {
+type UsersInterfaceSignup204ResponseHeaders struct {
+	SetCookie string
 }
 
-func (response Signup204Response) VisitSignupResponse(w http.ResponseWriter) error {
+type UsersInterfaceSignup204Response struct {
+	Headers UsersInterfaceSignup204ResponseHeaders
+}
+
+func (response UsersInterfaceSignup204Response) VisitUsersInterfaceSignupResponse(w http.ResponseWriter) error {
+	w.Header().Set("set-cookie", fmt.Sprint(response.Headers.SetCookie))
 	w.WriteHeader(204)
 	return nil
 }
 
-type Signup400JSONResponse struct {
-	Error            string `json:"error"`
-	ErrorDescription string `json:"error_description"`
+type UsersInterfaceSignup400JSONResponse struct {
+	Error            UsersSignupErr `json:"error"`
+	ErrorDescription string         `json:"error_description"`
 }
 
-func (response Signup400JSONResponse) VisitSignupResponse(w http.ResponseWriter) error {
+func (response UsersInterfaceSignup400JSONResponse) VisitUsersInterfaceSignupResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(400)
 
@@ -804,8 +814,8 @@ type StrictServerInterface interface {
 	// (POST /session)
 	SessionInterfaceLogin(ctx context.Context, request SessionInterfaceLoginRequestObject) (SessionInterfaceLoginResponseObject, error)
 	// Signup
-	// (POST /signup)
-	Signup(ctx context.Context, request SignupRequestObject) (SignupResponseObject, error)
+	// (POST /users/signup)
+	UsersInterfaceSignup(ctx context.Context, request UsersInterfaceSignupRequestObject) (UsersInterfaceSignupResponseObject, error)
 }
 
 type StrictHandlerFunc = strictecho.StrictEchoHandlerFunc
@@ -1117,29 +1127,29 @@ func (sh *strictHandler) SessionInterfaceLogin(ctx echo.Context) error {
 	return nil
 }
 
-// Signup operation middleware
-func (sh *strictHandler) Signup(ctx echo.Context) error {
-	var request SignupRequestObject
+// UsersInterfaceSignup operation middleware
+func (sh *strictHandler) UsersInterfaceSignup(ctx echo.Context) error {
+	var request UsersInterfaceSignupRequestObject
 
-	var body SignupJSONRequestBody
+	var body UsersInterfaceSignupJSONRequestBody
 	if err := ctx.Bind(&body); err != nil {
 		return err
 	}
 	request.Body = &body
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.Signup(ctx.Request().Context(), request.(SignupRequestObject))
+		return sh.ssi.UsersInterfaceSignup(ctx.Request().Context(), request.(UsersInterfaceSignupRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "Signup")
+		handler = middleware(handler, "UsersInterfaceSignup")
 	}
 
 	response, err := handler(ctx, request)
 
 	if err != nil {
 		return err
-	} else if validResponse, ok := response.(SignupResponseObject); ok {
-		return validResponse.VisitSignupResponse(ctx.Response())
+	} else if validResponse, ok := response.(UsersInterfaceSignupResponseObject); ok {
+		return validResponse.VisitUsersInterfaceSignupResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
@@ -1149,31 +1159,32 @@ func (sh *strictHandler) Signup(ctx echo.Context) error {
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

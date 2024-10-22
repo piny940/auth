@@ -111,7 +111,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/signup": {
+    "/users/signup": {
         parameters: {
             query?: never;
             header?: never;
@@ -121,7 +121,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Signup */
-        post: operations["signup"];
+        post: operations["UsersInterface_signup"];
         delete?: never;
         options?: never;
         head?: never;
@@ -166,11 +166,6 @@ export interface components {
             scope: string;
             state?: string;
         };
-        ReqSignup: {
-            name: string;
-            password: string;
-            password_confirmation: string;
-        };
         /** @enum {string} */
         "Session.LoginErr": "invalid_name_or_password";
         "Session.LoginReq": {
@@ -187,11 +182,13 @@ export interface components {
             id: number;
             name: string;
         };
-        UserCreate: {
+        "Users.ReqSignup": {
             name: string;
             password: string;
             password_confirmation: string;
         };
+        /** @enum {string} */
+        "Users.SignupErr": "name_length_not_enough" | "name_already_used" | "password_length_not_enough" | "password_confirmation_not_match";
     };
     responses: never;
     parameters: never;
@@ -577,7 +574,7 @@ export interface operations {
             };
         };
     };
-    signup: {
+    UsersInterface_signup: {
         parameters: {
             query?: never;
             header?: never;
@@ -586,13 +583,14 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["UserCreate"];
+                "application/json": components["schemas"]["Users.ReqSignup"];
             };
         };
         responses: {
             /** @description There is no content to send for this request, but the headers may be useful.  */
             204: {
                 headers: {
+                    "set-cookie": string;
                     [name: string]: unknown;
                 };
                 content?: never;
@@ -604,7 +602,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        error: string;
+                        error: components["schemas"]["Users.SignupErr"];
                         error_description: string;
                     };
                 };
