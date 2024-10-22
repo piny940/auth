@@ -6,6 +6,7 @@ import (
 	"auth/internal/usecase"
 	"errors"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/kelseyhightower/envconfig"
@@ -18,6 +19,7 @@ type Server struct {
 }
 
 type Config struct {
+	ServerUrl  string `envconfig:"SERVER_URL" required:"true"`
 	LoginUrl   string `split_words:"true" required:"true"`
 	ApproveUrl string `split_words:"true" required:"true"`
 }
@@ -164,15 +166,22 @@ func (s *Server) Authorize(ctx echo.Context, params AuthorizeParams) error {
 		return err
 	}
 	if user == nil {
-		url := s.Conf.LoginUrl +
-			"?error=unauthorized_client" +
-			"&redirect_uri=" + params.RedirectUri +
-			"&response_type=" + params.ResponseType +
-			"&client_id=" + params.ClientId +
-			"&scope=" + params.Scope
-		if params.State != nil {
-			url += "&state=" + *params.State
+		query := map[string]string{
+			"error":         "unauthorized_client",
+			"redirect_uri":  params.RedirectUri,
+			"response_type": params.ResponseType,
+			"client_id":     params.ClientId,
+			"scope":         params.Scope,
 		}
+		if params.State != nil {
+			query["state"] = *params.State
+		}
+		authorizeUrl, err := url.JoinPath(s.Conf.ServerUrl, "authorize")
+		if err != nil {
+			return err
+		}
+		next := authorizeUrl + "?" + toQueryString(query)
+		url := s.Conf.LoginUrl + "?" + toQueryString(map[string]string{"next": next})
 		return ctx.Redirect(http.StatusFound, url)
 	}
 	err = s.AuthUsecase.Request(user, req)
@@ -224,4 +233,12 @@ func toDAuthParams(params AuthorizeParams) *oauth.AuthRequest {
 		Scopes:       scopes,
 		State:        params.State,
 	}
+}
+
+func toQueryString(h map[string]string) string {
+	var q []string
+	for k, v := range h {
+		q = append(q, k+"="+url.QueryEscape(v))
+	}
+	return strings.Join(q, "&")
 }
