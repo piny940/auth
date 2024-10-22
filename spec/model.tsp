@@ -12,8 +12,12 @@ model User {
 }
 model Client {
   @visibility("read", "update")
-  id: int64;
+  id: string;
 
   name: string;
   redirect_urls: string[];
+}
+model PublicClient {
+  id: string;
+  name: string;
 }

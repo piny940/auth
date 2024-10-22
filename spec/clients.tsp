@@ -10,14 +10,18 @@ enum GetClientErr {
   client_not_found,
 }
 
+model GetClientRes {
+  client: PublicClient;
+}
+
 @route("/clients")
 interface ClientsInterface {
-  @route(":id")
+  @route("/{id}")
   @get
   @summary("Get a client")
   getClient(@path id: string): {
     @statusCode statusCode: 200;
-    client: Client;
+    @body body: GetClientRes;
   } | {
     @statusCode statusCode: 400;
     error: GetClientErr;

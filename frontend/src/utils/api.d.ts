@@ -21,7 +21,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/account/clients/": {
+    "/account/clients": {
         parameters: {
             query?: never;
             header?: never;
@@ -29,17 +29,17 @@ export interface paths {
             cookie?: never;
         };
         /** Get all clients */
-        get: operations["ClientInterface_listClients"];
+        get: operations["AccountClients_listClients"];
         put?: never;
         /** Create a new client */
-        post: operations["ClientInterface_createClient"];
+        post: operations["AccountClients_createClient"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/account/clients/:id/{id}": {
+    "/account/clients:id/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -49,9 +49,26 @@ export interface paths {
         get?: never;
         put?: never;
         /** Update a client */
-        post: operations["ClientInterface_updateClient"];
+        post: operations["AccountClients_updateClient"];
         /** Delete a client */
-        delete: operations["ClientInterface_deleteClient"];
+        delete: operations["AccountClients_deleteClient"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/clients/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a client */
+        get: operations["ClientsInterface_getClient"];
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -141,14 +158,18 @@ export interface components {
             error_description: string;
         };
         Client: {
-            /** Format: int64 */
-            id: number;
+            id: string;
             name: string;
             redirect_urls: string[];
         };
         ClientCreate: {
             name: string;
             redirect_urls: string[];
+        };
+        /** @enum {string} */
+        "Clients.GetClientErr": "client_not_found";
+        "Clients.GetClientRes": {
+            client: components["schemas"]["PublicClient"];
         };
         /** @enum {string} */
         "OAuth.AuthorizeErr": "invalid_request" | "unauthorized_client" | "access_denied" | "unsupported_response_type" | "invalid_scope" | "server_error" | "temporarily_unavailable";
@@ -158,6 +179,10 @@ export interface components {
             redirect_uri: string;
             scope: string;
             state?: string;
+        };
+        PublicClient: {
+            id: string;
+            name: string;
         };
         /** @enum {string} */
         "Session.LoginErr": "invalid_name_or_password";
@@ -222,7 +247,7 @@ export interface operations {
             };
         };
     };
-    ClientInterface_listClients: {
+    AccountClients_listClients: {
         parameters: {
             query?: never;
             header: {
@@ -246,7 +271,7 @@ export interface operations {
             };
         };
     };
-    ClientInterface_createClient: {
+    AccountClients_createClient: {
         parameters: {
             query?: never;
             header?: never;
@@ -285,7 +310,7 @@ export interface operations {
             };
         };
     };
-    ClientInterface_updateClient: {
+    AccountClients_updateClient: {
         parameters: {
             query?: never;
             header?: never;
@@ -326,7 +351,7 @@ export interface operations {
             };
         };
     };
-    ClientInterface_deleteClient: {
+    AccountClients_deleteClient: {
         parameters: {
             query?: never;
             header?: never;
@@ -352,6 +377,40 @@ export interface operations {
                 content: {
                     "application/json": {
                         error: string;
+                    };
+                };
+            };
+        };
+    };
+    ClientsInterface_getClient: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The request has succeeded. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Clients.GetClientRes"];
+                };
+            };
+            /** @description The server could not understand the request due to invalid syntax. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: components["schemas"]["Clients.GetClientErr"];
+                        error_description: string;
                     };
                 };
             };

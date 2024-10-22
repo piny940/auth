@@ -1,10 +1,27 @@
 package api
 
-import "context"
+import (
+	"auth/internal/domain"
+	"auth/internal/domain/oauth"
+	"context"
+	"errors"
+)
 
 // ClientsInterfaceGetClient implements StrictServerInterface.
 func (s *Server) ClientsInterfaceGetClient(ctx context.Context, request ClientsInterfaceGetClientRequestObject) (ClientsInterfaceGetClientResponseObject, error) {
-	panic("unimplemented")
+	client, err := s.ClientUsecase.Find(oauth.ClientID(request.Id))
+	if errors.Is(err, domain.ErrRecordNotFound) {
+		return ClientsInterfaceGetClient400JSONResponse{
+			Error:            ClientNotFound,
+			ErrorDescription: "client not found",
+		}, nil
+	}
+	return ClientsInterfaceGetClient200JSONResponse{
+		Client: PublicClient{
+			Id:   string(client.ID),
+			Name: client.Name,
+		},
+	}, nil
 }
 
 // AccountClientsCreateClient implements StrictServerInterface.
