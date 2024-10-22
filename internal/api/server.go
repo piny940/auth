@@ -3,18 +3,30 @@ package api
 import (
 	"auth/internal/usecase"
 
+	"github.com/kelseyhightower/envconfig"
 	"github.com/labstack/echo/v4"
 )
 
 type Server struct {
 	AuthUsecase *usecase.AuthUsecase
+	Conf        *Config
+}
+type Config struct {
+	LoginUrl   string `split_words:"true" required:"true"`
+	ApproveUrl string `split_words:"true" required:"true"`
 }
 
 var _ ServerInterface = &Server{}
 
 func NewServer(authUsecase *usecase.AuthUsecase) *Server {
+	conf := &Config{}
+	err := envconfig.Process("api", conf)
+	if err != nil {
+		panic(err)
+	}
 	return &Server{
 		AuthUsecase: authUsecase,
+		Conf:        conf,
 	}
 }
 

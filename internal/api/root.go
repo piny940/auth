@@ -86,7 +86,16 @@ func (s *Server) Authorize(ctx echo.Context, params AuthorizeParams) error {
 		return err
 	}
 	if user == nil {
-		return ctx.Redirect(http.StatusFound, "/?error=unauthorized_client")
+		url := s.Conf.LoginUrl +
+			"?error=unauthorized_client" +
+			"&redirect_uri=" + params.RedirectUri +
+			"&response_type=" + params.ResponseType +
+			"&client_id=" + params.ClientId +
+			"&scope=" + params.Scope
+		if params.State != nil {
+			url += "&state=" + *params.State
+		}
+		return ctx.Redirect(http.StatusFound, url)
 	}
 	err = s.AuthUsecase.Request(user, req)
 	if errors.Is(err, oauth.ErrInvalidRequestType) {
