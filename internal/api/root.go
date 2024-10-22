@@ -110,7 +110,7 @@ func (s *Server) Authorize(ctx echo.Context, params AuthorizeParams) error {
 	if errors.Is(err, oauth.ErrInvalidRedirectURI) {
 		return ctx.JSON(http.StatusBadRequest, echo.Map{
 			"error":             "invalid_request",
-			"error_description": "invalid_request",
+			"error_description": "redirect_uri is invalid",
 		})
 	}
 	if err != nil {

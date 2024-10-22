@@ -4,7 +4,6 @@ import (
 	"auth/internal/domain"
 	"errors"
 	"slices"
-	"time"
 )
 
 type TypeResponseType string
@@ -33,16 +32,6 @@ type AuthRequest struct {
 	RedirectURI  string
 	Scopes       []TypeScope
 	State        *string
-}
-
-type ApprovalID int64
-type Approval struct {
-	ID        ApprovalID
-	ClientID  ClientID
-	UserID    int64
-	Scopes    []TypeScope
-	CreatedAt time.Time
-	UpdatedAt time.Time
 }
 
 type IApprovalRepo interface {
@@ -83,6 +72,9 @@ func (s *AuthService) Validate(r *AuthRequest) error {
 
 func (s *AuthService) Approved(r *AuthRequest, user *domain.User) (bool, error) {
 	approval, err := s.ApprovalRepo.Find(r.ClientID, user.ID)
+	if errors.Is(err, domain.ErrRecordNotFound) {
+		return false, nil
+	}
 	if err != nil {
 		return false, err
 	}
