@@ -1,7 +1,12 @@
 import { LoginForm } from '@/components/LoginForm'
 import { Container, Typography } from '@mui/material'
 
-export default function Home() {
+type Props = {
+  searchParams: {
+    next?: string
+  }
+}
+export default function Page({ searchParams: query }: Props) {
   return (
     <Container component="main" sx={{ pt: 4, pb: 6 }}>
       <Typography
@@ -13,7 +18,7 @@ export default function Home() {
       >
         ログイン
       </Typography>
-      <LoginForm />
+      <LoginForm next={query.next || '/'} />
     </Container>
   )
 }
