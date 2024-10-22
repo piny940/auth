@@ -83,15 +83,6 @@ type ClientCreate struct {
 // OAuthAuthorizeErr defines model for OAuth.AuthorizeErr.
 type OAuthAuthorizeErr string
 
-// OAuthAuthorizeReq defines model for OAuth.AuthorizeReq.
-type OAuthAuthorizeReq struct {
-	ClientId     string  `json:"client_id"`
-	RedirectUri  string  `json:"redirect_uri"`
-	ResponseType string  `json:"response_type"`
-	Scope        string  `json:"scope"`
-	State        *string `json:"state,omitempty"`
-}
-
 // OAuthAuthorizeReqMultiPart defines model for OAuth.AuthorizeReqMultiPart.
 type OAuthAuthorizeReqMultiPart struct {
 	ClientId     string  `json:"client_id"`
@@ -151,7 +142,11 @@ type ClientInterfaceUpdateClientJSONBody struct {
 
 // OAuthInterfaceAuthorizeParams defines parameters for OAuthInterfaceAuthorize.
 type OAuthInterfaceAuthorizeParams struct {
-	Query OAuthAuthorizeReq `form:"query" json:"query"`
+	ResponseType string  `form:"response_type" json:"response_type"`
+	ClientId     string  `form:"client_id" json:"client_id"`
+	RedirectUri  string  `form:"redirect_uri" json:"redirect_uri"`
+	Scope        string  `form:"scope" json:"scope"`
+	State        *string `form:"state,omitempty" json:"state,omitempty"`
 }
 
 // OAuthInterfaceGetTokenJSONBody defines parameters for OAuthInterfaceGetToken.
@@ -313,11 +308,39 @@ func (w *ServerInterfaceWrapper) OAuthInterfaceAuthorize(ctx echo.Context) error
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params OAuthInterfaceAuthorizeParams
-	// ------------- Required query parameter "query" -------------
+	// ------------- Required query parameter "response_type" -------------
 
-	err = runtime.BindQueryParameter("form", false, true, "query", ctx.QueryParams(), &params.Query)
+	err = runtime.BindQueryParameter("form", false, true, "response_type", ctx.QueryParams(), &params.ResponseType)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter query: %s", err))
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter response_type: %s", err))
+	}
+
+	// ------------- Required query parameter "client_id" -------------
+
+	err = runtime.BindQueryParameter("form", false, true, "client_id", ctx.QueryParams(), &params.ClientId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter client_id: %s", err))
+	}
+
+	// ------------- Required query parameter "redirect_uri" -------------
+
+	err = runtime.BindQueryParameter("form", false, true, "redirect_uri", ctx.QueryParams(), &params.RedirectUri)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter redirect_uri: %s", err))
+	}
+
+	// ------------- Required query parameter "scope" -------------
+
+	err = runtime.BindQueryParameter("form", false, true, "scope", ctx.QueryParams(), &params.Scope)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter scope: %s", err))
+	}
+
+	// ------------- Optional query parameter "state" -------------
+
+	err = runtime.BindQueryParameter("form", false, false, "state", ctx.QueryParams(), &params.State)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter state: %s", err))
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
@@ -574,17 +597,18 @@ func (response OAuthInterfaceAuthorize204Response) VisitOAuthInterfaceAuthorizeR
 	return nil
 }
 
-type OAuthInterfaceAuthorize302JSONResponse struct {
-	Error            OAuthAuthorizeErr `json:"error"`
-	ErrorDescription string            `json:"error_description"`
-	State            *string           `json:"state,omitempty"`
+type OAuthInterfaceAuthorize302ResponseHeaders struct {
+	Location string
 }
 
-func (response OAuthInterfaceAuthorize302JSONResponse) VisitOAuthInterfaceAuthorizeResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(302)
+type OAuthInterfaceAuthorize302Response struct {
+	Headers OAuthInterfaceAuthorize302ResponseHeaders
+}
 
-	return json.NewEncoder(w).Encode(response)
+func (response OAuthInterfaceAuthorize302Response) VisitOAuthInterfaceAuthorizeResponse(w http.ResponseWriter) error {
+	w.Header().Set("location", fmt.Sprint(response.Headers.Location))
+	w.WriteHeader(302)
+	return nil
 }
 
 type OAuthInterfaceAuthorize400JSONResponse struct {
@@ -616,17 +640,18 @@ func (response OAuthInterfacePostAuthorize204Response) VisitOAuthInterfacePostAu
 	return nil
 }
 
-type OAuthInterfacePostAuthorize302JSONResponse struct {
-	Error            OAuthAuthorizeErr `json:"error"`
-	ErrorDescription string            `json:"error_description"`
-	State            *string           `json:"state,omitempty"`
+type OAuthInterfacePostAuthorize302ResponseHeaders struct {
+	Location string
 }
 
-func (response OAuthInterfacePostAuthorize302JSONResponse) VisitOAuthInterfacePostAuthorizeResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(302)
+type OAuthInterfacePostAuthorize302Response struct {
+	Headers OAuthInterfacePostAuthorize302ResponseHeaders
+}
 
-	return json.NewEncoder(w).Encode(response)
+func (response OAuthInterfacePostAuthorize302Response) VisitOAuthInterfacePostAuthorizeResponse(w http.ResponseWriter) error {
+	w.Header().Set("location", fmt.Sprint(response.Headers.Location))
+	w.WriteHeader(302)
+	return nil
 }
 
 type OAuthInterfacePostAuthorize400JSONResponse struct {
@@ -1159,32 +1184,32 @@ func (sh *strictHandler) UsersInterfaceSignup(ctx echo.Context) error {
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/+xa3W/bNhD/Vwhuj6rltsGA6a3rhq5YixZJ81QEAiOdbbYSqZDHNF7g/33ghyxbohwn",
-	"c9L046W1LfJ0H7/f8XiXa1rIupECBGqaXVNdLKBm7uOLplHyklV64j/BMVzY3xslG1DIwa0qKg4Cc17a",
-	"L7hsgGZUo+JiTlcJ1YW0vwyerBKq4MJwBSXNPm4IabecJe0Wef4JCrTCOoWOQR9dXQ2VAaWkiirinuQl",
-	"6ELxBrkUNyvlhcW2xpR76UwYquQdM5OqZkgzygX+dkTX+7lAmIOyAgSrIaq6gpIrKDA3qvIiEWodXRp+",
-	"YEqx5cAe5133lr7McXteKmAIQ6vuXdm99Xz3wuBiYv+Riv8LfykXfxCmdjaLS1bxMreiQSNNqBGsXVvm",
-	"Hnc0oawoQOu8BMGhdKu0aRqpEOxe3UihIXfvTtYyPVATqkFdgspbuCDUjVRM8WqZG8EuGa/YebWJ6M4F",
-	"PeXvQLANB/GRBZva34ajCdUYgr+bKH0HbbJ5S79d5B664q2pkL9nCn9Yn5yA1lyKyRs552IE2ZYouVR5",
-	"w7T+IlUZxdmWoCjKRgm9lnujyYGyEUWiFkmDPZOExLyS8zmUORc77XgLx17tbSOMBieQVdW7Gc0+XtNf",
-	"FcxoRn9Ju1MuDUdcempXr84SKkzlKZqhMjDQumeme0nMttPw9sPm/9EkPqaCPR0vTvhcmOYwYe4e5oUU",
-	"M24t2esA7QNiTNC4Jd6MPkws4isQc1zkFjIgpJkvgltyVilg5TI3GrbeGNsQVcctqRkWiwgEbQKAwiiO",
-	"yxMLIwiVEv8HljZ3uYgLmtFCys8c2lhl9MXph7+7sDO3ga6sPC5m0vmSY+VWWjEJvQSlnZfpdDKdTK1P",
-	"ZAOCNZxm9Ln7yRqAC6dByopCGoEpa2skF3upXfK0CHC2vS7tC9olrwWCmrECQn1HffhA4x+yXLo8KwWG",
-	"qoY1TcULJyX9pH34PZPsp108i9aRq22wWOJtJGan/bPpkf1vq2ajHxaggHBNhCRBO4KSaBAlmUlFcME1",
-	"CVYk5NwgwQWQBbASlCY1W5JzIEbDzFQTYp16NJ3eg6WhQHVWDgwgvmIghTRVSYREYoRVD5konbpBf1Ia",
-	"sMaFVE/0UiC7mngUmrpmarkOJxBGbGHT7nWL1qjwp49OrQFziGDCV3trQLzhGv1P2qFMsRoQlHY51eHb",
-	"e7TD9xrv2zFNNjzXp9LZIN63i0SsJNguOXfFKtTrN9WhrdhhjoqHtg3dgmmiTVEAlFD2Q/YKkLCqIq1w",
-	"m2KjVO2FxVfjL9ui9a5kjTluP3eF60DcSSM+uonkTx9I99tpvWdkiaUsIwK+EAVaGlWAW3AOIEjhvFUS",
-	"pgmzj02Fk7uknP3uuNHb677GHTQjeZQEtxSd8wfpKONles3LlU/zFfjCeicF/nTL1hSIpSZ7KHaJKVTc",
-	"Y0npxsIskqYe47H0rWHEx5GwNT72TIGnTcm+Qvy/h0Q7/ZYT7Q+ROD24N0hhk6a0ZV26blqNlnCugdKV",
-	"9Ov1A5LAVVPJEmg2Y5WGxJPmwoBadqxpv44TZxcOIm2tr5VHn0+fHQIyt7DW3lb3bDjv3U26TSt6iNPj",
-	"0G+y3w7Hom/aJYe/hQVbnRPJcXsJGzvVtsn6XmrcJOz4eVObCnnDFKb24HpSMmT7X093tVgfzX38J2F/",
-	"EvYrErY7cVF+BjHeRdtm8CvAD279YYvFsQlHeKqhUL4U2H+8ur314SvJtVt3q+yXPZqScfOa8PxZtH9/",
-	"zxPmB6CEa0sR73lHBO3HLbuu52Ei03UO3WCHPvzRkYSWpP8rBsAnoSOZXd+iJbnabPC7Ynmztf/xzBax",
-	"nb+CraskXpD3XfMW6P9k0q4Mvj0au0N3cl+rLUpaYIzWNxFYcHFP84XBcPNx1DIHAuSDHP+DQfN3kc88",
-	"6FwmMxqUTnU3FY2i1g0d15gNM9T7AW1/UvsTs7fFbH9C/F1AdhMNXrDv2Wy/1iZmcuIe04QaVdGMLhAb",
-	"naWuUTRpuFj+fjSdFLJOWcPTy6d0dbb6LwAA//9pD66U7CcAAA==",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

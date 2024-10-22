@@ -29,10 +29,19 @@ interface OAuthInterface {
   @route("/authorize")
   @get
   @summary("Authorization Request")
-  authorize(@query query: AuthorizeReq): {
+  authorize(
+    @query response_type: string,
+    @query client_id: string,
+    @query redirect_uri: string,
+    @query scope: string,
+    @query state?: string,
+  ): {
     @statusCode statusCode: 204;
   } | {
-    @statusCode statusCode: 302 | 400;
+    @statusCode statusCode: 302;
+    @header location: string;
+  } | {
+    @statusCode statusCode: 400;
     error: AuthorizeErr;
     error_description: string;
     state?: string;
@@ -47,7 +56,10 @@ interface OAuthInterface {
   ): {
     @statusCode statusCode: 204;
   } | {
-    @statusCode statusCode: 302 | 400;
+    @statusCode statusCode: 302;
+    @header location: string;
+  } | {
+    @statusCode statusCode: 400;
     error: AuthorizeErr;
     error_description: string;
     state?: string;

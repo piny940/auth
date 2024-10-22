@@ -160,31 +160,46 @@ paths:
       operationId: OAuthInterface_authorize
       summary: Authorization Request
       parameters:
-        - name: query
+        - name: response_type
           in: query
           required: true
           schema:
-            $ref: '#/components/schemas/OAuth.AuthorizeReq'
+            type: string
+          explode: false
+        - name: client_id
+          in: query
+          required: true
+          schema:
+            type: string
+          explode: false
+        - name: redirect_uri
+          in: query
+          required: true
+          schema:
+            type: string
+          explode: false
+        - name: scope
+          in: query
+          required: true
+          schema:
+            type: string
+          explode: false
+        - name: state
+          in: query
+          required: false
+          schema:
+            type: string
           explode: false
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
         '302':
           description: Redirection
-          content:
-            application/json:
+          headers:
+            location:
+              required: true
               schema:
-                type: object
-                properties:
-                  error:
-                    $ref: '#/components/schemas/OAuth.AuthorizeErr'
-                  error_description:
-                    type: string
-                  state:
-                    type: string
-                required:
-                  - error
-                  - error_description
+                type: string
         '400':
           description: The server could not understand the request due to invalid syntax.
           content:
@@ -210,20 +225,11 @@ paths:
           description: 'There is no content to send for this request, but the headers may be useful. '
         '302':
           description: Redirection
-          content:
-            application/json:
+          headers:
+            location:
+              required: true
               schema:
-                type: object
-                properties:
-                  error:
-                    $ref: '#/components/schemas/OAuth.AuthorizeErr'
-                  error_description:
-                    type: string
-                  state:
-                    type: string
-                required:
-                  - error
-                  - error_description
+                type: string
         '400':
           description: The server could not understand the request due to invalid syntax.
           content:
@@ -445,24 +451,6 @@ components:
         - invalid_scope
         - server_error
         - temporarily_unavailable
-    OAuth.AuthorizeReq:
-      type: object
-      required:
-        - response_type
-        - client_id
-        - redirect_uri
-        - scope
-      properties:
-        response_type:
-          type: string
-        client_id:
-          type: string
-        redirect_uri:
-          type: string
-        scope:
-          type: string
-        state:
-          type: string
     OAuth.AuthorizeReqMultiPart:
       type: object
       required:

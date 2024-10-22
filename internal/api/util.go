@@ -5,6 +5,8 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"net/url"
+	"strings"
 
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
@@ -100,6 +102,14 @@ func Logout(c context.Context) (*http.Cookie, error) {
 		return nil, err
 	}
 	return Save(c)
+}
+
+func toQueryString(h map[string]string) string {
+	var q []string
+	for k, v := range h {
+		q = append(q, k+"="+url.QueryEscape(v))
+	}
+	return strings.Join(q, "&")
 }
 
 var (

@@ -152,13 +152,6 @@ export interface components {
         };
         /** @enum {string} */
         "OAuth.AuthorizeErr": "invalid_request" | "unauthorized_client" | "access_denied" | "unsupported_response_type" | "invalid_scope" | "server_error" | "temporarily_unavailable";
-        "OAuth.AuthorizeReq": {
-            response_type: string;
-            client_id: string;
-            redirect_uri: string;
-            scope: string;
-            state?: string;
-        };
         "OAuth.AuthorizeReqMultiPart": {
             response_type: string;
             client_id: string;
@@ -367,7 +360,11 @@ export interface operations {
     OAuthInterface_authorize: {
         parameters: {
             query: {
-                query: components["schemas"]["OAuth.AuthorizeReq"];
+                response_type: string;
+                client_id: string;
+                redirect_uri: string;
+                scope: string;
+                state?: string;
             };
             header?: never;
             path?: never;
@@ -385,15 +382,10 @@ export interface operations {
             /** @description Redirection */
             302: {
                 headers: {
+                    location: string;
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": {
-                        error: components["schemas"]["OAuth.AuthorizeErr"];
-                        error_description: string;
-                        state?: string;
-                    };
-                };
+                content?: never;
             };
             /** @description The server could not understand the request due to invalid syntax. */
             400: {
@@ -433,15 +425,10 @@ export interface operations {
             /** @description Redirection */
             302: {
                 headers: {
+                    location: string;
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": {
-                        error: components["schemas"]["OAuth.AuthorizeErr"];
-                        error_description: string;
-                        state?: string;
-                    };
-                };
+                content?: never;
             };
             /** @description The server could not understand the request due to invalid syntax. */
             400: {
