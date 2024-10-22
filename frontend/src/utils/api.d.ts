@@ -58,23 +58,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/login": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Login */
-        post: operations["login"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/me": {
         parameters: {
             query?: never;
@@ -87,6 +70,24 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Login */
+        post: operations["login"];
+        /** Logout */
+        delete: operations["logout"];
         options?: never;
         head?: never;
         patch?: never;
@@ -407,6 +408,28 @@ export interface operations {
             };
         };
     };
+    me: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The request has succeeded. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        user: components["schemas"]["User"];
+                    };
+                };
+            };
+        };
+    };
     login: {
         parameters: {
             query?: never;
@@ -442,7 +465,7 @@ export interface operations {
             };
         };
     };
-    me: {
+    logout: {
         parameters: {
             query?: never;
             header?: never;
@@ -451,14 +474,23 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The request has succeeded. */
-            200: {
+            /** @description There is no content to send for this request, but the headers may be useful.  */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The server could not understand the request due to invalid syntax. */
+            400: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": {
-                        user: components["schemas"]["User"];
+                        /** @enum {string} */
+                        error: "not_logged_in";
+                        error_description: string;
                     };
                 };
             };

@@ -87,6 +87,7 @@ op login(@body body: ReqLogin): {
   error: "invalid_name_or_password";
   error_description: string;
 };
+@route("/session")
 @delete
 @summary("Logout")
 op logout(): {

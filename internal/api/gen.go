@@ -102,9 +102,6 @@ type TokenGetTokenJSONRequestBody TokenGetTokenJSONBody
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
-	// Logout
-	// (DELETE /)
-	Logout(ctx echo.Context) error
 	// Get all clients
 	// (GET /account/clients/)
 	ClientsListClients(ctx echo.Context, params ClientsListClientsParams) error
@@ -126,6 +123,9 @@ type ServerInterface interface {
 	// Get me
 	// (GET /me)
 	Me(ctx echo.Context) error
+	// Logout
+	// (DELETE /session)
+	Logout(ctx echo.Context) error
 	// Login
 	// (POST /session)
 	Login(ctx echo.Context) error
@@ -140,15 +140,6 @@ type ServerInterface interface {
 // ServerInterfaceWrapper converts echo contexts to parameters.
 type ServerInterfaceWrapper struct {
 	Handler ServerInterface
-}
-
-// Logout converts echo context to params.
-func (w *ServerInterfaceWrapper) Logout(ctx echo.Context) error {
-	var err error
-
-	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.Logout(ctx)
-	return err
 }
 
 // ClientsListClients converts echo context to params.
@@ -287,6 +278,15 @@ func (w *ServerInterfaceWrapper) Me(ctx echo.Context) error {
 	return err
 }
 
+// Logout converts echo context to params.
+func (w *ServerInterfaceWrapper) Logout(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.Logout(ctx)
+	return err
+}
+
 // Login converts echo context to params.
 func (w *ServerInterfaceWrapper) Login(ctx echo.Context) error {
 	var err error
@@ -342,7 +342,6 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 		Handler: si,
 	}
 
-	router.DELETE(baseURL+"/", wrapper.Logout)
 	router.GET(baseURL+"/account/clients/", wrapper.ClientsListClients)
 	router.POST(baseURL+"/account/clients/", wrapper.ClientsCreateClient)
 	router.DELETE(baseURL+"/account/clients/:id/:id", wrapper.ClientsDeleteClient)
@@ -350,6 +349,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/authorize", wrapper.Authorize)
 	router.POST(baseURL+"/authorize", wrapper.PostAuthorize)
 	router.GET(baseURL+"/me", wrapper.Me)
+	router.DELETE(baseURL+"/session", wrapper.Logout)
 	router.POST(baseURL+"/session", wrapper.Login)
 	router.POST(baseURL+"/signup", wrapper.Signup)
 	router.POST(baseURL+"/token/", wrapper.TokenGetToken)

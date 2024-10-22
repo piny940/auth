@@ -118,7 +118,20 @@ func (s *Server) Signup(ctx echo.Context) error {
 }
 
 func (s *Server) Logout(ctx echo.Context) error {
-	panic("unimplemented")
+	user, err := CurrentUser(ctx.Request())
+	if err != nil {
+		return err
+	}
+	if user == nil {
+		return ctx.JSON(http.StatusBadRequest, echo.Map{
+			"error":             "not_logged_in",
+			"error_description": "not logged in",
+		})
+	}
+	if err := Logout(ctx.Request(), ctx.Response().Writer); err != nil {
+		return err
+	}
+	return ctx.NoContent(http.StatusNoContent)
 }
 
 // Me implements ServerInterface.
@@ -128,7 +141,10 @@ func (s *Server) Me(ctx echo.Context) error {
 		return err
 	}
 	return ctx.JSON(http.StatusOK, echo.Map{
-		"user": user,
+		"user": echo.Map{
+			"id":   user.ID,
+			"name": user.Name,
+		},
 	})
 }
 
