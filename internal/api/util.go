@@ -6,6 +6,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v4"
 )
@@ -18,7 +19,7 @@ var sessionsOptions = &sessions.Options{
 	MaxAge:   60 * 60 * 24 * 7,
 }
 
-var store sessions.Store
+var store *sessions.CookieStore
 
 type CtxKey string
 
@@ -46,9 +47,14 @@ func setToSession(r *http.Request, w http.ResponseWriter, key string, value inte
 
 const SESSION_USER_KEY = "user"
 
-func Login(r *http.Request, w http.ResponseWriter, user *domain.User) *http.Cookie {
-	// return setToSession(r, w, SESSION_USER_KEY, user)
-	return nil
+func Login(c context.Context, user *domain.User) (*http.Cookie, error) {
+	encoded, err := securecookie.EncodeMulti(SESSION_NAME, map[interface{}]interface{}{
+		SESSION_USER_KEY: user,
+	}, store.Codecs...)
+	if err != nil {
+		return nil, err
+	}
+	return sessions.NewCookie(SESSION_NAME, encoded, sessionsOptions), nil
 }
 func Logout(r *http.Request, w http.ResponseWriter) error {
 	return setToSession(r, w, SESSION_USER_KEY, nil)

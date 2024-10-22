@@ -42,11 +42,8 @@ func main() {
 		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
 		AllowCredentials: true,
 	}))
-	authMid, err := myMiddleware.CreateAuthMiddleware()
-	if err != nil {
-		panic(err)
-	}
-	e.Use(authMid)
+	e.Use(myMiddleware.AuthMiddleware())
+	e.Use(myMiddleware.Session())
 	api.RegisterHandlers(e, api.NewStrictHandler(di.NewServer(), nil))
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)

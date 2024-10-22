@@ -9,10 +9,10 @@ import (
 	middleware "github.com/oapi-codegen/echo-middleware"
 )
 
-func CreateAuthMiddleware() (echo.MiddlewareFunc, error) {
+func AuthMiddleware() echo.MiddlewareFunc {
 	spec, err := api.GetSwagger()
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 	spec.Servers = nil // HACK: https://github.com/deepmap/oapi-codegen/blob/master/examples/petstore-expanded/echo/petstore.go#L30-L32
 	validator := middleware.OapiRequestValidatorWithOptions(spec,
@@ -21,7 +21,7 @@ func CreateAuthMiddleware() (echo.MiddlewareFunc, error) {
 				AuthenticationFunc: Authenticate,
 			},
 		})
-	return validator, nil
+	return validator
 }
 
 func Authenticate(ctx context.Context, input *openapi3filter.AuthenticationInput) error {

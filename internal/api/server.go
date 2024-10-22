@@ -36,26 +36,6 @@ func NewServer(authUsecase *usecase.AuthUsecase) *Server {
 	}
 }
 
-// func (s *Server) Login(ctx echo.Context) error {
-// 	var body LoginJSONRequestBody
-// 	if err := ctx.Bind(&body); err != nil {
-// 		return err
-// 	}
-
-// 	user, err := s.AuthUsecase.Login(body.Name, body.Password)
-// 	if err != nil {
-// 		return ctx.JSON(http.StatusBadRequest, echo.Map{
-// 			"error":             "invalid_name_or_password",
-// 			"error_description": "name or password is incorrect",
-// 		})
-// 	}
-// 	err = Login(ctx.Request(), ctx.Response().Writer, user)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return ctx.NoContent(http.StatusNoContent)
-// }
-
 // func (s *Server) Signup(ctx echo.Context) error {
 // 	var body SignupJSONRequestBody
 // 	if err := ctx.Bind(&body); err != nil {

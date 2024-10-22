@@ -36,6 +36,7 @@ interface SessionInterface {
   @summary("Login")
   login(@body body: LoginReq): {
     @statusCode statusCode: 204;
+    @header setCookie: string;
   } | {
     @statusCode statusCode: 400;
     error: LoginErr;
@@ -47,6 +48,7 @@ interface SessionInterface {
   @summary("Logout")
   logout(): {
     @statusCode statusCode: 204;
+    @header setCookie: string;
   } | {
     @statusCode statusCode: 400;
     error: LogoutErr;

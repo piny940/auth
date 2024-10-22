@@ -6,9 +6,23 @@ import (
 
 const CTX_COOKIE_KEY = "cookie"
 
-// SessionInterfaceLogin implements StrictServerInterface.
 func (s *Server) SessionInterfaceLogin(ctx context.Context, request SessionInterfaceLoginRequestObject) (SessionInterfaceLoginResponseObject, error) {
-	panic("unimplemented")
+	user, err := s.AuthUsecase.Login(request.Body.Name, request.Body.Password)
+	if err != nil {
+		return SessionInterfaceLogin400JSONResponse{
+			Error:            InvalidNameOrPassword,
+			ErrorDescription: "name or password is incorrect",
+		}, nil
+	}
+	cookie, err := Login(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+	return &SessionInterfaceLogin204Response{
+		Headers: SessionInterfaceLogin204ResponseHeaders{
+			SetCookie: cookie.String(),
+		},
+	}, nil
 }
 
 // SessionInterfaceLogout implements StrictServerInterface.

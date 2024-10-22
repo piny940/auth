@@ -230,15 +230,6 @@ export interface operations {
                     "application/json": components["schemas"]["Approvals.Res4xx"];
                 };
             };
-            /** @description Access is unauthorized. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Approvals.Res4xx"];
-                };
-            };
         };
     };
     ClientInterface_listClients: {
@@ -468,19 +459,6 @@ export interface operations {
                     };
                 };
             };
-            /** @description Access is unauthorized. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        error: components["schemas"]["OAuth.AuthorizeErr"];
-                        error_description: string;
-                        state?: string;
-                    };
-                };
-            };
         };
     };
     OAuthInterface_getToken: {
@@ -561,6 +539,7 @@ export interface operations {
             /** @description There is no content to send for this request, but the headers may be useful.  */
             204: {
                 headers: {
+                    "set-cookie": string;
                     [name: string]: unknown;
                 };
                 content?: never;
@@ -591,6 +570,7 @@ export interface operations {
             /** @description There is no content to send for this request, but the headers may be useful.  */
             204: {
                 headers: {
+                    "set-cookie": string;
                     [name: string]: unknown;
                 };
                 content?: never;
