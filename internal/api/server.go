@@ -86,7 +86,7 @@ func (s *Server) Signup(ctx echo.Context) error {
 	if err := ctx.Bind(&body); err != nil {
 		return err
 	}
-	err := s.AuthUsecase.SignUp(body.Name, body.Password, body.PasswordConfirmation)
+	user, err := s.AuthUsecase.SignUp(body.Name, body.Password, body.PasswordConfirmation)
 	if errors.Is(err, domain.ErrNameLengthNotEnough) {
 		return ctx.JSON(http.StatusBadRequest, echo.Map{
 			"error":             "name_length_not_enough",
@@ -112,6 +112,9 @@ func (s *Server) Signup(ctx echo.Context) error {
 		})
 	}
 	if err != nil {
+		return err
+	}
+	if err := Login(ctx.Request(), ctx.Response().Writer, user); err != nil {
 		return err
 	}
 	return ctx.NoContent(http.StatusNoContent)
