@@ -491,7 +491,8 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        error: string;
+                        /** @enum {string} */
+                        error: "name_already_used" | "name_length_not_enough" | "password_length_not_enough" | "password_confirmation";
                         error_description: string;
                     };
                 };
