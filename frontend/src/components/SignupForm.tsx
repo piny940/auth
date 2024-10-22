@@ -1,4 +1,5 @@
 'use client'
+import { useUser } from '@/context/user'
 import { client } from '@/utils/client'
 import { Box, Button, TextField, Typography } from '@mui/material'
 import Link from 'next/link'
@@ -11,6 +12,7 @@ type SignupInput = {
   passwordConfirmation: string
 }
 export const SignupForm = (): JSX.Element => {
+  const { refresh } = useUser()
   const { control, handleSubmit, setError } = useForm<SignupInput>({
     defaultValues: { name: '', password: '' },
   })
@@ -40,8 +42,9 @@ export const SignupForm = (): JSX.Element => {
         }
         return
       }
+      refresh()
     },
-    [setError]
+    [setError, refresh]
   )
   return (
     <Box

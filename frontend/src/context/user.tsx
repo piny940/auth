@@ -4,6 +4,7 @@ import { User } from '@/utils/types'
 import {
   createContext,
   ReactNode,
+  useCallback,
   useContext,
   useEffect,
   useState,
@@ -13,12 +14,14 @@ interface UserContextInterface {
   user: User | null
   loading: boolean
   setUser: (user: User | null) => void
+  refresh: () => void
 }
 
 const defaultUserState: UserContextInterface = {
   user: null,
   loading: true,
   setUser: () => undefined,
+  refresh: () => undefined,
 }
 
 const UserContext = createContext(defaultUserState)
@@ -33,14 +36,18 @@ const UserProvider = ({ children }: UserProviderProps): JSX.Element => {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
 
-  const value: UserContextInterface = { user, loading, setUser }
+  const refresh = useCallback(async () => {
+    setLoading(true)
+    const res = await client.GET('/me')
+    setUser(res.data?.user || null)
+    setLoading(false)
+  }, [setLoading, setUser])
+
+  const value: UserContextInterface = { user, loading, setUser, refresh }
 
   useEffect(() => {
-    client.GET('/me').then((res) => {
-      setUser(res.data?.user || null)
-      setLoading(false)
-    })
-  }, [])
+    refresh()
+  }, [refresh])
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>
 }
