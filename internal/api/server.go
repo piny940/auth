@@ -18,6 +18,36 @@ type Server struct {
 	Conf        *Config
 }
 
+// TokenGetToken implements ServerInterface.
+func (s *Server) TokenGetToken(ctx echo.Context) error {
+	panic("unimplemented")
+}
+
+// ApprovalsInterfaceApprove implements ServerInterface.
+func (s *Server) ApprovalsInterfaceApprove(ctx echo.Context) error {
+	panic("unimplemented")
+}
+
+// ClientInterfaceCreateClient implements ServerInterface.
+func (s *Server) ClientInterfaceCreateClient(ctx echo.Context) error {
+	panic("unimplemented")
+}
+
+// ClientInterfaceDeleteClient implements ServerInterface.
+func (s *Server) ClientInterfaceDeleteClient(ctx echo.Context, id int64) error {
+	panic("unimplemented")
+}
+
+// ClientInterfaceListClients implements ServerInterface.
+func (s *Server) ClientInterfaceListClients(ctx echo.Context, params ClientInterfaceListClientsParams) error {
+	panic("unimplemented")
+}
+
+// ClientInterfaceUpdateClient implements ServerInterface.
+func (s *Server) ClientInterfaceUpdateClient(ctx echo.Context, id int64) error {
+	panic("unimplemented")
+}
+
 type Config struct {
 	ServerUrl  string `envconfig:"SERVER_URL" required:"true"`
 	LoginUrl   string `split_words:"true" required:"true"`
@@ -36,31 +66,6 @@ func NewServer(authUsecase *usecase.AuthUsecase) *Server {
 		AuthUsecase: authUsecase,
 		Conf:        conf,
 	}
-}
-
-// ClientsCreateClient implements ServerInterface.
-func (s *Server) ClientsCreateClient(ctx echo.Context) error {
-	panic("unimplemented")
-}
-
-// ClientsDeleteClient implements ServerInterface.
-func (s *Server) ClientsDeleteClient(ctx echo.Context, id int64) error {
-	panic("unimplemented")
-}
-
-// ClientsListClients implements ServerInterface.
-func (s *Server) ClientsListClients(ctx echo.Context, params ClientsListClientsParams) error {
-	panic("unimplemented")
-}
-
-// ClientsUpdateClient implements ServerInterface.
-func (s *Server) ClientsUpdateClient(ctx echo.Context, id int64) error {
-	panic("unimplemented")
-}
-
-// TokenGetToken implements ServerInterface.
-func (s *Server) TokenGetToken(ctx echo.Context) error {
-	panic("unimplemented")
 }
 
 func (s *Server) Login(ctx echo.Context) error {

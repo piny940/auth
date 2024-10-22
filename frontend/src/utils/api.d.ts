@@ -406,6 +406,19 @@ export interface operations {
                     };
                 };
             };
+            /** @description Access is unauthorized. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: string;
+                        error_description: string;
+                        state?: string;
+                    };
+                };
+            };
         };
     };
     me: {

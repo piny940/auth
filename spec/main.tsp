@@ -3,6 +3,8 @@ import "@typespec/rest";
 import "@typespec/openapi3";
 
 import "./model.tsp";
+import "./approvals.tsp";
+import "./clients.tsp";
 
 using TypeSpec.Http;
 @service({
@@ -48,19 +50,28 @@ op postAuthorize(
   redirect_uri: string,
   scope: string,
   state?: string,
-): {
-  @statusCode statusCode: 204;
-} | {
-  @statusCode statusCode: 302;
-  error: string;
-  error_description: string;
-  state?: string;
-} | {
-  @statusCode statusCode: 400;
-  error: string;
-  error_description: string;
-  state?: string;
-};
+):
+  | {
+      @statusCode statusCode: 204;
+    }
+  | {
+      @statusCode statusCode: 302;
+      error: string;
+      error_description: string;
+      state?: string;
+    }
+  | {
+      @statusCode statusCode: 400;
+      error: string;
+      error_description: string;
+      state?: string;
+    }
+  | {
+      @statusCode statusCode: 401;
+      error: string;
+      error_description: string;
+      state?: string;
+    };
 
 @route("/token")
 namespace Token {
@@ -125,49 +136,3 @@ op me(): {
   @statusCode statusCode: 200;
   user: User;
 };
-
-@route("/account")
-namespace Account {
-  @route("/clients")
-  namespace Clients {
-    @route("/")
-    @get
-    @summary("Get all clients")
-    op listClients(@header cookie: string): {
-      @statusCode statusCode: 200;
-      clients: Client[];
-    };
-
-    @route("/")
-    @post
-    @summary("Create a new client")
-    op createClient(client: Client): {
-      @statusCode statusCode: 201;
-      client: Client;
-    } | {
-      @statusCode statusCode: 400;
-      error: string;
-    };
-
-    @route("/:id")
-    @post
-    @summary("Update a client")
-    op updateClient(@path id: int64, client: Client): {
-      @statusCode statusCode: 200;
-      client: Client;
-    } | {
-      @statusCode statusCode: 400;
-      error: string;
-    };
-
-    @route("/:id")
-    @delete
-    @summary("Delete a client")
-    op deleteClient(@path id: int64): {
-      @statusCode statusCode: 204;
-    } | {
-      @statusCode statusCode: 400;
-      error: string;
-    };
-  }
-}

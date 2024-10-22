@@ -11,6 +11,18 @@ import (
 	"github.com/oapi-codegen/runtime"
 )
 
+// ApprovalsApproveReq defines model for Approvals.ApproveReq.
+type ApprovalsApproveReq struct {
+	ClientId string `json:"client_id"`
+	Scope    string `json:"scope"`
+}
+
+// ApprovalsRes4xx defines model for Approvals.Res4xx.
+type ApprovalsRes4xx struct {
+	Error            string `json:"error"`
+	ErrorDescription string `json:"error_description"`
+}
+
 // Client defines model for Client.
 type Client struct {
 	Id           int64    `json:"id"`
@@ -43,18 +55,18 @@ type UserCreate struct {
 	PasswordConfirmation string `json:"password_confirmation"`
 }
 
-// ClientsListClientsParams defines parameters for ClientsListClients.
-type ClientsListClientsParams struct {
+// ClientInterfaceListClientsParams defines parameters for ClientInterfaceListClients.
+type ClientInterfaceListClientsParams struct {
 	Cookie string `json:"cookie"`
 }
 
-// ClientsCreateClientJSONBody defines parameters for ClientsCreateClient.
-type ClientsCreateClientJSONBody struct {
+// ClientInterfaceCreateClientJSONBody defines parameters for ClientInterfaceCreateClient.
+type ClientInterfaceCreateClientJSONBody struct {
 	Client ClientCreate `json:"client"`
 }
 
-// ClientsUpdateClientJSONBody defines parameters for ClientsUpdateClient.
-type ClientsUpdateClientJSONBody struct {
+// ClientInterfaceUpdateClientJSONBody defines parameters for ClientInterfaceUpdateClient.
+type ClientInterfaceUpdateClientJSONBody struct {
 	Client ClientCreate `json:"client"`
 }
 
@@ -82,11 +94,14 @@ type TokenGetTokenJSONBody struct {
 	ClientSecret string `json:"client_secret"`
 }
 
-// ClientsCreateClientJSONRequestBody defines body for ClientsCreateClient for application/json ContentType.
-type ClientsCreateClientJSONRequestBody ClientsCreateClientJSONBody
+// ApprovalsInterfaceApproveJSONRequestBody defines body for ApprovalsInterfaceApprove for application/json ContentType.
+type ApprovalsInterfaceApproveJSONRequestBody = ApprovalsApproveReq
 
-// ClientsUpdateClientJSONRequestBody defines body for ClientsUpdateClient for application/json ContentType.
-type ClientsUpdateClientJSONRequestBody ClientsUpdateClientJSONBody
+// ClientInterfaceCreateClientJSONRequestBody defines body for ClientInterfaceCreateClient for application/json ContentType.
+type ClientInterfaceCreateClientJSONRequestBody ClientInterfaceCreateClientJSONBody
+
+// ClientInterfaceUpdateClientJSONRequestBody defines body for ClientInterfaceUpdateClient for application/json ContentType.
+type ClientInterfaceUpdateClientJSONRequestBody ClientInterfaceUpdateClientJSONBody
 
 // PostAuthorizeMultipartRequestBody defines body for PostAuthorize for multipart/form-data ContentType.
 type PostAuthorizeMultipartRequestBody PostAuthorizeMultipartBody
@@ -102,18 +117,21 @@ type TokenGetTokenJSONRequestBody TokenGetTokenJSONBody
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// Approve a auth request
+	// (POST /account/approvals)
+	ApprovalsInterfaceApprove(ctx echo.Context) error
 	// Get all clients
 	// (GET /account/clients/)
-	ClientsListClients(ctx echo.Context, params ClientsListClientsParams) error
+	ClientInterfaceListClients(ctx echo.Context, params ClientInterfaceListClientsParams) error
 	// Create a new client
 	// (POST /account/clients/)
-	ClientsCreateClient(ctx echo.Context) error
+	ClientInterfaceCreateClient(ctx echo.Context) error
 	// Delete a client
 	// (DELETE /account/clients/:id/{id})
-	ClientsDeleteClient(ctx echo.Context, id int64) error
+	ClientInterfaceDeleteClient(ctx echo.Context, id int64) error
 	// Update a client
 	// (POST /account/clients/:id/{id})
-	ClientsUpdateClient(ctx echo.Context, id int64) error
+	ClientInterfaceUpdateClient(ctx echo.Context, id int64) error
 	// Authorization Request
 	// (GET /authorize)
 	Authorize(ctx echo.Context, params AuthorizeParams) error
@@ -142,12 +160,21 @@ type ServerInterfaceWrapper struct {
 	Handler ServerInterface
 }
 
-// ClientsListClients converts echo context to params.
-func (w *ServerInterfaceWrapper) ClientsListClients(ctx echo.Context) error {
+// ApprovalsInterfaceApprove converts echo context to params.
+func (w *ServerInterfaceWrapper) ApprovalsInterfaceApprove(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.ApprovalsInterfaceApprove(ctx)
+	return err
+}
+
+// ClientInterfaceListClients converts echo context to params.
+func (w *ServerInterfaceWrapper) ClientInterfaceListClients(ctx echo.Context) error {
 	var err error
 
 	// Parameter object where we will unmarshal all parameters from the context
-	var params ClientsListClientsParams
+	var params ClientInterfaceListClientsParams
 
 	headers := ctx.Request().Header
 	// ------------- Required header parameter "cookie" -------------
@@ -169,37 +196,21 @@ func (w *ServerInterfaceWrapper) ClientsListClients(ctx echo.Context) error {
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.ClientsListClients(ctx, params)
+	err = w.Handler.ClientInterfaceListClients(ctx, params)
 	return err
 }
 
-// ClientsCreateClient converts echo context to params.
-func (w *ServerInterfaceWrapper) ClientsCreateClient(ctx echo.Context) error {
+// ClientInterfaceCreateClient converts echo context to params.
+func (w *ServerInterfaceWrapper) ClientInterfaceCreateClient(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.ClientsCreateClient(ctx)
+	err = w.Handler.ClientInterfaceCreateClient(ctx)
 	return err
 }
 
-// ClientsDeleteClient converts echo context to params.
-func (w *ServerInterfaceWrapper) ClientsDeleteClient(ctx echo.Context) error {
-	var err error
-	// ------------- Path parameter "id" -------------
-	var id int64
-
-	err = runtime.BindStyledParameterWithOptions("simple", "id", ctx.Param("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
-	}
-
-	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.ClientsDeleteClient(ctx, id)
-	return err
-}
-
-// ClientsUpdateClient converts echo context to params.
-func (w *ServerInterfaceWrapper) ClientsUpdateClient(ctx echo.Context) error {
+// ClientInterfaceDeleteClient converts echo context to params.
+func (w *ServerInterfaceWrapper) ClientInterfaceDeleteClient(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "id" -------------
 	var id int64
@@ -210,7 +221,23 @@ func (w *ServerInterfaceWrapper) ClientsUpdateClient(ctx echo.Context) error {
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.ClientsUpdateClient(ctx, id)
+	err = w.Handler.ClientInterfaceDeleteClient(ctx, id)
+	return err
+}
+
+// ClientInterfaceUpdateClient converts echo context to params.
+func (w *ServerInterfaceWrapper) ClientInterfaceUpdateClient(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", ctx.Param("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.ClientInterfaceUpdateClient(ctx, id)
 	return err
 }
 
@@ -342,10 +369,11 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 		Handler: si,
 	}
 
-	router.GET(baseURL+"/account/clients/", wrapper.ClientsListClients)
-	router.POST(baseURL+"/account/clients/", wrapper.ClientsCreateClient)
-	router.DELETE(baseURL+"/account/clients/:id/:id", wrapper.ClientsDeleteClient)
-	router.POST(baseURL+"/account/clients/:id/:id", wrapper.ClientsUpdateClient)
+	router.POST(baseURL+"/account/approvals", wrapper.ApprovalsInterfaceApprove)
+	router.GET(baseURL+"/account/clients/", wrapper.ClientInterfaceListClients)
+	router.POST(baseURL+"/account/clients/", wrapper.ClientInterfaceCreateClient)
+	router.DELETE(baseURL+"/account/clients/:id/:id", wrapper.ClientInterfaceDeleteClient)
+	router.POST(baseURL+"/account/clients/:id/:id", wrapper.ClientInterfaceUpdateClient)
 	router.GET(baseURL+"/authorize", wrapper.Authorize)
 	router.POST(baseURL+"/authorize", wrapper.PostAuthorize)
 	router.GET(baseURL+"/me", wrapper.Me)
