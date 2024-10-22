@@ -1,20 +1,25 @@
+import { ApproveButton } from '@/components/ApproveButton'
 import { client } from '@/utils/client'
-import { Container, Typography } from '@mui/material'
+import { Box, Button, Container, Typography } from '@mui/material'
 
 type Props = {
   searchParams: {
-    next?: string
+    next: string
     scope: string
     client_id: string
   }
 }
 export default async function Page({ searchParams: query }: Props) {
+  if (!query.scope || !query.client_id || !query.next) {
+    throw new Error('invalid query')
+  }
   const { data, error } = await client.GET('/clients/{id}', {
     params: { path: { id: query.client_id } },
   })
   if (error) {
     throw new Error(error.error_description)
   }
+
   return (
     <Container component="main" sx={{ pt: 4, pb: 6 }}>
       <Typography
@@ -24,11 +29,18 @@ export default async function Page({ searchParams: query }: Props) {
         gutterBottom
         mt={5}
       >
-        {data.client.name} にアクセスを許可しますか？
+        Will you authorize client: {data.client.name} ?
       </Typography>
-      <Typography component="p" mt={2}>
-        Scope: {query.scope}
-      </Typography>
+      <Box sx={{ '> *': { margin: 2 } }}>
+        <Typography component="p" mt={2}>
+          Scope: {query.scope}
+        </Typography>
+        <ApproveButton
+          clientID={query.client_id}
+          scope={query.scope}
+          next={query.next}
+        />
+      </Box>
     </Container>
   )
 }
