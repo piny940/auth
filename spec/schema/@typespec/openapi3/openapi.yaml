@@ -161,40 +161,16 @@ paths:
                     type: string
                 required:
                   - error
-  /authorize:
+  /oauth/authorize:
     get:
-      operationId: authorize
+      operationId: OAuthInterface_authorize
       summary: Authorization Request
       parameters:
-        - name: response_type
+        - name: query
           in: query
           required: true
           schema:
-            type: string
-          explode: false
-        - name: client_id
-          in: query
-          required: true
-          schema:
-            type: string
-          explode: false
-        - name: redirect_uri
-          in: query
-          required: true
-          schema:
-            type: string
-          explode: false
-        - name: scope
-          in: query
-          required: true
-          schema:
-            type: string
-          explode: false
-        - name: state
-          in: query
-          required: false
-          schema:
-            type: string
+            $ref: '#/components/schemas/OAuth.AuthorizeReq'
           explode: false
       responses:
         '204':
@@ -207,7 +183,7 @@ paths:
                 type: object
                 properties:
                   error:
-                    type: string
+                    $ref: '#/components/schemas/OAuth.AuthorizeErr'
                   error_description:
                     type: string
                   state:
@@ -223,7 +199,7 @@ paths:
                 type: object
                 properties:
                   error:
-                    type: string
+                    $ref: '#/components/schemas/OAuth.AuthorizeErr'
                   error_description:
                     type: string
                   state:
@@ -232,7 +208,7 @@ paths:
                   - error
                   - error_description
     post:
-      operationId: postAuthorize
+      operationId: OAuthInterface_postAuthorize
       summary: Authorization Request
       parameters: []
       responses:
@@ -246,7 +222,7 @@ paths:
                 type: object
                 properties:
                   error:
-                    type: string
+                    $ref: '#/components/schemas/OAuth.AuthorizeErr'
                   error_description:
                     type: string
                   state:
@@ -262,7 +238,7 @@ paths:
                 type: object
                 properties:
                   error:
-                    type: string
+                    $ref: '#/components/schemas/OAuth.AuthorizeErr'
                   error_description:
                     type: string
                   state:
@@ -278,7 +254,7 @@ paths:
                 type: object
                 properties:
                   error:
-                    type: string
+                    $ref: '#/components/schemas/OAuth.AuthorizeErr'
                   error_description:
                     type: string
                   state:
@@ -291,120 +267,10 @@ paths:
         content:
           multipart/form-data:
             schema:
-              type: object
-              properties:
-                response_type:
-                  type: string
-                client_id:
-                  type: string
-                redirect_uri:
-                  type: string
-                scope:
-                  type: string
-                state:
-                  type: string
-              required:
-                - response_type
-                - client_id
-                - redirect_uri
-                - scope
-  /me:
-    get:
-      operationId: me
-      summary: Get me
-      parameters: []
-      responses:
-        '200':
-          description: The request has succeeded.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  user:
-                    $ref: '#/components/schemas/User'
-                required:
-                  - user
-  /session:
+              $ref: '#/components/schemas/OAuth.AuthorizeReqMultiPart'
+  /oauth/token:
     post:
-      operationId: login
-      summary: Login
-      parameters: []
-      responses:
-        '204':
-          description: 'There is no content to send for this request, but the headers may be useful. '
-        '400':
-          description: The server could not understand the request due to invalid syntax.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                  error_description:
-                    type: string
-                required:
-                  - error
-                  - error_description
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ReqLogin'
-    delete:
-      operationId: logout
-      summary: Logout
-      parameters: []
-      responses:
-        '204':
-          description: 'There is no content to send for this request, but the headers may be useful. '
-        '400':
-          description: The server could not understand the request due to invalid syntax.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                  error_description:
-                    type: string
-                required:
-                  - error
-                  - error_description
-  /signup:
-    post:
-      operationId: signup
-      summary: Signup
-      parameters: []
-      responses:
-        '204':
-          description: 'There is no content to send for this request, but the headers may be useful. '
-        '400':
-          description: The server could not understand the request due to invalid syntax.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                  error_description:
-                    type: string
-                required:
-                  - error
-                  - error_description
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserCreate'
-  /token/:
-    post:
-      operationId: Token_getToken
+      operationId: OAuthInterface_getToken
       summary: Get a token
       parameters: []
       responses:
@@ -448,6 +314,94 @@ paths:
               required:
                 - client_id
                 - client_secret
+  /session/:
+    get:
+      operationId: SessionInterface_me
+      summary: Get session
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session.MeRes'
+    post:
+      operationId: SessionInterface_login
+      summary: Login
+      parameters: []
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        '400':
+          description: The server could not understand the request due to invalid syntax.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: '#/components/schemas/Session.LoginErr'
+                  error_description:
+                    type: string
+                required:
+                  - error
+                  - error_description
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Session.LoginReq'
+    delete:
+      operationId: SessionInterface_logout
+      summary: Logout
+      parameters: []
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        '400':
+          description: The server could not understand the request due to invalid syntax.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: '#/components/schemas/Session.LogoutErr'
+                  error_description:
+                    type: string
+                required:
+                  - error
+                  - error_description
+  /signup:
+    post:
+      operationId: signup
+      summary: Signup
+      parameters: []
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        '400':
+          description: The server could not understand the request due to invalid syntax.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  error_description:
+                    type: string
+                required:
+                  - error
+                  - error_description
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
 components:
   schemas:
     Approvals.ApproveReq:
@@ -498,15 +452,51 @@ components:
           type: array
           items:
             type: string
-    ReqLogin:
+    OAuth.AuthorizeErr:
+      type: string
+      enum:
+        - invalid_request
+        - unauthorized_client
+        - access_denied
+        - unsupported_response_type
+        - invalid_scope
+        - server_error
+        - temporarily_unavailable
+    OAuth.AuthorizeReq:
       type: object
       required:
-        - name
-        - password
+        - response_type
+        - client_id
+        - redirect_uri
+        - scope
       properties:
-        name:
+        response_type:
           type: string
-        password:
+        client_id:
+          type: string
+        redirect_uri:
+          type: string
+        scope:
+          type: string
+        state:
+          type: string
+    OAuth.AuthorizeReqMultiPart:
+      type: object
+      required:
+        - response_type
+        - client_id
+        - redirect_uri
+        - scope
+      properties:
+        response_type:
+          type: string
+        client_id:
+          type: string
+        redirect_uri:
+          type: string
+        scope:
+          type: string
+        state:
           type: string
     ReqSignup:
       type: object
@@ -521,6 +511,34 @@ components:
           type: string
         password_confirmation:
           type: string
+    Session.LoginErr:
+      type: string
+      enum:
+        - invalid_name_or_password
+    Session.LoginReq:
+      type: object
+      required:
+        - name
+        - password
+      properties:
+        name:
+          type: string
+        password:
+          type: string
+    Session.LogoutErr:
+      type: string
+      enum:
+        - not_logged_in
+    Session.MeRes:
+      type: object
+      required:
+        - user
+      properties:
+        user:
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/User'
+          nullable: true
     User:
       type: object
       required:

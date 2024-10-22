@@ -57,7 +57,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/authorize": {
+    "/oauth/authorize": {
         parameters: {
             query?: never;
             header?: never;
@@ -65,34 +65,17 @@ export interface paths {
             cookie?: never;
         };
         /** Authorization Request */
-        get: operations["authorize"];
+        get: operations["OAuthInterface_authorize"];
         put?: never;
         /** Authorization Request */
-        post: operations["postAuthorize"];
+        post: operations["OAuthInterface_postAuthorize"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/me": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get me */
-        get: operations["me"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/session": {
+    "/oauth/token": {
         parameters: {
             query?: never;
             header?: never;
@@ -101,10 +84,28 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** Get a token */
+        post: operations["OAuthInterface_getToken"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/session/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get session */
+        get: operations["SessionInterface_me"];
+        put?: never;
         /** Login */
-        post: operations["login"];
+        post: operations["SessionInterface_login"];
         /** Logout */
-        delete: operations["logout"];
+        delete: operations["SessionInterface_logout"];
         options?: never;
         head?: never;
         patch?: never;
@@ -121,23 +122,6 @@ export interface paths {
         put?: never;
         /** Signup */
         post: operations["signup"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/token/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Get a token */
-        post: operations["Token_getToken"];
         delete?: never;
         options?: never;
         head?: never;
@@ -166,14 +150,37 @@ export interface components {
             name: string;
             redirect_urls: string[];
         };
-        ReqLogin: {
-            name: string;
-            password: string;
+        /** @enum {string} */
+        "OAuth.AuthorizeErr": "invalid_request" | "unauthorized_client" | "access_denied" | "unsupported_response_type" | "invalid_scope" | "server_error" | "temporarily_unavailable";
+        "OAuth.AuthorizeReq": {
+            response_type: string;
+            client_id: string;
+            redirect_uri: string;
+            scope: string;
+            state?: string;
+        };
+        "OAuth.AuthorizeReqMultiPart": {
+            response_type: string;
+            client_id: string;
+            redirect_uri: string;
+            scope: string;
+            state?: string;
         };
         ReqSignup: {
             name: string;
             password: string;
             password_confirmation: string;
+        };
+        /** @enum {string} */
+        "Session.LoginErr": "invalid_name_or_password";
+        "Session.LoginReq": {
+            name: string;
+            password: string;
+        };
+        /** @enum {string} */
+        "Session.LogoutErr": "not_logged_in";
+        "Session.MeRes": {
+            user: components["schemas"]["User"] | null;
         };
         User: {
             /** Format: int64 */
@@ -369,14 +376,10 @@ export interface operations {
             };
         };
     };
-    authorize: {
+    OAuthInterface_authorize: {
         parameters: {
             query: {
-                response_type: string;
-                client_id: string;
-                redirect_uri: string;
-                scope: string;
-                state?: string;
+                query: components["schemas"]["OAuth.AuthorizeReq"];
             };
             header?: never;
             path?: never;
@@ -398,7 +401,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        error: string;
+                        error: components["schemas"]["OAuth.AuthorizeErr"];
                         error_description: string;
                         state?: string;
                     };
@@ -411,7 +414,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        error: string;
+                        error: components["schemas"]["OAuth.AuthorizeErr"];
                         error_description: string;
                         state?: string;
                     };
@@ -419,7 +422,7 @@ export interface operations {
             };
         };
     };
-    postAuthorize: {
+    OAuthInterface_postAuthorize: {
         parameters: {
             query?: never;
             header?: never;
@@ -428,13 +431,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "multipart/form-data": {
-                    response_type: string;
-                    client_id: string;
-                    redirect_uri: string;
-                    scope: string;
-                    state?: string;
-                };
+                "multipart/form-data": components["schemas"]["OAuth.AuthorizeReqMultiPart"];
             };
         };
         responses: {
@@ -452,7 +449,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        error: string;
+                        error: components["schemas"]["OAuth.AuthorizeErr"];
                         error_description: string;
                         state?: string;
                     };
@@ -465,7 +462,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        error: string;
+                        error: components["schemas"]["OAuth.AuthorizeErr"];
                         error_description: string;
                         state?: string;
                     };
@@ -478,7 +475,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        error: string;
+                        error: components["schemas"]["OAuth.AuthorizeErr"];
                         error_description: string;
                         state?: string;
                     };
@@ -486,127 +483,7 @@ export interface operations {
             };
         };
     };
-    me: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description The request has succeeded. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        user: components["schemas"]["User"];
-                    };
-                };
-            };
-        };
-    };
-    login: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ReqLogin"];
-            };
-        };
-        responses: {
-            /** @description There is no content to send for this request, but the headers may be useful.  */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description The server could not understand the request due to invalid syntax. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        error: string;
-                        error_description: string;
-                    };
-                };
-            };
-        };
-    };
-    logout: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description There is no content to send for this request, but the headers may be useful.  */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description The server could not understand the request due to invalid syntax. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        error: string;
-                        error_description: string;
-                    };
-                };
-            };
-        };
-    };
-    signup: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UserCreate"];
-            };
-        };
-        responses: {
-            /** @description There is no content to send for this request, but the headers may be useful.  */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description The server could not understand the request due to invalid syntax. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        error: string;
-                        error_description: string;
-                    };
-                };
-            };
-        };
-    };
-    Token_getToken: {
+    OAuthInterface_getToken: {
         parameters: {
             query?: never;
             header?: never;
@@ -642,6 +519,124 @@ export interface operations {
                     "application/json": {
                         /** Format: int32 */
                         error: number;
+                        error_description: string;
+                    };
+                };
+            };
+        };
+    };
+    SessionInterface_me: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The request has succeeded. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Session.MeRes"];
+                };
+            };
+        };
+    };
+    SessionInterface_login: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Session.LoginReq"];
+            };
+        };
+        responses: {
+            /** @description There is no content to send for this request, but the headers may be useful.  */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The server could not understand the request due to invalid syntax. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: components["schemas"]["Session.LoginErr"];
+                        error_description: string;
+                    };
+                };
+            };
+        };
+    };
+    SessionInterface_logout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description There is no content to send for this request, but the headers may be useful.  */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The server could not understand the request due to invalid syntax. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: components["schemas"]["Session.LogoutErr"];
+                        error_description: string;
+                    };
+                };
+            };
+        };
+    };
+    signup: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserCreate"];
+            };
+        };
+        responses: {
+            /** @description There is no content to send for this request, but the headers may be useful.  */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The server could not understand the request due to invalid syntax. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: string;
                         error_description: string;
                     };
                 };

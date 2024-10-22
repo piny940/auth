@@ -12,18 +12,18 @@ type Server struct {
 	Conf        *Config
 }
 
-// Login implements StrictServerInterface.
-func (s *Server) Login(ctx context.Context, request LoginRequestObject) (LoginResponseObject, error) {
+// SessionInterfaceLogin implements StrictServerInterface.
+func (s *Server) SessionInterfaceLogin(ctx context.Context, request SessionInterfaceLoginRequestObject) (SessionInterfaceLoginResponseObject, error) {
 	panic("unimplemented")
 }
 
-// Logout implements StrictServerInterface.
-func (s *Server) Logout(ctx context.Context, request LogoutRequestObject) (LogoutResponseObject, error) {
+// SessionInterfaceLogout implements StrictServerInterface.
+func (s *Server) SessionInterfaceLogout(ctx context.Context, request SessionInterfaceLogoutRequestObject) (SessionInterfaceLogoutResponseObject, error) {
 	panic("unimplemented")
 }
 
-// Me implements StrictServerInterface.
-func (s *Server) Me(ctx context.Context, request MeRequestObject) (MeResponseObject, error) {
+// SessionInterfaceMe implements StrictServerInterface.
+func (s *Server) SessionInterfaceMe(ctx context.Context, request SessionInterfaceMeRequestObject) (SessionInterfaceMeResponseObject, error) {
 	panic("unimplemented")
 }
 

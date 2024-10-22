@@ -15,6 +15,27 @@ import (
 	strictecho "github.com/oapi-codegen/runtime/strictmiddleware/echo"
 )
 
+// Defines values for OAuthAuthorizeErr.
+const (
+	AccessDenied            OAuthAuthorizeErr = "access_denied"
+	InvalidRequest          OAuthAuthorizeErr = "invalid_request"
+	InvalidScope            OAuthAuthorizeErr = "invalid_scope"
+	ServerError             OAuthAuthorizeErr = "server_error"
+	TemporarilyUnavailable  OAuthAuthorizeErr = "temporarily_unavailable"
+	UnauthorizedClient      OAuthAuthorizeErr = "unauthorized_client"
+	UnsupportedResponseType OAuthAuthorizeErr = "unsupported_response_type"
+)
+
+// Defines values for SessionLoginErr.
+const (
+	InvalidNameOrPassword SessionLoginErr = "invalid_name_or_password"
+)
+
+// Defines values for SessionLogoutErr.
+const (
+	NotLoggedIn SessionLogoutErr = "not_logged_in"
+)
+
 // ApprovalsApproveReq defines model for Approvals.ApproveReq.
 type ApprovalsApproveReq struct {
 	ClientId string `json:"client_id"`
@@ -40,10 +61,42 @@ type ClientCreate struct {
 	RedirectUrls []string `json:"redirect_urls"`
 }
 
-// ReqLogin defines model for ReqLogin.
-type ReqLogin struct {
+// OAuthAuthorizeErr defines model for OAuth.AuthorizeErr.
+type OAuthAuthorizeErr string
+
+// OAuthAuthorizeReq defines model for OAuth.AuthorizeReq.
+type OAuthAuthorizeReq struct {
+	ClientId     string  `json:"client_id"`
+	RedirectUri  string  `json:"redirect_uri"`
+	ResponseType string  `json:"response_type"`
+	Scope        string  `json:"scope"`
+	State        *string `json:"state,omitempty"`
+}
+
+// OAuthAuthorizeReqMultiPart defines model for OAuth.AuthorizeReqMultiPart.
+type OAuthAuthorizeReqMultiPart struct {
+	ClientId     string  `json:"client_id"`
+	RedirectUri  string  `json:"redirect_uri"`
+	ResponseType string  `json:"response_type"`
+	Scope        string  `json:"scope"`
+	State        *string `json:"state,omitempty"`
+}
+
+// SessionLoginErr defines model for Session.LoginErr.
+type SessionLoginErr string
+
+// SessionLoginReq defines model for Session.LoginReq.
+type SessionLoginReq struct {
 	Name     string `json:"name"`
 	Password string `json:"password"`
+}
+
+// SessionLogoutErr defines model for Session.LogoutErr.
+type SessionLogoutErr string
+
+// SessionMeRes defines model for Session.MeRes.
+type SessionMeRes struct {
+	User *User `json:"user"`
 }
 
 // User defines model for User.
@@ -74,26 +127,13 @@ type ClientInterfaceUpdateClientJSONBody struct {
 	Client ClientCreate `json:"client"`
 }
 
-// AuthorizeParams defines parameters for Authorize.
-type AuthorizeParams struct {
-	ResponseType string  `form:"response_type" json:"response_type"`
-	ClientId     string  `form:"client_id" json:"client_id"`
-	RedirectUri  string  `form:"redirect_uri" json:"redirect_uri"`
-	Scope        string  `form:"scope" json:"scope"`
-	State        *string `form:"state,omitempty" json:"state,omitempty"`
+// OAuthInterfaceAuthorizeParams defines parameters for OAuthInterfaceAuthorize.
+type OAuthInterfaceAuthorizeParams struct {
+	Query OAuthAuthorizeReq `form:"query" json:"query"`
 }
 
-// PostAuthorizeMultipartBody defines parameters for PostAuthorize.
-type PostAuthorizeMultipartBody struct {
-	ClientId     string  `json:"client_id"`
-	RedirectUri  string  `json:"redirect_uri"`
-	ResponseType string  `json:"response_type"`
-	Scope        string  `json:"scope"`
-	State        *string `json:"state,omitempty"`
-}
-
-// TokenGetTokenJSONBody defines parameters for TokenGetToken.
-type TokenGetTokenJSONBody struct {
+// OAuthInterfaceGetTokenJSONBody defines parameters for OAuthInterfaceGetToken.
+type OAuthInterfaceGetTokenJSONBody struct {
 	ClientId     string `json:"client_id"`
 	ClientSecret string `json:"client_secret"`
 }
@@ -107,17 +147,17 @@ type ClientInterfaceCreateClientJSONRequestBody ClientInterfaceCreateClientJSONB
 // ClientInterfaceUpdateClientJSONRequestBody defines body for ClientInterfaceUpdateClient for application/json ContentType.
 type ClientInterfaceUpdateClientJSONRequestBody ClientInterfaceUpdateClientJSONBody
 
-// PostAuthorizeMultipartRequestBody defines body for PostAuthorize for multipart/form-data ContentType.
-type PostAuthorizeMultipartRequestBody PostAuthorizeMultipartBody
+// OAuthInterfacePostAuthorizeMultipartRequestBody defines body for OAuthInterfacePostAuthorize for multipart/form-data ContentType.
+type OAuthInterfacePostAuthorizeMultipartRequestBody = OAuthAuthorizeReqMultiPart
 
-// LoginJSONRequestBody defines body for Login for application/json ContentType.
-type LoginJSONRequestBody = ReqLogin
+// OAuthInterfaceGetTokenJSONRequestBody defines body for OAuthInterfaceGetToken for application/json ContentType.
+type OAuthInterfaceGetTokenJSONRequestBody OAuthInterfaceGetTokenJSONBody
+
+// SessionInterfaceLoginJSONRequestBody defines body for SessionInterfaceLogin for application/json ContentType.
+type SessionInterfaceLoginJSONRequestBody = SessionLoginReq
 
 // SignupJSONRequestBody defines body for Signup for application/json ContentType.
 type SignupJSONRequestBody = UserCreate
-
-// TokenGetTokenJSONRequestBody defines body for TokenGetToken for application/json ContentType.
-type TokenGetTokenJSONRequestBody TokenGetTokenJSONBody
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
@@ -137,26 +177,26 @@ type ServerInterface interface {
 	// (POST /account/clients/:id/{id})
 	ClientInterfaceUpdateClient(ctx echo.Context, id int64) error
 	// Authorization Request
-	// (GET /authorize)
-	Authorize(ctx echo.Context, params AuthorizeParams) error
+	// (GET /oauth/authorize)
+	OAuthInterfaceAuthorize(ctx echo.Context, params OAuthInterfaceAuthorizeParams) error
 	// Authorization Request
-	// (POST /authorize)
-	PostAuthorize(ctx echo.Context) error
-	// Get me
-	// (GET /me)
-	Me(ctx echo.Context) error
+	// (POST /oauth/authorize)
+	OAuthInterfacePostAuthorize(ctx echo.Context) error
+	// Get a token
+	// (POST /oauth/token)
+	OAuthInterfaceGetToken(ctx echo.Context) error
 	// Logout
-	// (DELETE /session)
-	Logout(ctx echo.Context) error
+	// (DELETE /session/)
+	SessionInterfaceLogout(ctx echo.Context) error
+	// Get session
+	// (GET /session/)
+	SessionInterfaceMe(ctx echo.Context) error
 	// Login
-	// (POST /session)
-	Login(ctx echo.Context) error
+	// (POST /session/)
+	SessionInterfaceLogin(ctx echo.Context) error
 	// Signup
 	// (POST /signup)
 	Signup(ctx echo.Context) error
-	// Get a token
-	// (POST /token/)
-	TokenGetToken(ctx echo.Context) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -245,85 +285,66 @@ func (w *ServerInterfaceWrapper) ClientInterfaceUpdateClient(ctx echo.Context) e
 	return err
 }
 
-// Authorize converts echo context to params.
-func (w *ServerInterfaceWrapper) Authorize(ctx echo.Context) error {
+// OAuthInterfaceAuthorize converts echo context to params.
+func (w *ServerInterfaceWrapper) OAuthInterfaceAuthorize(ctx echo.Context) error {
 	var err error
 
 	// Parameter object where we will unmarshal all parameters from the context
-	var params AuthorizeParams
-	// ------------- Required query parameter "response_type" -------------
+	var params OAuthInterfaceAuthorizeParams
+	// ------------- Required query parameter "query" -------------
 
-	err = runtime.BindQueryParameter("form", false, true, "response_type", ctx.QueryParams(), &params.ResponseType)
+	err = runtime.BindQueryParameter("form", false, true, "query", ctx.QueryParams(), &params.Query)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter response_type: %s", err))
-	}
-
-	// ------------- Required query parameter "client_id" -------------
-
-	err = runtime.BindQueryParameter("form", false, true, "client_id", ctx.QueryParams(), &params.ClientId)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter client_id: %s", err))
-	}
-
-	// ------------- Required query parameter "redirect_uri" -------------
-
-	err = runtime.BindQueryParameter("form", false, true, "redirect_uri", ctx.QueryParams(), &params.RedirectUri)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter redirect_uri: %s", err))
-	}
-
-	// ------------- Required query parameter "scope" -------------
-
-	err = runtime.BindQueryParameter("form", false, true, "scope", ctx.QueryParams(), &params.Scope)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter scope: %s", err))
-	}
-
-	// ------------- Optional query parameter "state" -------------
-
-	err = runtime.BindQueryParameter("form", false, false, "state", ctx.QueryParams(), &params.State)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter state: %s", err))
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter query: %s", err))
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.Authorize(ctx, params)
+	err = w.Handler.OAuthInterfaceAuthorize(ctx, params)
 	return err
 }
 
-// PostAuthorize converts echo context to params.
-func (w *ServerInterfaceWrapper) PostAuthorize(ctx echo.Context) error {
+// OAuthInterfacePostAuthorize converts echo context to params.
+func (w *ServerInterfaceWrapper) OAuthInterfacePostAuthorize(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.PostAuthorize(ctx)
+	err = w.Handler.OAuthInterfacePostAuthorize(ctx)
 	return err
 }
 
-// Me converts echo context to params.
-func (w *ServerInterfaceWrapper) Me(ctx echo.Context) error {
+// OAuthInterfaceGetToken converts echo context to params.
+func (w *ServerInterfaceWrapper) OAuthInterfaceGetToken(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.Me(ctx)
+	err = w.Handler.OAuthInterfaceGetToken(ctx)
 	return err
 }
 
-// Logout converts echo context to params.
-func (w *ServerInterfaceWrapper) Logout(ctx echo.Context) error {
+// SessionInterfaceLogout converts echo context to params.
+func (w *ServerInterfaceWrapper) SessionInterfaceLogout(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.Logout(ctx)
+	err = w.Handler.SessionInterfaceLogout(ctx)
 	return err
 }
 
-// Login converts echo context to params.
-func (w *ServerInterfaceWrapper) Login(ctx echo.Context) error {
+// SessionInterfaceMe converts echo context to params.
+func (w *ServerInterfaceWrapper) SessionInterfaceMe(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.Login(ctx)
+	err = w.Handler.SessionInterfaceMe(ctx)
+	return err
+}
+
+// SessionInterfaceLogin converts echo context to params.
+func (w *ServerInterfaceWrapper) SessionInterfaceLogin(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.SessionInterfaceLogin(ctx)
 	return err
 }
 
@@ -333,15 +354,6 @@ func (w *ServerInterfaceWrapper) Signup(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.Signup(ctx)
-	return err
-}
-
-// TokenGetToken converts echo context to params.
-func (w *ServerInterfaceWrapper) TokenGetToken(ctx echo.Context) error {
-	var err error
-
-	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.TokenGetToken(ctx)
 	return err
 }
 
@@ -378,13 +390,13 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.POST(baseURL+"/account/clients/", wrapper.ClientInterfaceCreateClient)
 	router.DELETE(baseURL+"/account/clients/:id/:id", wrapper.ClientInterfaceDeleteClient)
 	router.POST(baseURL+"/account/clients/:id/:id", wrapper.ClientInterfaceUpdateClient)
-	router.GET(baseURL+"/authorize", wrapper.Authorize)
-	router.POST(baseURL+"/authorize", wrapper.PostAuthorize)
-	router.GET(baseURL+"/me", wrapper.Me)
-	router.DELETE(baseURL+"/session", wrapper.Logout)
-	router.POST(baseURL+"/session", wrapper.Login)
+	router.GET(baseURL+"/oauth/authorize", wrapper.OAuthInterfaceAuthorize)
+	router.POST(baseURL+"/oauth/authorize", wrapper.OAuthInterfacePostAuthorize)
+	router.POST(baseURL+"/oauth/token", wrapper.OAuthInterfaceGetToken)
+	router.DELETE(baseURL+"/session/", wrapper.SessionInterfaceLogout)
+	router.GET(baseURL+"/session/", wrapper.SessionInterfaceMe)
+	router.POST(baseURL+"/session/", wrapper.SessionInterfaceLogin)
 	router.POST(baseURL+"/signup", wrapper.Signup)
-	router.POST(baseURL+"/token/", wrapper.TokenGetToken)
 
 }
 
@@ -529,170 +541,199 @@ func (response ClientInterfaceUpdateClient400JSONResponse) VisitClientInterfaceU
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AuthorizeRequestObject struct {
-	Params AuthorizeParams
+type OAuthInterfaceAuthorizeRequestObject struct {
+	Params OAuthInterfaceAuthorizeParams
 }
 
-type AuthorizeResponseObject interface {
-	VisitAuthorizeResponse(w http.ResponseWriter) error
+type OAuthInterfaceAuthorizeResponseObject interface {
+	VisitOAuthInterfaceAuthorizeResponse(w http.ResponseWriter) error
 }
 
-type Authorize204Response struct {
+type OAuthInterfaceAuthorize204Response struct {
 }
 
-func (response Authorize204Response) VisitAuthorizeResponse(w http.ResponseWriter) error {
+func (response OAuthInterfaceAuthorize204Response) VisitOAuthInterfaceAuthorizeResponse(w http.ResponseWriter) error {
 	w.WriteHeader(204)
 	return nil
 }
 
-type Authorize302JSONResponse struct {
-	Error            string  `json:"error"`
-	ErrorDescription string  `json:"error_description"`
-	State            *string `json:"state,omitempty"`
+type OAuthInterfaceAuthorize302JSONResponse struct {
+	Error            OAuthAuthorizeErr `json:"error"`
+	ErrorDescription string            `json:"error_description"`
+	State            *string           `json:"state,omitempty"`
 }
 
-func (response Authorize302JSONResponse) VisitAuthorizeResponse(w http.ResponseWriter) error {
+func (response OAuthInterfaceAuthorize302JSONResponse) VisitOAuthInterfaceAuthorizeResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(302)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type Authorize400JSONResponse struct {
-	Error            string  `json:"error"`
-	ErrorDescription string  `json:"error_description"`
-	State            *string `json:"state,omitempty"`
+type OAuthInterfaceAuthorize400JSONResponse struct {
+	Error            OAuthAuthorizeErr `json:"error"`
+	ErrorDescription string            `json:"error_description"`
+	State            *string           `json:"state,omitempty"`
 }
 
-func (response Authorize400JSONResponse) VisitAuthorizeResponse(w http.ResponseWriter) error {
+func (response OAuthInterfaceAuthorize400JSONResponse) VisitOAuthInterfaceAuthorizeResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(400)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostAuthorizeRequestObject struct {
+type OAuthInterfacePostAuthorizeRequestObject struct {
 	Body *multipart.Reader
 }
 
-type PostAuthorizeResponseObject interface {
-	VisitPostAuthorizeResponse(w http.ResponseWriter) error
+type OAuthInterfacePostAuthorizeResponseObject interface {
+	VisitOAuthInterfacePostAuthorizeResponse(w http.ResponseWriter) error
 }
 
-type PostAuthorize204Response struct {
+type OAuthInterfacePostAuthorize204Response struct {
 }
 
-func (response PostAuthorize204Response) VisitPostAuthorizeResponse(w http.ResponseWriter) error {
+func (response OAuthInterfacePostAuthorize204Response) VisitOAuthInterfacePostAuthorizeResponse(w http.ResponseWriter) error {
 	w.WriteHeader(204)
 	return nil
 }
 
-type PostAuthorize302JSONResponse struct {
-	Error            string  `json:"error"`
-	ErrorDescription string  `json:"error_description"`
-	State            *string `json:"state,omitempty"`
+type OAuthInterfacePostAuthorize302JSONResponse struct {
+	Error            OAuthAuthorizeErr `json:"error"`
+	ErrorDescription string            `json:"error_description"`
+	State            *string           `json:"state,omitempty"`
 }
 
-func (response PostAuthorize302JSONResponse) VisitPostAuthorizeResponse(w http.ResponseWriter) error {
+func (response OAuthInterfacePostAuthorize302JSONResponse) VisitOAuthInterfacePostAuthorizeResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(302)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostAuthorize400JSONResponse struct {
-	Error            string  `json:"error"`
-	ErrorDescription string  `json:"error_description"`
-	State            *string `json:"state,omitempty"`
+type OAuthInterfacePostAuthorize400JSONResponse struct {
+	Error            OAuthAuthorizeErr `json:"error"`
+	ErrorDescription string            `json:"error_description"`
+	State            *string           `json:"state,omitempty"`
 }
 
-func (response PostAuthorize400JSONResponse) VisitPostAuthorizeResponse(w http.ResponseWriter) error {
+func (response OAuthInterfacePostAuthorize400JSONResponse) VisitOAuthInterfacePostAuthorizeResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(400)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostAuthorize401JSONResponse struct {
-	Error            string  `json:"error"`
-	ErrorDescription string  `json:"error_description"`
-	State            *string `json:"state,omitempty"`
+type OAuthInterfacePostAuthorize401JSONResponse struct {
+	Error            OAuthAuthorizeErr `json:"error"`
+	ErrorDescription string            `json:"error_description"`
+	State            *string           `json:"state,omitempty"`
 }
 
-func (response PostAuthorize401JSONResponse) VisitPostAuthorizeResponse(w http.ResponseWriter) error {
+func (response OAuthInterfacePostAuthorize401JSONResponse) VisitOAuthInterfacePostAuthorizeResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(401)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type MeRequestObject struct {
+type OAuthInterfaceGetTokenRequestObject struct {
+	Body *OAuthInterfaceGetTokenJSONRequestBody
 }
 
-type MeResponseObject interface {
-	VisitMeResponse(w http.ResponseWriter) error
+type OAuthInterfaceGetTokenResponseObject interface {
+	VisitOAuthInterfaceGetTokenResponse(w http.ResponseWriter) error
 }
 
-type Me200JSONResponse struct {
-	User User `json:"user"`
+type OAuthInterfaceGetToken200JSONResponse struct {
+	Token string `json:"token"`
 }
 
-func (response Me200JSONResponse) VisitMeResponse(w http.ResponseWriter) error {
+func (response OAuthInterfaceGetToken200JSONResponse) VisitOAuthInterfaceGetTokenResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type LogoutRequestObject struct {
-}
-
-type LogoutResponseObject interface {
-	VisitLogoutResponse(w http.ResponseWriter) error
-}
-
-type Logout204Response struct {
-}
-
-func (response Logout204Response) VisitLogoutResponse(w http.ResponseWriter) error {
-	w.WriteHeader(204)
-	return nil
-}
-
-type Logout400JSONResponse struct {
-	Error            string `json:"error"`
+type OAuthInterfaceGetToken400JSONResponse struct {
+	Error            int32  `json:"error"`
 	ErrorDescription string `json:"error_description"`
 }
 
-func (response Logout400JSONResponse) VisitLogoutResponse(w http.ResponseWriter) error {
+func (response OAuthInterfaceGetToken400JSONResponse) VisitOAuthInterfaceGetTokenResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(400)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type LoginRequestObject struct {
-	Body *LoginJSONRequestBody
+type SessionInterfaceLogoutRequestObject struct {
 }
 
-type LoginResponseObject interface {
-	VisitLoginResponse(w http.ResponseWriter) error
+type SessionInterfaceLogoutResponseObject interface {
+	VisitSessionInterfaceLogoutResponse(w http.ResponseWriter) error
 }
 
-type Login204Response struct {
+type SessionInterfaceLogout204Response struct {
 }
 
-func (response Login204Response) VisitLoginResponse(w http.ResponseWriter) error {
+func (response SessionInterfaceLogout204Response) VisitSessionInterfaceLogoutResponse(w http.ResponseWriter) error {
 	w.WriteHeader(204)
 	return nil
 }
 
-type Login400JSONResponse struct {
-	Error            string `json:"error"`
-	ErrorDescription string `json:"error_description"`
+type SessionInterfaceLogout400JSONResponse struct {
+	Error            SessionLogoutErr `json:"error"`
+	ErrorDescription string           `json:"error_description"`
 }
 
-func (response Login400JSONResponse) VisitLoginResponse(w http.ResponseWriter) error {
+func (response SessionInterfaceLogout400JSONResponse) VisitSessionInterfaceLogoutResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type SessionInterfaceMeRequestObject struct {
+}
+
+type SessionInterfaceMeResponseObject interface {
+	VisitSessionInterfaceMeResponse(w http.ResponseWriter) error
+}
+
+type SessionInterfaceMe200JSONResponse SessionMeRes
+
+func (response SessionInterfaceMe200JSONResponse) VisitSessionInterfaceMeResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type SessionInterfaceLoginRequestObject struct {
+	Body *SessionInterfaceLoginJSONRequestBody
+}
+
+type SessionInterfaceLoginResponseObject interface {
+	VisitSessionInterfaceLoginResponse(w http.ResponseWriter) error
+}
+
+type SessionInterfaceLogin204Response struct {
+}
+
+func (response SessionInterfaceLogin204Response) VisitSessionInterfaceLoginResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type SessionInterfaceLogin400JSONResponse struct {
+	Error            SessionLoginErr `json:"error"`
+	ErrorDescription string          `json:"error_description"`
+}
+
+func (response SessionInterfaceLogin400JSONResponse) VisitSessionInterfaceLoginResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(400)
 
@@ -727,37 +768,6 @@ func (response Signup400JSONResponse) VisitSignupResponse(w http.ResponseWriter)
 	return json.NewEncoder(w).Encode(response)
 }
 
-type TokenGetTokenRequestObject struct {
-	Body *TokenGetTokenJSONRequestBody
-}
-
-type TokenGetTokenResponseObject interface {
-	VisitTokenGetTokenResponse(w http.ResponseWriter) error
-}
-
-type TokenGetToken200JSONResponse struct {
-	Token string `json:"token"`
-}
-
-func (response TokenGetToken200JSONResponse) VisitTokenGetTokenResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type TokenGetToken400JSONResponse struct {
-	Error            int32  `json:"error"`
-	ErrorDescription string `json:"error_description"`
-}
-
-func (response TokenGetToken400JSONResponse) VisitTokenGetTokenResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
 	// Approve a auth request
@@ -776,26 +786,26 @@ type StrictServerInterface interface {
 	// (POST /account/clients/:id/{id})
 	ClientInterfaceUpdateClient(ctx context.Context, request ClientInterfaceUpdateClientRequestObject) (ClientInterfaceUpdateClientResponseObject, error)
 	// Authorization Request
-	// (GET /authorize)
-	Authorize(ctx context.Context, request AuthorizeRequestObject) (AuthorizeResponseObject, error)
+	// (GET /oauth/authorize)
+	OAuthInterfaceAuthorize(ctx context.Context, request OAuthInterfaceAuthorizeRequestObject) (OAuthInterfaceAuthorizeResponseObject, error)
 	// Authorization Request
-	// (POST /authorize)
-	PostAuthorize(ctx context.Context, request PostAuthorizeRequestObject) (PostAuthorizeResponseObject, error)
-	// Get me
-	// (GET /me)
-	Me(ctx context.Context, request MeRequestObject) (MeResponseObject, error)
+	// (POST /oauth/authorize)
+	OAuthInterfacePostAuthorize(ctx context.Context, request OAuthInterfacePostAuthorizeRequestObject) (OAuthInterfacePostAuthorizeResponseObject, error)
+	// Get a token
+	// (POST /oauth/token)
+	OAuthInterfaceGetToken(ctx context.Context, request OAuthInterfaceGetTokenRequestObject) (OAuthInterfaceGetTokenResponseObject, error)
 	// Logout
-	// (DELETE /session)
-	Logout(ctx context.Context, request LogoutRequestObject) (LogoutResponseObject, error)
+	// (DELETE /session/)
+	SessionInterfaceLogout(ctx context.Context, request SessionInterfaceLogoutRequestObject) (SessionInterfaceLogoutResponseObject, error)
+	// Get session
+	// (GET /session/)
+	SessionInterfaceMe(ctx context.Context, request SessionInterfaceMeRequestObject) (SessionInterfaceMeResponseObject, error)
 	// Login
-	// (POST /session)
-	Login(ctx context.Context, request LoginRequestObject) (LoginResponseObject, error)
+	// (POST /session/)
+	SessionInterfaceLogin(ctx context.Context, request SessionInterfaceLoginRequestObject) (SessionInterfaceLoginResponseObject, error)
 	// Signup
 	// (POST /signup)
 	Signup(ctx context.Context, request SignupRequestObject) (SignupResponseObject, error)
-	// Get a token
-	// (POST /token/)
-	TokenGetToken(ctx context.Context, request TokenGetTokenRequestObject) (TokenGetTokenResponseObject, error)
 }
 
 type StrictHandlerFunc = strictecho.StrictEchoHandlerFunc
@@ -949,34 +959,34 @@ func (sh *strictHandler) ClientInterfaceUpdateClient(ctx echo.Context, id int64)
 	return nil
 }
 
-// Authorize operation middleware
-func (sh *strictHandler) Authorize(ctx echo.Context, params AuthorizeParams) error {
-	var request AuthorizeRequestObject
+// OAuthInterfaceAuthorize operation middleware
+func (sh *strictHandler) OAuthInterfaceAuthorize(ctx echo.Context, params OAuthInterfaceAuthorizeParams) error {
+	var request OAuthInterfaceAuthorizeRequestObject
 
 	request.Params = params
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.Authorize(ctx.Request().Context(), request.(AuthorizeRequestObject))
+		return sh.ssi.OAuthInterfaceAuthorize(ctx.Request().Context(), request.(OAuthInterfaceAuthorizeRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "Authorize")
+		handler = middleware(handler, "OAuthInterfaceAuthorize")
 	}
 
 	response, err := handler(ctx, request)
 
 	if err != nil {
 		return err
-	} else if validResponse, ok := response.(AuthorizeResponseObject); ok {
-		return validResponse.VisitAuthorizeResponse(ctx.Response())
+	} else if validResponse, ok := response.(OAuthInterfaceAuthorizeResponseObject); ok {
+		return validResponse.VisitOAuthInterfaceAuthorizeResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
 	return nil
 }
 
-// PostAuthorize operation middleware
-func (sh *strictHandler) PostAuthorize(ctx echo.Context) error {
-	var request PostAuthorizeRequestObject
+// OAuthInterfacePostAuthorize operation middleware
+func (sh *strictHandler) OAuthInterfacePostAuthorize(ctx echo.Context) error {
+	var request OAuthInterfacePostAuthorizeRequestObject
 
 	if reader, err := ctx.Request().MultipartReader(); err != nil {
 		return err
@@ -985,93 +995,122 @@ func (sh *strictHandler) PostAuthorize(ctx echo.Context) error {
 	}
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.PostAuthorize(ctx.Request().Context(), request.(PostAuthorizeRequestObject))
+		return sh.ssi.OAuthInterfacePostAuthorize(ctx.Request().Context(), request.(OAuthInterfacePostAuthorizeRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "PostAuthorize")
+		handler = middleware(handler, "OAuthInterfacePostAuthorize")
 	}
 
 	response, err := handler(ctx, request)
 
 	if err != nil {
 		return err
-	} else if validResponse, ok := response.(PostAuthorizeResponseObject); ok {
-		return validResponse.VisitPostAuthorizeResponse(ctx.Response())
+	} else if validResponse, ok := response.(OAuthInterfacePostAuthorizeResponseObject); ok {
+		return validResponse.VisitOAuthInterfacePostAuthorizeResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
 	return nil
 }
 
-// Me operation middleware
-func (sh *strictHandler) Me(ctx echo.Context) error {
-	var request MeRequestObject
+// OAuthInterfaceGetToken operation middleware
+func (sh *strictHandler) OAuthInterfaceGetToken(ctx echo.Context) error {
+	var request OAuthInterfaceGetTokenRequestObject
 
-	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.Me(ctx.Request().Context(), request.(MeRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "Me")
-	}
-
-	response, err := handler(ctx, request)
-
-	if err != nil {
-		return err
-	} else if validResponse, ok := response.(MeResponseObject); ok {
-		return validResponse.VisitMeResponse(ctx.Response())
-	} else if response != nil {
-		return fmt.Errorf("unexpected response type: %T", response)
-	}
-	return nil
-}
-
-// Logout operation middleware
-func (sh *strictHandler) Logout(ctx echo.Context) error {
-	var request LogoutRequestObject
-
-	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.Logout(ctx.Request().Context(), request.(LogoutRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "Logout")
-	}
-
-	response, err := handler(ctx, request)
-
-	if err != nil {
-		return err
-	} else if validResponse, ok := response.(LogoutResponseObject); ok {
-		return validResponse.VisitLogoutResponse(ctx.Response())
-	} else if response != nil {
-		return fmt.Errorf("unexpected response type: %T", response)
-	}
-	return nil
-}
-
-// Login operation middleware
-func (sh *strictHandler) Login(ctx echo.Context) error {
-	var request LoginRequestObject
-
-	var body LoginJSONRequestBody
+	var body OAuthInterfaceGetTokenJSONRequestBody
 	if err := ctx.Bind(&body); err != nil {
 		return err
 	}
 	request.Body = &body
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.Login(ctx.Request().Context(), request.(LoginRequestObject))
+		return sh.ssi.OAuthInterfaceGetToken(ctx.Request().Context(), request.(OAuthInterfaceGetTokenRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "Login")
+		handler = middleware(handler, "OAuthInterfaceGetToken")
 	}
 
 	response, err := handler(ctx, request)
 
 	if err != nil {
 		return err
-	} else if validResponse, ok := response.(LoginResponseObject); ok {
-		return validResponse.VisitLoginResponse(ctx.Response())
+	} else if validResponse, ok := response.(OAuthInterfaceGetTokenResponseObject); ok {
+		return validResponse.VisitOAuthInterfaceGetTokenResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// SessionInterfaceLogout operation middleware
+func (sh *strictHandler) SessionInterfaceLogout(ctx echo.Context) error {
+	var request SessionInterfaceLogoutRequestObject
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.SessionInterfaceLogout(ctx.Request().Context(), request.(SessionInterfaceLogoutRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "SessionInterfaceLogout")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(SessionInterfaceLogoutResponseObject); ok {
+		return validResponse.VisitSessionInterfaceLogoutResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// SessionInterfaceMe operation middleware
+func (sh *strictHandler) SessionInterfaceMe(ctx echo.Context) error {
+	var request SessionInterfaceMeRequestObject
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.SessionInterfaceMe(ctx.Request().Context(), request.(SessionInterfaceMeRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "SessionInterfaceMe")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(SessionInterfaceMeResponseObject); ok {
+		return validResponse.VisitSessionInterfaceMeResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// SessionInterfaceLogin operation middleware
+func (sh *strictHandler) SessionInterfaceLogin(ctx echo.Context) error {
+	var request SessionInterfaceLoginRequestObject
+
+	var body SessionInterfaceLoginJSONRequestBody
+	if err := ctx.Bind(&body); err != nil {
+		return err
+	}
+	request.Body = &body
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.SessionInterfaceLogin(ctx.Request().Context(), request.(SessionInterfaceLoginRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "SessionInterfaceLogin")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(SessionInterfaceLoginResponseObject); ok {
+		return validResponse.VisitSessionInterfaceLoginResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
@@ -1101,35 +1140,6 @@ func (sh *strictHandler) Signup(ctx echo.Context) error {
 		return err
 	} else if validResponse, ok := response.(SignupResponseObject); ok {
 		return validResponse.VisitSignupResponse(ctx.Response())
-	} else if response != nil {
-		return fmt.Errorf("unexpected response type: %T", response)
-	}
-	return nil
-}
-
-// TokenGetToken operation middleware
-func (sh *strictHandler) TokenGetToken(ctx echo.Context) error {
-	var request TokenGetTokenRequestObject
-
-	var body TokenGetTokenJSONRequestBody
-	if err := ctx.Bind(&body); err != nil {
-		return err
-	}
-	request.Body = &body
-
-	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.TokenGetToken(ctx.Request().Context(), request.(TokenGetTokenRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "TokenGetToken")
-	}
-
-	response, err := handler(ctx, request)
-
-	if err != nil {
-		return err
-	} else if validResponse, ok := response.(TokenGetTokenResponseObject); ok {
-		return validResponse.VisitTokenGetTokenResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}

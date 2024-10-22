@@ -2,17 +2,17 @@ package api
 
 import "context"
 
-// PostAuthorize implements StrictServerInterface.
-func (s *Server) PostAuthorize(ctx context.Context, request PostAuthorizeRequestObject) (PostAuthorizeResponseObject, error) {
+// OAuthInterfaceAuthorize implements StrictServerInterface.
+func (s *Server) OAuthInterfaceAuthorize(ctx context.Context, request OAuthInterfaceAuthorizeRequestObject) (OAuthInterfaceAuthorizeResponseObject, error) {
 	panic("unimplemented")
 }
 
-// TokenGetToken implements StrictServerInterface.
-func (s *Server) TokenGetToken(ctx context.Context, request TokenGetTokenRequestObject) (TokenGetTokenResponseObject, error) {
+// OAuthInterfaceGetToken implements StrictServerInterface.
+func (s *Server) OAuthInterfaceGetToken(ctx context.Context, request OAuthInterfaceGetTokenRequestObject) (OAuthInterfaceGetTokenResponseObject, error) {
 	panic("unimplemented")
 }
 
-// Authorize implements StrictServerInterface.
-func (s *Server) Authorize(ctx context.Context, request AuthorizeRequestObject) (AuthorizeResponseObject, error) {
+// OAuthInterfacePostAuthorize implements StrictServerInterface.
+func (s *Server) OAuthInterfacePostAuthorize(ctx context.Context, request OAuthInterfacePostAuthorizeRequestObject) (OAuthInterfacePostAuthorizeResponseObject, error) {
 	panic("unimplemented")
 }
