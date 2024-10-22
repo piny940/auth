@@ -1,7 +1,9 @@
 'use client'
+import { useUser } from '@/context/user'
 import { client } from '@/utils/client'
 import { Box, Button, TextField, Typography } from '@mui/material'
 import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 
@@ -10,7 +12,13 @@ type SignupInput = {
   password: string
   passwordConfirmation: string
 }
-export const SignupForm = (): JSX.Element => {
+export type SignupFormProps = {
+  next: string
+}
+export const SignupForm = ({ next }: SignupFormProps): JSX.Element => {
+  const { refresh } = useUser()
+  const router = useRouter()
+  const query = useSearchParams()
   const { control, handleSubmit, setError } = useForm<SignupInput>({
     defaultValues: { name: '', password: '' },
   })
@@ -40,8 +48,10 @@ export const SignupForm = (): JSX.Element => {
         }
         return
       }
+      refresh()
+      router.push(next)
     },
-    [setError]
+    [setError, refresh, router, next]
   )
   return (
     <Box
@@ -102,7 +112,7 @@ export const SignupForm = (): JSX.Element => {
           )}
         />
       </Box>
-      <Link href="/">
+      <Link href={`/?${query.toString()}`}>
         <Typography component="span" color="primary">
           すでにアカウントをお持ちの方はこちら
         </Typography>

@@ -5,18 +5,26 @@ import { Box, Button, TextField, Typography } from '@mui/material'
 import { useCallback } from 'react'
 import { client } from '@/utils/client'
 import Link from 'next/link'
+import { useUser } from '@/context/user'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 type LoginInput = {
   name: string
   password: string
 }
-export const LoginForm = (): JSX.Element => {
+type LoginFormProps = {
+  next: string
+}
+export const LoginForm = ({ next }: LoginFormProps): JSX.Element => {
+  const { refresh } = useUser()
+  const router = useRouter()
+  const query = useSearchParams()
   const { control, handleSubmit, setError } = useForm<LoginInput>({
     defaultValues: { name: '', password: '' },
   })
   const submit = useCallback(
     async (data: LoginInput) => {
-      const { error } = await client.POST('/login', {
+      const { error } = await client.POST('/session', {
         body: { name: data.name, password: data.password },
       })
       if (!!error) {
@@ -24,8 +32,10 @@ export const LoginForm = (): JSX.Element => {
         setError('password', { message: error.error_description })
         return
       }
+      refresh()
+      router.push(next)
     },
-    [setError]
+    [setError, refresh, router, next]
   )
 
   return (
@@ -69,7 +79,7 @@ export const LoginForm = (): JSX.Element => {
           )}
         />
       </Box>
-      <Link href="/signup">
+      <Link href={`/signup?${query.toString()}`}>
         <Typography component="span" color="primary">
           新規アカウント登録
         </Typography>

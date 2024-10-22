@@ -1,0 +1,50 @@
+version: "3"
+
+tasks:
+  generate:
+    desc: "Generate codes"
+    cmds:
+      - task create-migration
+      - cd spec && pnpm compile
+      - go generate ./...
+      - cd frontend && pnpm codegen
+
+  create-migration:
+    cmds:
+      - cd atlas && atlas migrate diff --env local
+
+  migrate:
+    desc: "Migrate database"
+    cmds:
+      - cd atlas && atlas migrate apply --env local
+
+  dev:
+    desc: "Run development server"
+    deps:
+      - task: dev:backend
+      - task: dev:frontend
+      - task: dev:spec
+
+  dev:backend:
+    desc: "Run development server for backend"
+    cmds:
+      - go run cmd/main.go
+
+  dev:frontend:
+    desc: "Run development server for frontend"
+    cmds:
+      - cd frontend && pnpm dev
+
+  dev:spec:
+    desc: "Run development server for spec"
+    deps:
+      - task: dev:spec:dev
+      - task: dev:spec:doc
+  dev:spec:dev:
+    desc: "Watch compile for spec"
+    cmds:
+      - cd spec && pnpm dev
+  dev:spec:doc:
+    desc: "API doc server for spec"
+    cmds:
+      - cd spec && pnpm doc

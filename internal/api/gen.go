@@ -120,12 +120,15 @@ type ServerInterface interface {
 	// Authorization Request
 	// (POST /authorize)
 	PostAuthorize(ctx echo.Context) error
-	// Login
-	// (POST /login)
-	Login(ctx echo.Context) error
 	// Get me
 	// (GET /me)
 	Me(ctx echo.Context) error
+	// Logout
+	// (DELETE /session)
+	Logout(ctx echo.Context) error
+	// Login
+	// (POST /session)
+	Login(ctx echo.Context) error
 	// Signup
 	// (POST /signup)
 	Signup(ctx echo.Context) error
@@ -266,21 +269,30 @@ func (w *ServerInterfaceWrapper) PostAuthorize(ctx echo.Context) error {
 	return err
 }
 
-// Login converts echo context to params.
-func (w *ServerInterfaceWrapper) Login(ctx echo.Context) error {
-	var err error
-
-	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.Login(ctx)
-	return err
-}
-
 // Me converts echo context to params.
 func (w *ServerInterfaceWrapper) Me(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.Me(ctx)
+	return err
+}
+
+// Logout converts echo context to params.
+func (w *ServerInterfaceWrapper) Logout(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.Logout(ctx)
+	return err
+}
+
+// Login converts echo context to params.
+func (w *ServerInterfaceWrapper) Login(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.Login(ctx)
 	return err
 }
 
@@ -336,8 +348,9 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.POST(baseURL+"/account/clients/:id/:id", wrapper.ClientsUpdateClient)
 	router.GET(baseURL+"/authorize", wrapper.Authorize)
 	router.POST(baseURL+"/authorize", wrapper.PostAuthorize)
-	router.POST(baseURL+"/login", wrapper.Login)
 	router.GET(baseURL+"/me", wrapper.Me)
+	router.DELETE(baseURL+"/session", wrapper.Logout)
+	router.POST(baseURL+"/session", wrapper.Login)
 	router.POST(baseURL+"/signup", wrapper.Signup)
 	router.POST(baseURL+"/token/", wrapper.TokenGetToken)
 

@@ -1,7 +1,13 @@
 import { SignupForm } from '@/components/SignupForm'
 import { Container, Typography } from '@mui/material'
 
-export default function Page() {
+type Props = {
+  searchParams: {
+    next?: string
+  }
+}
+
+export default function Page({ searchParams: query }: Props) {
   return (
     <Container component="main" sx={{ pt: 4, pb: 6 }}>
       <Typography
@@ -13,7 +19,7 @@ export default function Page() {
       >
         ユーザー登録
       </Typography>
-      <SignupForm />
+      <SignupForm next={query.next || '/'} />
     </Container>
   )
 }

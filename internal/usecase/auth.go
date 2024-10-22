@@ -42,19 +42,23 @@ func (u *AuthUsecase) Login(username, password string) (*domain.User, error) {
 	return user, nil
 }
 
-func (u *AuthUsecase) SignUp(username, password, passwordConfirmation string) error {
+func (u *AuthUsecase) SignUp(username, password, passwordConfirmation string) (*domain.User, error) {
 	if err := u.UserService.Validate(username, password, passwordConfirmation); err != nil {
-		return err
+		return nil, err
 	}
 	hash, err := domain.EncryptPassword(password)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	err = u.UserRepo.Create(username, hash)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	user, err := u.UserRepo.FindByName(username)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }
 
 func (u *AuthUsecase) Request(user *domain.User, req *oauth.AuthRequest) error {

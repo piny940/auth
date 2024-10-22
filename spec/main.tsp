@@ -77,7 +77,7 @@ namespace Token {
   };
 }
 
-@route("/login")
+@route("/session")
 @post
 @summary("Login")
 op login(@body body: ReqLogin): {
@@ -85,6 +85,16 @@ op login(@body body: ReqLogin): {
 } | {
   @statusCode statusCode: 400;
   error: "invalid_name_or_password";
+  error_description: string;
+};
+@route("/session")
+@delete
+@summary("Logout")
+op logout(): {
+  @statusCode statusCode: 204;
+} | {
+  @statusCode statusCode: 400;
+  error: "not_logged_in";
   error_description: string;
 };
 

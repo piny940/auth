@@ -40,6 +40,9 @@ const SESSION_USER_KEY = "user"
 func Login(r *http.Request, w http.ResponseWriter, user *domain.User) error {
 	return setToSession(r, w, SESSION_USER_KEY, user)
 }
+func Logout(r *http.Request, w http.ResponseWriter) error {
+	return setToSession(r, w, SESSION_USER_KEY, nil)
+}
 func CurrentUser(r *http.Request) (*domain.User, error) {
 	user, err := getFromSession(r, SESSION_USER_KEY)
 	if err != nil {
