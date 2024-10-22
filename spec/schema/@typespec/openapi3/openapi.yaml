@@ -24,9 +24,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Approvals.ApproveReq'
-  /account/clients/:
+  /account/clients:
     get:
-      operationId: ClientInterface_listClients
+      operationId: AccountClients_listClients
       summary: Get all clients
       parameters:
         - name: cookie
@@ -49,7 +49,7 @@ paths:
                 required:
                   - clients
     post:
-      operationId: ClientInterface_createClient
+      operationId: AccountClients_createClient
       summary: Create a new client
       parameters: []
       responses:
@@ -86,9 +86,9 @@ paths:
                   $ref: '#/components/schemas/ClientCreate'
               required:
                 - client
-  /account/clients/:id/{id}:
+  /account/clients:id/{id}:
     post:
-      operationId: ClientInterface_updateClient
+      operationId: AccountClients_updateClient
       summary: Update a client
       parameters:
         - name: id
@@ -132,7 +132,7 @@ paths:
               required:
                 - client
     delete:
-      operationId: ClientInterface_deleteClient
+      operationId: AccountClients_deleteClient
       summary: Delete a client
       parameters:
         - name: id
@@ -155,6 +155,42 @@ paths:
                     type: string
                 required:
                   - error
+  /clients:id/{id}:
+    get:
+      operationId: ClientsInterface_getClient
+      summary: Get a client
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  client:
+                    $ref: '#/components/schemas/Client'
+                required:
+                  - client
+        '400':
+          description: The server could not understand the request due to invalid syntax.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: '#/components/schemas/Clients.GetClientErr'
+                  error_description:
+                    type: string
+                required:
+                  - error
+                  - error_description
   /oauth/authorize:
     get:
       operationId: OAuthInterface_authorize
@@ -441,6 +477,10 @@ components:
           type: array
           items:
             type: string
+    Clients.GetClientErr:
+      type: string
+      enum:
+        - client_not_found
     OAuth.AuthorizeErr:
       type: string
       enum:

@@ -8,6 +8,7 @@ import "./clients.tsp";
 import "./oauth.tsp";
 import "./session.tsp";
 import "./users.tsp";
+import "./account/clients.tsp";
 
 using TypeSpec.Http;
 @service({
