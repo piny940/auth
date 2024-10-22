@@ -96,14 +96,14 @@ table "approvals" {
   column "user_id" {
     type = bigint
   }
-  column "scopes" {
-    type = sql("int[]")
-  }
   column "created_at" {
     type = timestamptz
   }
   column "updated_at" {
     type = timestamptz
+  }
+  primary_key {
+    columns = [column.id]
   }
   foreign_key "client_id" {
     columns = [column.client_id]
@@ -120,5 +120,26 @@ table "approvals" {
   index "user_id_client_id" {
     columns = [column.user_id, column.client_id]
     unique = true
+  }
+}
+table "approval_scopes" {
+  schema = schema.public
+  column "id" {
+    type = int
+  }
+  column "approval_id" {
+    type = bigint
+  }
+  primary_key {
+    columns = [column.id]
+  }
+  foreign_key "approval_id" {
+    columns = [column.approval_id]
+    ref_columns = [table.approvals.column.id]
+    on_update = NO_ACTION
+    on_delete = CASCADE
+  }
+  index "approval_id" {
+    columns = [column.approval_id]
   }
 }
