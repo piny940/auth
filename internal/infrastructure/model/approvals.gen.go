@@ -12,10 +12,9 @@ const TableNameApproval = "approvals"
 
 // Approval mapped from table <approvals>
 type Approval struct {
-	ID        int64     `gorm:"column:id;not null" json:"id"`
+	ID        int64     `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
 	ClientID  string    `gorm:"column:client_id;not null" json:"client_id"`
 	UserID    int64     `gorm:"column:user_id;not null" json:"user_id"`
-	Scopes_   string    `gorm:"column:scopes;not null" json:"scopes"`
 	CreatedAt time.Time `gorm:"column:created_at;not null" json:"created_at"`
 	UpdatedAt time.Time `gorm:"column:updated_at;not null" json:"updated_at"`
 }

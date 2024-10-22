@@ -30,7 +30,6 @@ func newApproval(db *gorm.DB, opts ...gen.DOOption) approval {
 	_approval.ID = field.NewInt64(tableName, "id")
 	_approval.ClientID = field.NewString(tableName, "client_id")
 	_approval.UserID = field.NewInt64(tableName, "user_id")
-	_approval.Scopes_ = field.NewString(tableName, "scopes")
 	_approval.CreatedAt = field.NewTime(tableName, "created_at")
 	_approval.UpdatedAt = field.NewTime(tableName, "updated_at")
 
@@ -46,7 +45,6 @@ type approval struct {
 	ID        field.Int64
 	ClientID  field.String
 	UserID    field.Int64
-	Scopes_   field.String
 	CreatedAt field.Time
 	UpdatedAt field.Time
 
@@ -68,7 +66,6 @@ func (a *approval) updateTableName(table string) *approval {
 	a.ID = field.NewInt64(table, "id")
 	a.ClientID = field.NewString(table, "client_id")
 	a.UserID = field.NewInt64(table, "user_id")
-	a.Scopes_ = field.NewString(table, "scopes")
 	a.CreatedAt = field.NewTime(table, "created_at")
 	a.UpdatedAt = field.NewTime(table, "updated_at")
 
@@ -87,11 +84,10 @@ func (a *approval) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (a *approval) fillFieldMap() {
-	a.fieldMap = make(map[string]field.Expr, 6)
+	a.fieldMap = make(map[string]field.Expr, 5)
 	a.fieldMap["id"] = a.ID
 	a.fieldMap["client_id"] = a.ClientID
 	a.fieldMap["user_id"] = a.UserID
-	a.fieldMap["scopes"] = a.Scopes_
 	a.fieldMap["created_at"] = a.CreatedAt
 	a.fieldMap["updated_at"] = a.UpdatedAt
 }
