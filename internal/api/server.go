@@ -140,6 +140,11 @@ func (s *Server) Me(ctx echo.Context) error {
 	if err != nil {
 		return err
 	}
+	if user == nil {
+		return ctx.JSON(http.StatusOK, echo.Map{
+			"user": nil,
+		})
+	}
 	return ctx.JSON(http.StatusOK, echo.Map{
 		"user": echo.Map{
 			"id":   user.ID,
