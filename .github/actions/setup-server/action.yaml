@@ -10,6 +10,7 @@ runs:
   using: composite
   steps:
     - name: Copy .env.sample
+      shell: bash
       run: cp .env.sample .env.test && cp .env.sample .env
     - uses: actions/cache@v3.3.1
       with:
