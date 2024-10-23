@@ -32,6 +32,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Approvals.ApproveReq'
+      security:
+        - ApiKeyAuth: []
   /account/clients:
     get:
       operationId: AccountClients_listClients
@@ -586,7 +588,7 @@ components:
     ApiKeyAuth:
       type: apiKey
       in: cookie
-      name: AUTH
+      name: auth
 servers:
   - url: https://auth.piny940.com/api/v1
     description: Auth Server

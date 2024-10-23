@@ -25,7 +25,7 @@ interface SessionInterface {
   @route("")
   @get
   @summary("Get session")
-  @useAuth(ApiKeyAuth<ApiKeyLocation.cookie, "AUTH">)
+  @useAuth(ApiKeyAuth<ApiKeyLocation.cookie, "auth">)
   me(): {
     @statusCode statusCode: 200;
     @body body: MeRes;
@@ -46,7 +46,7 @@ interface SessionInterface {
   @route("")
   @delete
   @summary("Logout")
-  @useAuth(ApiKeyAuth<ApiKeyLocation.cookie, "AUTH">)
+  @useAuth(ApiKeyAuth<ApiKeyLocation.cookie, "auth">)
   logout(): {
     @statusCode statusCode: 204;
     @header setCookie: string;
