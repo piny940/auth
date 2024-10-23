@@ -29,4 +29,4 @@ runs:
     - uses: ariga/atlas-action/migrate/apply@v1
       with:
         dir: file://atlas/migrations
-        url: postgres://postgres:postgres@localhost:5432/test
+        url: postgres://postgres:postgres@localhost:5432/test?sslmode=disable
