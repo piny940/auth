@@ -4,16 +4,80 @@
 package api
 
 import (
+	"bytes"
+	"compress/gzip"
+	"context"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
+	"mime/multipart"
 	"net/http"
+	"net/url"
+	"path"
+	"strings"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/labstack/echo/v4"
 	"github.com/oapi-codegen/runtime"
+	strictecho "github.com/oapi-codegen/runtime/strictmiddleware/echo"
 )
+
+const (
+	ApiKeyAuthScopes = "ApiKeyAuth.Scopes"
+)
+
+// Defines values for ApprovalsApproveErr.
+const (
+	ApprovalsApproveErrInvalidClient ApprovalsApproveErr = "invalid_client"
+	ApprovalsApproveErrInvalidScope  ApprovalsApproveErr = "invalid_scope"
+)
+
+// Defines values for ClientsGetClientErr.
+const (
+	ClientNotFound ClientsGetClientErr = "client_not_found"
+)
+
+// Defines values for OAuthAuthorizeErr.
+const (
+	OAuthAuthorizeErrAccessDenied            OAuthAuthorizeErr = "access_denied"
+	OAuthAuthorizeErrInvalidRequest          OAuthAuthorizeErr = "invalid_request"
+	OAuthAuthorizeErrInvalidScope            OAuthAuthorizeErr = "invalid_scope"
+	OAuthAuthorizeErrServerError             OAuthAuthorizeErr = "server_error"
+	OAuthAuthorizeErrTemporarilyUnavailable  OAuthAuthorizeErr = "temporarily_unavailable"
+	OAuthAuthorizeErrUnauthorizedClient      OAuthAuthorizeErr = "unauthorized_client"
+	OAuthAuthorizeErrUnsupportedResponseType OAuthAuthorizeErr = "unsupported_response_type"
+)
+
+// Defines values for SessionLoginErr.
+const (
+	InvalidNameOrPassword SessionLoginErr = "invalid_name_or_password"
+)
+
+// Defines values for SessionLogoutErr.
+const (
+	NotLoggedIn SessionLogoutErr = "not_logged_in"
+)
+
+// Defines values for UsersSignupErr.
+const (
+	NameAlreadyUsed              UsersSignupErr = "name_already_used"
+	NameLengthNotEnough          UsersSignupErr = "name_length_not_enough"
+	PasswordConfirmationNotMatch UsersSignupErr = "password_confirmation_not_match"
+	PasswordLengthNotEnough      UsersSignupErr = "password_length_not_enough"
+)
+
+// ApprovalsApproveErr defines model for Approvals.ApproveErr.
+type ApprovalsApproveErr string
+
+// ApprovalsApproveReq defines model for Approvals.ApproveReq.
+type ApprovalsApproveReq struct {
+	ClientId string `json:"client_id"`
+	Scope    string `json:"scope"`
+}
 
 // Client defines model for Client.
 type Client struct {
-	Id           int64    `json:"id"`
+	Id           string   `json:"id"`
 	Name         string   `json:"name"`
 	RedirectUrls []string `json:"redirect_urls"`
 }
@@ -24,10 +88,47 @@ type ClientCreate struct {
 	RedirectUrls []string `json:"redirect_urls"`
 }
 
-// ReqLogin defines model for ReqLogin.
-type ReqLogin struct {
+// ClientsGetClientErr defines model for Clients.GetClientErr.
+type ClientsGetClientErr string
+
+// ClientsGetClientRes defines model for Clients.GetClientRes.
+type ClientsGetClientRes struct {
+	Client PublicClient `json:"client"`
+}
+
+// OAuthAuthorizeErr defines model for OAuth.AuthorizeErr.
+type OAuthAuthorizeErr string
+
+// OAuthAuthorizeReqMultiPart defines model for OAuth.AuthorizeReqMultiPart.
+type OAuthAuthorizeReqMultiPart struct {
+	ClientId     string  `json:"client_id"`
+	RedirectUri  string  `json:"redirect_uri"`
+	ResponseType string  `json:"response_type"`
+	Scope        string  `json:"scope"`
+	State        *string `json:"state,omitempty"`
+}
+
+// PublicClient defines model for PublicClient.
+type PublicClient struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
+}
+
+// SessionLoginErr defines model for Session.LoginErr.
+type SessionLoginErr string
+
+// SessionLoginReq defines model for Session.LoginReq.
+type SessionLoginReq struct {
 	Name     string `json:"name"`
 	Password string `json:"password"`
+}
+
+// SessionLogoutErr defines model for Session.LogoutErr.
+type SessionLogoutErr string
+
+// SessionMeRes defines model for Session.MeRes.
+type SessionMeRes struct {
+	User *User `json:"user"`
 }
 
 // User defines model for User.
@@ -36,30 +137,33 @@ type User struct {
 	Name string `json:"name"`
 }
 
-// UserCreate defines model for UserCreate.
-type UserCreate struct {
+// UsersReqSignup defines model for Users.ReqSignup.
+type UsersReqSignup struct {
 	Name                 string `json:"name"`
 	Password             string `json:"password"`
 	PasswordConfirmation string `json:"password_confirmation"`
 }
 
-// ClientsListClientsParams defines parameters for ClientsListClients.
-type ClientsListClientsParams struct {
+// UsersSignupErr defines model for Users.SignupErr.
+type UsersSignupErr string
+
+// AccountClientsListClientsParams defines parameters for AccountClientsListClients.
+type AccountClientsListClientsParams struct {
 	Cookie string `json:"cookie"`
 }
 
-// ClientsCreateClientJSONBody defines parameters for ClientsCreateClient.
-type ClientsCreateClientJSONBody struct {
+// AccountClientsCreateClientJSONBody defines parameters for AccountClientsCreateClient.
+type AccountClientsCreateClientJSONBody struct {
 	Client ClientCreate `json:"client"`
 }
 
-// ClientsUpdateClientJSONBody defines parameters for ClientsUpdateClient.
-type ClientsUpdateClientJSONBody struct {
+// AccountClientsUpdateClientJSONBody defines parameters for AccountClientsUpdateClient.
+type AccountClientsUpdateClientJSONBody struct {
 	Client ClientCreate `json:"client"`
 }
 
-// AuthorizeParams defines parameters for Authorize.
-type AuthorizeParams struct {
+// OAuthInterfaceAuthorizeParams defines parameters for OAuthInterfaceAuthorize.
+type OAuthInterfaceAuthorizeParams struct {
 	ResponseType string  `form:"response_type" json:"response_type"`
 	ClientId     string  `form:"client_id" json:"client_id"`
 	RedirectUri  string  `form:"redirect_uri" json:"redirect_uri"`
@@ -67,74 +171,74 @@ type AuthorizeParams struct {
 	State        *string `form:"state,omitempty" json:"state,omitempty"`
 }
 
-// PostAuthorizeMultipartBody defines parameters for PostAuthorize.
-type PostAuthorizeMultipartBody struct {
-	ClientId     string  `json:"client_id"`
-	RedirectUri  string  `json:"redirect_uri"`
-	ResponseType string  `json:"response_type"`
-	Scope        string  `json:"scope"`
-	State        *string `json:"state,omitempty"`
-}
-
-// TokenGetTokenJSONBody defines parameters for TokenGetToken.
-type TokenGetTokenJSONBody struct {
+// OAuthInterfaceGetTokenJSONBody defines parameters for OAuthInterfaceGetToken.
+type OAuthInterfaceGetTokenJSONBody struct {
 	ClientId     string `json:"client_id"`
 	ClientSecret string `json:"client_secret"`
 }
 
-// ClientsCreateClientJSONRequestBody defines body for ClientsCreateClient for application/json ContentType.
-type ClientsCreateClientJSONRequestBody ClientsCreateClientJSONBody
+// ApprovalsInterfaceApproveJSONRequestBody defines body for ApprovalsInterfaceApprove for application/json ContentType.
+type ApprovalsInterfaceApproveJSONRequestBody = ApprovalsApproveReq
 
-// ClientsUpdateClientJSONRequestBody defines body for ClientsUpdateClient for application/json ContentType.
-type ClientsUpdateClientJSONRequestBody ClientsUpdateClientJSONBody
+// AccountClientsCreateClientJSONRequestBody defines body for AccountClientsCreateClient for application/json ContentType.
+type AccountClientsCreateClientJSONRequestBody AccountClientsCreateClientJSONBody
 
-// PostAuthorizeMultipartRequestBody defines body for PostAuthorize for multipart/form-data ContentType.
-type PostAuthorizeMultipartRequestBody PostAuthorizeMultipartBody
+// AccountClientsUpdateClientJSONRequestBody defines body for AccountClientsUpdateClient for application/json ContentType.
+type AccountClientsUpdateClientJSONRequestBody AccountClientsUpdateClientJSONBody
 
-// LoginJSONRequestBody defines body for Login for application/json ContentType.
-type LoginJSONRequestBody = ReqLogin
+// OAuthInterfacePostAuthorizeMultipartRequestBody defines body for OAuthInterfacePostAuthorize for multipart/form-data ContentType.
+type OAuthInterfacePostAuthorizeMultipartRequestBody = OAuthAuthorizeReqMultiPart
 
-// SignupJSONRequestBody defines body for Signup for application/json ContentType.
-type SignupJSONRequestBody = UserCreate
+// OAuthInterfaceGetTokenJSONRequestBody defines body for OAuthInterfaceGetToken for application/json ContentType.
+type OAuthInterfaceGetTokenJSONRequestBody OAuthInterfaceGetTokenJSONBody
 
-// TokenGetTokenJSONRequestBody defines body for TokenGetToken for application/json ContentType.
-type TokenGetTokenJSONRequestBody TokenGetTokenJSONBody
+// SessionInterfaceLoginJSONRequestBody defines body for SessionInterfaceLogin for application/json ContentType.
+type SessionInterfaceLoginJSONRequestBody = SessionLoginReq
+
+// UsersInterfaceSignupJSONRequestBody defines body for UsersInterfaceSignup for application/json ContentType.
+type UsersInterfaceSignupJSONRequestBody = UsersReqSignup
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// Approve a auth request
+	// (POST /account/approvals)
+	ApprovalsInterfaceApprove(ctx echo.Context) error
 	// Get all clients
-	// (GET /account/clients/)
-	ClientsListClients(ctx echo.Context, params ClientsListClientsParams) error
+	// (GET /account/clients)
+	AccountClientsListClients(ctx echo.Context, params AccountClientsListClientsParams) error
 	// Create a new client
-	// (POST /account/clients/)
-	ClientsCreateClient(ctx echo.Context) error
+	// (POST /account/clients)
+	AccountClientsCreateClient(ctx echo.Context) error
 	// Delete a client
-	// (DELETE /account/clients/:id/{id})
-	ClientsDeleteClient(ctx echo.Context, id int64) error
+	// (DELETE /account/clients:id/{id})
+	AccountClientsDeleteClient(ctx echo.Context, id int64) error
 	// Update a client
-	// (POST /account/clients/:id/{id})
-	ClientsUpdateClient(ctx echo.Context, id int64) error
+	// (POST /account/clients:id/{id})
+	AccountClientsUpdateClient(ctx echo.Context, id int64) error
+	// Get a client
+	// (GET /clients/{id})
+	ClientsInterfaceGetClient(ctx echo.Context, id string) error
 	// Authorization Request
-	// (GET /authorize)
-	Authorize(ctx echo.Context, params AuthorizeParams) error
+	// (GET /oauth/authorize)
+	OAuthInterfaceAuthorize(ctx echo.Context, params OAuthInterfaceAuthorizeParams) error
 	// Authorization Request
-	// (POST /authorize)
-	PostAuthorize(ctx echo.Context) error
-	// Get me
-	// (GET /me)
-	Me(ctx echo.Context) error
+	// (POST /oauth/authorize)
+	OAuthInterfacePostAuthorize(ctx echo.Context) error
+	// Get a token
+	// (POST /oauth/token)
+	OAuthInterfaceGetToken(ctx echo.Context) error
 	// Logout
 	// (DELETE /session)
-	Logout(ctx echo.Context) error
+	SessionInterfaceLogout(ctx echo.Context) error
+	// Get session
+	// (GET /session)
+	SessionInterfaceMe(ctx echo.Context) error
 	// Login
 	// (POST /session)
-	Login(ctx echo.Context) error
+	SessionInterfaceLogin(ctx echo.Context) error
 	// Signup
-	// (POST /signup)
-	Signup(ctx echo.Context) error
-	// Get a token
-	// (POST /token/)
-	TokenGetToken(ctx echo.Context) error
+	// (POST /users/signup)
+	UsersInterfaceSignup(ctx echo.Context) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -142,12 +246,21 @@ type ServerInterfaceWrapper struct {
 	Handler ServerInterface
 }
 
-// ClientsListClients converts echo context to params.
-func (w *ServerInterfaceWrapper) ClientsListClients(ctx echo.Context) error {
+// ApprovalsInterfaceApprove converts echo context to params.
+func (w *ServerInterfaceWrapper) ApprovalsInterfaceApprove(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.ApprovalsInterfaceApprove(ctx)
+	return err
+}
+
+// AccountClientsListClients converts echo context to params.
+func (w *ServerInterfaceWrapper) AccountClientsListClients(ctx echo.Context) error {
 	var err error
 
 	// Parameter object where we will unmarshal all parameters from the context
-	var params ClientsListClientsParams
+	var params AccountClientsListClientsParams
 
 	headers := ctx.Request().Header
 	// ------------- Required header parameter "cookie" -------------
@@ -169,37 +282,21 @@ func (w *ServerInterfaceWrapper) ClientsListClients(ctx echo.Context) error {
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.ClientsListClients(ctx, params)
+	err = w.Handler.AccountClientsListClients(ctx, params)
 	return err
 }
 
-// ClientsCreateClient converts echo context to params.
-func (w *ServerInterfaceWrapper) ClientsCreateClient(ctx echo.Context) error {
+// AccountClientsCreateClient converts echo context to params.
+func (w *ServerInterfaceWrapper) AccountClientsCreateClient(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.ClientsCreateClient(ctx)
+	err = w.Handler.AccountClientsCreateClient(ctx)
 	return err
 }
 
-// ClientsDeleteClient converts echo context to params.
-func (w *ServerInterfaceWrapper) ClientsDeleteClient(ctx echo.Context) error {
-	var err error
-	// ------------- Path parameter "id" -------------
-	var id int64
-
-	err = runtime.BindStyledParameterWithOptions("simple", "id", ctx.Param("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
-	}
-
-	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.ClientsDeleteClient(ctx, id)
-	return err
-}
-
-// ClientsUpdateClient converts echo context to params.
-func (w *ServerInterfaceWrapper) ClientsUpdateClient(ctx echo.Context) error {
+// AccountClientsDeleteClient converts echo context to params.
+func (w *ServerInterfaceWrapper) AccountClientsDeleteClient(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "id" -------------
 	var id int64
@@ -210,16 +307,48 @@ func (w *ServerInterfaceWrapper) ClientsUpdateClient(ctx echo.Context) error {
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.ClientsUpdateClient(ctx, id)
+	err = w.Handler.AccountClientsDeleteClient(ctx, id)
 	return err
 }
 
-// Authorize converts echo context to params.
-func (w *ServerInterfaceWrapper) Authorize(ctx echo.Context) error {
+// AccountClientsUpdateClient converts echo context to params.
+func (w *ServerInterfaceWrapper) AccountClientsUpdateClient(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", ctx.Param("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AccountClientsUpdateClient(ctx, id)
+	return err
+}
+
+// ClientsInterfaceGetClient converts echo context to params.
+func (w *ServerInterfaceWrapper) ClientsInterfaceGetClient(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", ctx.Param("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.ClientsInterfaceGetClient(ctx, id)
+	return err
+}
+
+// OAuthInterfaceAuthorize converts echo context to params.
+func (w *ServerInterfaceWrapper) OAuthInterfaceAuthorize(ctx echo.Context) error {
 	var err error
 
 	// Parameter object where we will unmarshal all parameters from the context
-	var params AuthorizeParams
+	var params OAuthInterfaceAuthorizeParams
 	// ------------- Required query parameter "response_type" -------------
 
 	err = runtime.BindQueryParameter("form", false, true, "response_type", ctx.QueryParams(), &params.ResponseType)
@@ -256,61 +385,65 @@ func (w *ServerInterfaceWrapper) Authorize(ctx echo.Context) error {
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.Authorize(ctx, params)
+	err = w.Handler.OAuthInterfaceAuthorize(ctx, params)
 	return err
 }
 
-// PostAuthorize converts echo context to params.
-func (w *ServerInterfaceWrapper) PostAuthorize(ctx echo.Context) error {
+// OAuthInterfacePostAuthorize converts echo context to params.
+func (w *ServerInterfaceWrapper) OAuthInterfacePostAuthorize(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.PostAuthorize(ctx)
+	err = w.Handler.OAuthInterfacePostAuthorize(ctx)
 	return err
 }
 
-// Me converts echo context to params.
-func (w *ServerInterfaceWrapper) Me(ctx echo.Context) error {
+// OAuthInterfaceGetToken converts echo context to params.
+func (w *ServerInterfaceWrapper) OAuthInterfaceGetToken(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.Me(ctx)
+	err = w.Handler.OAuthInterfaceGetToken(ctx)
 	return err
 }
 
-// Logout converts echo context to params.
-func (w *ServerInterfaceWrapper) Logout(ctx echo.Context) error {
+// SessionInterfaceLogout converts echo context to params.
+func (w *ServerInterfaceWrapper) SessionInterfaceLogout(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(ApiKeyAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.Logout(ctx)
+	err = w.Handler.SessionInterfaceLogout(ctx)
 	return err
 }
 
-// Login converts echo context to params.
-func (w *ServerInterfaceWrapper) Login(ctx echo.Context) error {
+// SessionInterfaceMe converts echo context to params.
+func (w *ServerInterfaceWrapper) SessionInterfaceMe(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(ApiKeyAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.Login(ctx)
+	err = w.Handler.SessionInterfaceMe(ctx)
 	return err
 }
 
-// Signup converts echo context to params.
-func (w *ServerInterfaceWrapper) Signup(ctx echo.Context) error {
+// SessionInterfaceLogin converts echo context to params.
+func (w *ServerInterfaceWrapper) SessionInterfaceLogin(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.Signup(ctx)
+	err = w.Handler.SessionInterfaceLogin(ctx)
 	return err
 }
 
-// TokenGetToken converts echo context to params.
-func (w *ServerInterfaceWrapper) TokenGetToken(ctx echo.Context) error {
+// UsersInterfaceSignup converts echo context to params.
+func (w *ServerInterfaceWrapper) UsersInterfaceSignup(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.TokenGetToken(ctx)
+	err = w.Handler.UsersInterfaceSignup(ctx)
 	return err
 }
 
@@ -342,16 +475,914 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 		Handler: si,
 	}
 
-	router.GET(baseURL+"/account/clients/", wrapper.ClientsListClients)
-	router.POST(baseURL+"/account/clients/", wrapper.ClientsCreateClient)
-	router.DELETE(baseURL+"/account/clients/:id/:id", wrapper.ClientsDeleteClient)
-	router.POST(baseURL+"/account/clients/:id/:id", wrapper.ClientsUpdateClient)
-	router.GET(baseURL+"/authorize", wrapper.Authorize)
-	router.POST(baseURL+"/authorize", wrapper.PostAuthorize)
-	router.GET(baseURL+"/me", wrapper.Me)
-	router.DELETE(baseURL+"/session", wrapper.Logout)
-	router.POST(baseURL+"/session", wrapper.Login)
-	router.POST(baseURL+"/signup", wrapper.Signup)
-	router.POST(baseURL+"/token/", wrapper.TokenGetToken)
+	router.POST(baseURL+"/account/approvals", wrapper.ApprovalsInterfaceApprove)
+	router.GET(baseURL+"/account/clients", wrapper.AccountClientsListClients)
+	router.POST(baseURL+"/account/clients", wrapper.AccountClientsCreateClient)
+	router.DELETE(baseURL+"/account/clients:id/:id", wrapper.AccountClientsDeleteClient)
+	router.POST(baseURL+"/account/clients:id/:id", wrapper.AccountClientsUpdateClient)
+	router.GET(baseURL+"/clients/:id", wrapper.ClientsInterfaceGetClient)
+	router.GET(baseURL+"/oauth/authorize", wrapper.OAuthInterfaceAuthorize)
+	router.POST(baseURL+"/oauth/authorize", wrapper.OAuthInterfacePostAuthorize)
+	router.POST(baseURL+"/oauth/token", wrapper.OAuthInterfaceGetToken)
+	router.DELETE(baseURL+"/session", wrapper.SessionInterfaceLogout)
+	router.GET(baseURL+"/session", wrapper.SessionInterfaceMe)
+	router.POST(baseURL+"/session", wrapper.SessionInterfaceLogin)
+	router.POST(baseURL+"/users/signup", wrapper.UsersInterfaceSignup)
 
+}
+
+type ApprovalsInterfaceApproveRequestObject struct {
+	Body *ApprovalsInterfaceApproveJSONRequestBody
+}
+
+type ApprovalsInterfaceApproveResponseObject interface {
+	VisitApprovalsInterfaceApproveResponse(w http.ResponseWriter) error
+}
+
+type ApprovalsInterfaceApprove204Response struct {
+}
+
+func (response ApprovalsInterfaceApprove204Response) VisitApprovalsInterfaceApproveResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type ApprovalsInterfaceApprove400JSONResponse struct {
+	Error            ApprovalsApproveErr `json:"error"`
+	ErrorDescription string              `json:"error_description"`
+}
+
+func (response ApprovalsInterfaceApprove400JSONResponse) VisitApprovalsInterfaceApproveResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AccountClientsListClientsRequestObject struct {
+	Params AccountClientsListClientsParams
+}
+
+type AccountClientsListClientsResponseObject interface {
+	VisitAccountClientsListClientsResponse(w http.ResponseWriter) error
+}
+
+type AccountClientsListClients200JSONResponse struct {
+	Clients []Client `json:"clients"`
+}
+
+func (response AccountClientsListClients200JSONResponse) VisitAccountClientsListClientsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AccountClientsCreateClientRequestObject struct {
+	Body *AccountClientsCreateClientJSONRequestBody
+}
+
+type AccountClientsCreateClientResponseObject interface {
+	VisitAccountClientsCreateClientResponse(w http.ResponseWriter) error
+}
+
+type AccountClientsCreateClient201JSONResponse struct {
+	Client Client `json:"client"`
+}
+
+func (response AccountClientsCreateClient201JSONResponse) VisitAccountClientsCreateClientResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AccountClientsCreateClient400JSONResponse struct {
+	Error string `json:"error"`
+}
+
+func (response AccountClientsCreateClient400JSONResponse) VisitAccountClientsCreateClientResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AccountClientsDeleteClientRequestObject struct {
+	Id int64 `json:"id"`
+}
+
+type AccountClientsDeleteClientResponseObject interface {
+	VisitAccountClientsDeleteClientResponse(w http.ResponseWriter) error
+}
+
+type AccountClientsDeleteClient204Response struct {
+}
+
+func (response AccountClientsDeleteClient204Response) VisitAccountClientsDeleteClientResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type AccountClientsDeleteClient400JSONResponse struct {
+	Error string `json:"error"`
+}
+
+func (response AccountClientsDeleteClient400JSONResponse) VisitAccountClientsDeleteClientResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AccountClientsUpdateClientRequestObject struct {
+	Id   int64 `json:"id"`
+	Body *AccountClientsUpdateClientJSONRequestBody
+}
+
+type AccountClientsUpdateClientResponseObject interface {
+	VisitAccountClientsUpdateClientResponse(w http.ResponseWriter) error
+}
+
+type AccountClientsUpdateClient200JSONResponse struct {
+	Client Client `json:"client"`
+}
+
+func (response AccountClientsUpdateClient200JSONResponse) VisitAccountClientsUpdateClientResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AccountClientsUpdateClient400JSONResponse struct {
+	Error string `json:"error"`
+}
+
+func (response AccountClientsUpdateClient400JSONResponse) VisitAccountClientsUpdateClientResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ClientsInterfaceGetClientRequestObject struct {
+	Id string `json:"id"`
+}
+
+type ClientsInterfaceGetClientResponseObject interface {
+	VisitClientsInterfaceGetClientResponse(w http.ResponseWriter) error
+}
+
+type ClientsInterfaceGetClient200JSONResponse ClientsGetClientRes
+
+func (response ClientsInterfaceGetClient200JSONResponse) VisitClientsInterfaceGetClientResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ClientsInterfaceGetClient400JSONResponse struct {
+	Error            ClientsGetClientErr `json:"error"`
+	ErrorDescription string              `json:"error_description"`
+}
+
+func (response ClientsInterfaceGetClient400JSONResponse) VisitClientsInterfaceGetClientResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type OAuthInterfaceAuthorizeRequestObject struct {
+	Params OAuthInterfaceAuthorizeParams
+}
+
+type OAuthInterfaceAuthorizeResponseObject interface {
+	VisitOAuthInterfaceAuthorizeResponse(w http.ResponseWriter) error
+}
+
+type OAuthInterfaceAuthorize204Response struct {
+}
+
+func (response OAuthInterfaceAuthorize204Response) VisitOAuthInterfaceAuthorizeResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type OAuthInterfaceAuthorize302ResponseHeaders struct {
+	Location string
+}
+
+type OAuthInterfaceAuthorize302Response struct {
+	Headers OAuthInterfaceAuthorize302ResponseHeaders
+}
+
+func (response OAuthInterfaceAuthorize302Response) VisitOAuthInterfaceAuthorizeResponse(w http.ResponseWriter) error {
+	w.Header().Set("location", fmt.Sprint(response.Headers.Location))
+	w.WriteHeader(302)
+	return nil
+}
+
+type OAuthInterfaceAuthorize400JSONResponse struct {
+	Error            OAuthAuthorizeErr `json:"error"`
+	ErrorDescription string            `json:"error_description"`
+	State            *string           `json:"state,omitempty"`
+}
+
+func (response OAuthInterfaceAuthorize400JSONResponse) VisitOAuthInterfaceAuthorizeResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type OAuthInterfacePostAuthorizeRequestObject struct {
+	Body *multipart.Reader
+}
+
+type OAuthInterfacePostAuthorizeResponseObject interface {
+	VisitOAuthInterfacePostAuthorizeResponse(w http.ResponseWriter) error
+}
+
+type OAuthInterfacePostAuthorize204Response struct {
+}
+
+func (response OAuthInterfacePostAuthorize204Response) VisitOAuthInterfacePostAuthorizeResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type OAuthInterfacePostAuthorize302ResponseHeaders struct {
+	Location string
+}
+
+type OAuthInterfacePostAuthorize302Response struct {
+	Headers OAuthInterfacePostAuthorize302ResponseHeaders
+}
+
+func (response OAuthInterfacePostAuthorize302Response) VisitOAuthInterfacePostAuthorizeResponse(w http.ResponseWriter) error {
+	w.Header().Set("location", fmt.Sprint(response.Headers.Location))
+	w.WriteHeader(302)
+	return nil
+}
+
+type OAuthInterfacePostAuthorize400JSONResponse struct {
+	Error            OAuthAuthorizeErr `json:"error"`
+	ErrorDescription string            `json:"error_description"`
+	State            *string           `json:"state,omitempty"`
+}
+
+func (response OAuthInterfacePostAuthorize400JSONResponse) VisitOAuthInterfacePostAuthorizeResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type OAuthInterfaceGetTokenRequestObject struct {
+	Body *OAuthInterfaceGetTokenJSONRequestBody
+}
+
+type OAuthInterfaceGetTokenResponseObject interface {
+	VisitOAuthInterfaceGetTokenResponse(w http.ResponseWriter) error
+}
+
+type OAuthInterfaceGetToken200JSONResponse struct {
+	Token string `json:"token"`
+}
+
+func (response OAuthInterfaceGetToken200JSONResponse) VisitOAuthInterfaceGetTokenResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type OAuthInterfaceGetToken400JSONResponse struct {
+	Error            int32  `json:"error"`
+	ErrorDescription string `json:"error_description"`
+}
+
+func (response OAuthInterfaceGetToken400JSONResponse) VisitOAuthInterfaceGetTokenResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type SessionInterfaceLogoutRequestObject struct {
+}
+
+type SessionInterfaceLogoutResponseObject interface {
+	VisitSessionInterfaceLogoutResponse(w http.ResponseWriter) error
+}
+
+type SessionInterfaceLogout204ResponseHeaders struct {
+	SetCookie string
+}
+
+type SessionInterfaceLogout204Response struct {
+	Headers SessionInterfaceLogout204ResponseHeaders
+}
+
+func (response SessionInterfaceLogout204Response) VisitSessionInterfaceLogoutResponse(w http.ResponseWriter) error {
+	w.Header().Set("set-cookie", fmt.Sprint(response.Headers.SetCookie))
+	w.WriteHeader(204)
+	return nil
+}
+
+type SessionInterfaceMeRequestObject struct {
+}
+
+type SessionInterfaceMeResponseObject interface {
+	VisitSessionInterfaceMeResponse(w http.ResponseWriter) error
+}
+
+type SessionInterfaceMe200JSONResponse SessionMeRes
+
+func (response SessionInterfaceMe200JSONResponse) VisitSessionInterfaceMeResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type SessionInterfaceLoginRequestObject struct {
+	Body *SessionInterfaceLoginJSONRequestBody
+}
+
+type SessionInterfaceLoginResponseObject interface {
+	VisitSessionInterfaceLoginResponse(w http.ResponseWriter) error
+}
+
+type SessionInterfaceLogin204ResponseHeaders struct {
+	SetCookie string
+}
+
+type SessionInterfaceLogin204Response struct {
+	Headers SessionInterfaceLogin204ResponseHeaders
+}
+
+func (response SessionInterfaceLogin204Response) VisitSessionInterfaceLoginResponse(w http.ResponseWriter) error {
+	w.Header().Set("set-cookie", fmt.Sprint(response.Headers.SetCookie))
+	w.WriteHeader(204)
+	return nil
+}
+
+type SessionInterfaceLogin400JSONResponse struct {
+	Error            SessionLoginErr `json:"error"`
+	ErrorDescription string          `json:"error_description"`
+}
+
+func (response SessionInterfaceLogin400JSONResponse) VisitSessionInterfaceLoginResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type UsersInterfaceSignupRequestObject struct {
+	Body *UsersInterfaceSignupJSONRequestBody
+}
+
+type UsersInterfaceSignupResponseObject interface {
+	VisitUsersInterfaceSignupResponse(w http.ResponseWriter) error
+}
+
+type UsersInterfaceSignup204ResponseHeaders struct {
+	SetCookie string
+}
+
+type UsersInterfaceSignup204Response struct {
+	Headers UsersInterfaceSignup204ResponseHeaders
+}
+
+func (response UsersInterfaceSignup204Response) VisitUsersInterfaceSignupResponse(w http.ResponseWriter) error {
+	w.Header().Set("set-cookie", fmt.Sprint(response.Headers.SetCookie))
+	w.WriteHeader(204)
+	return nil
+}
+
+type UsersInterfaceSignup400JSONResponse struct {
+	Error            UsersSignupErr `json:"error"`
+	ErrorDescription string         `json:"error_description"`
+}
+
+func (response UsersInterfaceSignup400JSONResponse) VisitUsersInterfaceSignupResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+// StrictServerInterface represents all server handlers.
+type StrictServerInterface interface {
+	// Approve a auth request
+	// (POST /account/approvals)
+	ApprovalsInterfaceApprove(ctx context.Context, request ApprovalsInterfaceApproveRequestObject) (ApprovalsInterfaceApproveResponseObject, error)
+	// Get all clients
+	// (GET /account/clients)
+	AccountClientsListClients(ctx context.Context, request AccountClientsListClientsRequestObject) (AccountClientsListClientsResponseObject, error)
+	// Create a new client
+	// (POST /account/clients)
+	AccountClientsCreateClient(ctx context.Context, request AccountClientsCreateClientRequestObject) (AccountClientsCreateClientResponseObject, error)
+	// Delete a client
+	// (DELETE /account/clients:id/{id})
+	AccountClientsDeleteClient(ctx context.Context, request AccountClientsDeleteClientRequestObject) (AccountClientsDeleteClientResponseObject, error)
+	// Update a client
+	// (POST /account/clients:id/{id})
+	AccountClientsUpdateClient(ctx context.Context, request AccountClientsUpdateClientRequestObject) (AccountClientsUpdateClientResponseObject, error)
+	// Get a client
+	// (GET /clients/{id})
+	ClientsInterfaceGetClient(ctx context.Context, request ClientsInterfaceGetClientRequestObject) (ClientsInterfaceGetClientResponseObject, error)
+	// Authorization Request
+	// (GET /oauth/authorize)
+	OAuthInterfaceAuthorize(ctx context.Context, request OAuthInterfaceAuthorizeRequestObject) (OAuthInterfaceAuthorizeResponseObject, error)
+	// Authorization Request
+	// (POST /oauth/authorize)
+	OAuthInterfacePostAuthorize(ctx context.Context, request OAuthInterfacePostAuthorizeRequestObject) (OAuthInterfacePostAuthorizeResponseObject, error)
+	// Get a token
+	// (POST /oauth/token)
+	OAuthInterfaceGetToken(ctx context.Context, request OAuthInterfaceGetTokenRequestObject) (OAuthInterfaceGetTokenResponseObject, error)
+	// Logout
+	// (DELETE /session)
+	SessionInterfaceLogout(ctx context.Context, request SessionInterfaceLogoutRequestObject) (SessionInterfaceLogoutResponseObject, error)
+	// Get session
+	// (GET /session)
+	SessionInterfaceMe(ctx context.Context, request SessionInterfaceMeRequestObject) (SessionInterfaceMeResponseObject, error)
+	// Login
+	// (POST /session)
+	SessionInterfaceLogin(ctx context.Context, request SessionInterfaceLoginRequestObject) (SessionInterfaceLoginResponseObject, error)
+	// Signup
+	// (POST /users/signup)
+	UsersInterfaceSignup(ctx context.Context, request UsersInterfaceSignupRequestObject) (UsersInterfaceSignupResponseObject, error)
+}
+
+type StrictHandlerFunc = strictecho.StrictEchoHandlerFunc
+type StrictMiddlewareFunc = strictecho.StrictEchoMiddlewareFunc
+
+func NewStrictHandler(ssi StrictServerInterface, middlewares []StrictMiddlewareFunc) ServerInterface {
+	return &strictHandler{ssi: ssi, middlewares: middlewares}
+}
+
+type strictHandler struct {
+	ssi         StrictServerInterface
+	middlewares []StrictMiddlewareFunc
+}
+
+// ApprovalsInterfaceApprove operation middleware
+func (sh *strictHandler) ApprovalsInterfaceApprove(ctx echo.Context) error {
+	var request ApprovalsInterfaceApproveRequestObject
+
+	var body ApprovalsInterfaceApproveJSONRequestBody
+	if err := ctx.Bind(&body); err != nil {
+		return err
+	}
+	request.Body = &body
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.ApprovalsInterfaceApprove(ctx.Request().Context(), request.(ApprovalsInterfaceApproveRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ApprovalsInterfaceApprove")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(ApprovalsInterfaceApproveResponseObject); ok {
+		return validResponse.VisitApprovalsInterfaceApproveResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// AccountClientsListClients operation middleware
+func (sh *strictHandler) AccountClientsListClients(ctx echo.Context, params AccountClientsListClientsParams) error {
+	var request AccountClientsListClientsRequestObject
+
+	request.Params = params
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.AccountClientsListClients(ctx.Request().Context(), request.(AccountClientsListClientsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "AccountClientsListClients")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(AccountClientsListClientsResponseObject); ok {
+		return validResponse.VisitAccountClientsListClientsResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// AccountClientsCreateClient operation middleware
+func (sh *strictHandler) AccountClientsCreateClient(ctx echo.Context) error {
+	var request AccountClientsCreateClientRequestObject
+
+	var body AccountClientsCreateClientJSONRequestBody
+	if err := ctx.Bind(&body); err != nil {
+		return err
+	}
+	request.Body = &body
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.AccountClientsCreateClient(ctx.Request().Context(), request.(AccountClientsCreateClientRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "AccountClientsCreateClient")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(AccountClientsCreateClientResponseObject); ok {
+		return validResponse.VisitAccountClientsCreateClientResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// AccountClientsDeleteClient operation middleware
+func (sh *strictHandler) AccountClientsDeleteClient(ctx echo.Context, id int64) error {
+	var request AccountClientsDeleteClientRequestObject
+
+	request.Id = id
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.AccountClientsDeleteClient(ctx.Request().Context(), request.(AccountClientsDeleteClientRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "AccountClientsDeleteClient")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(AccountClientsDeleteClientResponseObject); ok {
+		return validResponse.VisitAccountClientsDeleteClientResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// AccountClientsUpdateClient operation middleware
+func (sh *strictHandler) AccountClientsUpdateClient(ctx echo.Context, id int64) error {
+	var request AccountClientsUpdateClientRequestObject
+
+	request.Id = id
+
+	var body AccountClientsUpdateClientJSONRequestBody
+	if err := ctx.Bind(&body); err != nil {
+		return err
+	}
+	request.Body = &body
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.AccountClientsUpdateClient(ctx.Request().Context(), request.(AccountClientsUpdateClientRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "AccountClientsUpdateClient")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(AccountClientsUpdateClientResponseObject); ok {
+		return validResponse.VisitAccountClientsUpdateClientResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// ClientsInterfaceGetClient operation middleware
+func (sh *strictHandler) ClientsInterfaceGetClient(ctx echo.Context, id string) error {
+	var request ClientsInterfaceGetClientRequestObject
+
+	request.Id = id
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.ClientsInterfaceGetClient(ctx.Request().Context(), request.(ClientsInterfaceGetClientRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ClientsInterfaceGetClient")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(ClientsInterfaceGetClientResponseObject); ok {
+		return validResponse.VisitClientsInterfaceGetClientResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// OAuthInterfaceAuthorize operation middleware
+func (sh *strictHandler) OAuthInterfaceAuthorize(ctx echo.Context, params OAuthInterfaceAuthorizeParams) error {
+	var request OAuthInterfaceAuthorizeRequestObject
+
+	request.Params = params
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.OAuthInterfaceAuthorize(ctx.Request().Context(), request.(OAuthInterfaceAuthorizeRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "OAuthInterfaceAuthorize")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(OAuthInterfaceAuthorizeResponseObject); ok {
+		return validResponse.VisitOAuthInterfaceAuthorizeResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// OAuthInterfacePostAuthorize operation middleware
+func (sh *strictHandler) OAuthInterfacePostAuthorize(ctx echo.Context) error {
+	var request OAuthInterfacePostAuthorizeRequestObject
+
+	if reader, err := ctx.Request().MultipartReader(); err != nil {
+		return err
+	} else {
+		request.Body = reader
+	}
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.OAuthInterfacePostAuthorize(ctx.Request().Context(), request.(OAuthInterfacePostAuthorizeRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "OAuthInterfacePostAuthorize")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(OAuthInterfacePostAuthorizeResponseObject); ok {
+		return validResponse.VisitOAuthInterfacePostAuthorizeResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// OAuthInterfaceGetToken operation middleware
+func (sh *strictHandler) OAuthInterfaceGetToken(ctx echo.Context) error {
+	var request OAuthInterfaceGetTokenRequestObject
+
+	var body OAuthInterfaceGetTokenJSONRequestBody
+	if err := ctx.Bind(&body); err != nil {
+		return err
+	}
+	request.Body = &body
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.OAuthInterfaceGetToken(ctx.Request().Context(), request.(OAuthInterfaceGetTokenRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "OAuthInterfaceGetToken")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(OAuthInterfaceGetTokenResponseObject); ok {
+		return validResponse.VisitOAuthInterfaceGetTokenResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// SessionInterfaceLogout operation middleware
+func (sh *strictHandler) SessionInterfaceLogout(ctx echo.Context) error {
+	var request SessionInterfaceLogoutRequestObject
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.SessionInterfaceLogout(ctx.Request().Context(), request.(SessionInterfaceLogoutRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "SessionInterfaceLogout")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(SessionInterfaceLogoutResponseObject); ok {
+		return validResponse.VisitSessionInterfaceLogoutResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// SessionInterfaceMe operation middleware
+func (sh *strictHandler) SessionInterfaceMe(ctx echo.Context) error {
+	var request SessionInterfaceMeRequestObject
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.SessionInterfaceMe(ctx.Request().Context(), request.(SessionInterfaceMeRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "SessionInterfaceMe")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(SessionInterfaceMeResponseObject); ok {
+		return validResponse.VisitSessionInterfaceMeResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// SessionInterfaceLogin operation middleware
+func (sh *strictHandler) SessionInterfaceLogin(ctx echo.Context) error {
+	var request SessionInterfaceLoginRequestObject
+
+	var body SessionInterfaceLoginJSONRequestBody
+	if err := ctx.Bind(&body); err != nil {
+		return err
+	}
+	request.Body = &body
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.SessionInterfaceLogin(ctx.Request().Context(), request.(SessionInterfaceLoginRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "SessionInterfaceLogin")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(SessionInterfaceLoginResponseObject); ok {
+		return validResponse.VisitSessionInterfaceLoginResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// UsersInterfaceSignup operation middleware
+func (sh *strictHandler) UsersInterfaceSignup(ctx echo.Context) error {
+	var request UsersInterfaceSignupRequestObject
+
+	var body UsersInterfaceSignupJSONRequestBody
+	if err := ctx.Bind(&body); err != nil {
+		return err
+	}
+	request.Body = &body
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.UsersInterfaceSignup(ctx.Request().Context(), request.(UsersInterfaceSignupRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UsersInterfaceSignup")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(UsersInterfaceSignupResponseObject); ok {
+		return validResponse.VisitUsersInterfaceSignupResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// Base64 encoded, gzipped, json marshaled Swagger object
+var swaggerSpec = []string{
+
+	"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",
+}
+
+// GetSwagger returns the content of the embedded swagger specification file
+// or error if failed to decode
+func decodeSpec() ([]byte, error) {
+	zipped, err := base64.StdEncoding.DecodeString(strings.Join(swaggerSpec, ""))
+	if err != nil {
+		return nil, fmt.Errorf("error base64 decoding spec: %w", err)
+	}
+	zr, err := gzip.NewReader(bytes.NewReader(zipped))
+	if err != nil {
+		return nil, fmt.Errorf("error decompressing spec: %w", err)
+	}
+	var buf bytes.Buffer
+	_, err = buf.ReadFrom(zr)
+	if err != nil {
+		return nil, fmt.Errorf("error decompressing spec: %w", err)
+	}
+
+	return buf.Bytes(), nil
+}
+
+var rawSpec = decodeSpecCached()
+
+// a naive cached of a decoded swagger spec
+func decodeSpecCached() func() ([]byte, error) {
+	data, err := decodeSpec()
+	return func() ([]byte, error) {
+		return data, err
+	}
+}
+
+// Constructs a synthetic filesystem for resolving external references when loading openapi specifications.
+func PathToRawSpec(pathToFile string) map[string]func() ([]byte, error) {
+	res := make(map[string]func() ([]byte, error))
+	if len(pathToFile) > 0 {
+		res[pathToFile] = rawSpec
+	}
+
+	return res
+}
+
+// GetSwagger returns the Swagger specification corresponding to the generated code
+// in this file. The external references of Swagger specification are resolved.
+// The logic of resolving external references is tightly connected to "import-mapping" feature.
+// Externally referenced files must be embedded in the corresponding golang packages.
+// Urls can be supported but this task was out of the scope.
+func GetSwagger() (swagger *openapi3.T, err error) {
+	resolvePath := PathToRawSpec("")
+
+	loader := openapi3.NewLoader()
+	loader.IsExternalRefsAllowed = true
+	loader.ReadFromURIFunc = func(loader *openapi3.Loader, url *url.URL) ([]byte, error) {
+		pathToFile := url.String()
+		pathToFile = path.Clean(pathToFile)
+		getSpec, ok := resolvePath[pathToFile]
+		if !ok {
+			err1 := fmt.Errorf("path not found: %s", pathToFile)
+			return nil, err1
+		}
+		return getSpec()
+	}
+	var specData []byte
+	specData, err = rawSpec()
+	if err != nil {
+		return
+	}
+	swagger, err = loader.LoadFromData(specData)
+	if err != nil {
+		return
+	}
+	return
 }

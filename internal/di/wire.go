@@ -22,19 +22,7 @@ func (r *registry) NewServer() *api.Server {
 		domain.NewUserService,
 		oauth.NewAuthService,
 		gateway.NewClientRepo,
-		infrastructure.GetDB,
-	)
-	return nil
-}
-
-func (r *registry) NewAuthUsecase() *usecase.AuthUsecase {
-	wire.Build(
-		usecase.NewAuthUsecase,
-		gateway.NewApprovalRepo,
-		domain.NewUserService,
-		gateway.NewUserRepo,
-		oauth.NewAuthService,
-		gateway.NewClientRepo,
+		usecase.NewClientUsecase,
 		infrastructure.GetDB,
 	)
 	return nil

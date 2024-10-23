@@ -25,17 +25,7 @@ func NewServer() *api.Server {
 	iClientRepo := gateway.NewClientRepo(db)
 	authService := oauth.NewAuthService(iClientRepo, iApprovalRepo)
 	authUsecase := usecase.NewAuthUsecase(iUserRepo, iApprovalRepo, userService, authService)
-	server := api.NewServer(authUsecase)
+	iClientUsecase := usecase.NewClientUsecase(iClientRepo)
+	server := api.NewServer(authUsecase, iClientUsecase)
 	return server
-}
-
-func NewAuthUsecase() *usecase.AuthUsecase {
-	db := infrastructure.GetDB()
-	iUserRepo := gateway.NewUserRepo(db)
-	iApprovalRepo := gateway.NewApprovalRepo(db)
-	userService := domain.NewUserService(iUserRepo)
-	iClientRepo := gateway.NewClientRepo(db)
-	authService := oauth.NewAuthService(iClientRepo, iApprovalRepo)
-	authUsecase := usecase.NewAuthUsecase(iUserRepo, iApprovalRepo, userService, authService)
-	return authUsecase
 }

@@ -4,6 +4,12 @@ OAuth2.0、OpenID Connect
 
 ## 開発
 
+- dependency: go, task, aqua, db 作成
+- .env ファイル作成
+
+- task install
+- task dev
+
 ### DB
 
 マイグレーションファイル作成：`cd atlas && atlas migrate diff {migration name} --env local`

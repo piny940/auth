@@ -124,22 +124,19 @@ table "approvals" {
 }
 table "approval_scopes" {
   schema = schema.public
-  column "id" {
+  column "scope_id" {
     type = int
   }
   column "approval_id" {
     type = bigint
   }
   primary_key {
-    columns = [column.id]
+    columns = [column.scope_id, column.approval_id]
   }
   foreign_key "approval_id" {
     columns = [column.approval_id]
     ref_columns = [table.approvals.column.id]
     on_update = NO_ACTION
     on_delete = CASCADE
-  }
-  index "approval_id" {
-    columns = [column.approval_id]
   }
 }

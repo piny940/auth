@@ -7,6 +7,7 @@ import (
 	"auth/internal/api"
 	"auth/internal/di"
 	"auth/internal/infrastructure"
+	myMiddleware "auth/internal/middleware"
 	"context"
 	"os"
 	"os/signal"
@@ -41,7 +42,9 @@ func main() {
 		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
 		AllowCredentials: true,
 	}))
-	api.RegisterHandlers(e.Group("/api/v1"), di.NewServer())
+	e.Use(myMiddleware.Session())
+	e.Use(myMiddleware.AuthMiddleware())
+	api.RegisterHandlers(e, api.NewStrictHandler(di.NewServer(), nil))
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()

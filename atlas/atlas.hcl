@@ -12,7 +12,7 @@ locals {
 }
 env "local" {
   src = "file://schema.hcl"
-  url = "postgres://${local.dotenv.DB_USER}:${local.dotenv.DB_PASSWORD}@${local.dotenv.DB_HOST}:${local.dotenv.DB_PORT}/${local.dotenv.DB_NAME}"
+  url = "postgres://${local.dotenv.DB_USER}:${local.dotenv.DB_PASSWORD}@${local.dotenv.DB_HOST}:${local.dotenv.DB_PORT}/${local.dotenv.DB_NAME}?sslmode=${local.dotenv.DB_SSLMODE}"
   dev = "docker://postgres/15/dev"
   migration {
     dir = "file://migrations"

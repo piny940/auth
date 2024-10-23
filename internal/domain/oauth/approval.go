@@ -14,3 +14,7 @@ type Approval struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
+type IApprovalRepo interface {
+	Find(clientID ClientID, userID domain.UserID) (*Approval, error)
+	Create(clientID ClientID, userID domain.UserID, scopes []TypeScope) error
+}

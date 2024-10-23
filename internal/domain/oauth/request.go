@@ -34,10 +34,6 @@ type AuthRequest struct {
 	State        *string
 }
 
-type IApprovalRepo interface {
-	Find(clientID ClientID, userID domain.UserID) (*Approval, error)
-}
-
 type AuthService struct {
 	ClientRepo   IClientRepo
 	ApprovalRepo IApprovalRepo
@@ -55,16 +51,17 @@ func (s *AuthService) Validate(r *AuthRequest) error {
 		return ErrInvalidRequestType
 	}
 	client, err := s.ClientRepo.FindByID(r.ClientID)
+	if errors.Is(err, domain.ErrRecordNotFound) {
+		return ErrInvalidClientID
+	}
 	if err != nil {
 		return err
 	}
 	if !slices.Contains(client.RedirectURIs, r.RedirectURI) {
 		return ErrInvalidRedirectURI
 	}
-	for _, scope := range r.Scopes {
-		if !slices.Contains(AllScopes, scope) {
-			return ErrInvalidScope
-		}
+	if err := ValidScopes(r.Scopes); err != nil {
+		return err
 	}
 
 	return nil
@@ -89,8 +86,18 @@ func (s *AuthService) Approved(r *AuthRequest, user *domain.User) (bool, error) 
 	return true, nil
 }
 
+func ValidScopes(scopes []TypeScope) error {
+	for _, s := range scopes {
+		if !slices.Contains(AllScopes, s) {
+			return ErrInvalidScope
+		}
+	}
+	return nil
+}
+
 var (
 	ErrInvalidRequestType = errors.New("invalid request type")
+	ErrInvalidClientID    = errors.New("invalid client id. client not found")
 	ErrInvalidRedirectURI = errors.New("invalid redirect uri")
 	ErrInvalidScope       = errors.New("invalid scope")
 )

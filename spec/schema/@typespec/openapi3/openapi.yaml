@@ -4,9 +4,37 @@ info:
   version: 0.0.0
 tags: []
 paths:
-  /account/clients/:
+  /account/approvals:
+    post:
+      operationId: ApprovalsInterface_approve
+      summary: Approve a auth request
+      parameters: []
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        '400':
+          description: The server could not understand the request due to invalid syntax.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: '#/components/schemas/Approvals.ApproveErr'
+                  error_description:
+                    type: string
+                required:
+                  - error
+                  - error_description
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Approvals.ApproveReq'
+  /account/clients:
     get:
-      operationId: Clients_listClients
+      operationId: AccountClients_listClients
       summary: Get all clients
       parameters:
         - name: cookie
@@ -29,7 +57,7 @@ paths:
                 required:
                   - clients
     post:
-      operationId: Clients_createClient
+      operationId: AccountClients_createClient
       summary: Create a new client
       parameters: []
       responses:
@@ -66,9 +94,9 @@ paths:
                   $ref: '#/components/schemas/ClientCreate'
               required:
                 - client
-  /account/clients/:id/{id}:
+  /account/clients:id/{id}:
     post:
-      operationId: Clients_updateClient
+      operationId: AccountClients_updateClient
       summary: Update a client
       parameters:
         - name: id
@@ -112,7 +140,7 @@ paths:
               required:
                 - client
     delete:
-      operationId: Clients_deleteClient
+      operationId: AccountClients_deleteClient
       summary: Delete a client
       parameters:
         - name: id
@@ -135,9 +163,40 @@ paths:
                     type: string
                 required:
                   - error
-  /authorize:
+  /clients/{id}:
     get:
-      operationId: authorize
+      operationId: ClientsInterface_getClient
+      summary: Get a client
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Clients.GetClientRes'
+        '400':
+          description: The server could not understand the request due to invalid syntax.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: '#/components/schemas/Clients.GetClientErr'
+                  error_description:
+                    type: string
+                required:
+                  - error
+                  - error_description
+  /oauth/authorize:
+    get:
+      operationId: OAuthInterface_authorize
       summary: Authorization Request
       parameters:
         - name: response_type
@@ -175,20 +234,11 @@ paths:
           description: 'There is no content to send for this request, but the headers may be useful. '
         '302':
           description: Redirection
-          content:
-            application/json:
+          headers:
+            location:
+              required: true
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                  error_description:
-                    type: string
-                  state:
-                    type: string
-                required:
-                  - error
-                  - error_description
+                type: string
         '400':
           description: The server could not understand the request due to invalid syntax.
           content:
@@ -197,7 +247,7 @@ paths:
                 type: object
                 properties:
                   error:
-                    type: string
+                    $ref: '#/components/schemas/OAuth.AuthorizeErr'
                   error_description:
                     type: string
                   state:
@@ -206,7 +256,7 @@ paths:
                   - error
                   - error_description
     post:
-      operationId: postAuthorize
+      operationId: OAuthInterface_postAuthorize
       summary: Authorization Request
       parameters: []
       responses:
@@ -214,20 +264,11 @@ paths:
           description: 'There is no content to send for this request, but the headers may be useful. '
         '302':
           description: Redirection
-          content:
-            application/json:
+          headers:
+            location:
+              required: true
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                  error_description:
-                    type: string
-                  state:
-                    type: string
-                required:
-                  - error
-                  - error_description
+                type: string
         '400':
           description: The server could not understand the request due to invalid syntax.
           content:
@@ -236,7 +277,7 @@ paths:
                 type: object
                 properties:
                   error:
-                    type: string
+                    $ref: '#/components/schemas/OAuth.AuthorizeErr'
                   error_description:
                     type: string
                   state:
@@ -249,129 +290,10 @@ paths:
         content:
           multipart/form-data:
             schema:
-              type: object
-              properties:
-                response_type:
-                  type: string
-                client_id:
-                  type: string
-                redirect_uri:
-                  type: string
-                scope:
-                  type: string
-                state:
-                  type: string
-              required:
-                - response_type
-                - client_id
-                - redirect_uri
-                - scope
-  /me:
-    get:
-      operationId: me
-      summary: Get me
-      parameters: []
-      responses:
-        '200':
-          description: The request has succeeded.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  user:
-                    $ref: '#/components/schemas/User'
-                required:
-                  - user
-  /session:
+              $ref: '#/components/schemas/OAuth.AuthorizeReqMultiPart'
+  /oauth/token:
     post:
-      operationId: login
-      summary: Login
-      parameters: []
-      responses:
-        '204':
-          description: 'There is no content to send for this request, but the headers may be useful. '
-        '400':
-          description: The server could not understand the request due to invalid syntax.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    enum:
-                      - invalid_name_or_password
-                  error_description:
-                    type: string
-                required:
-                  - error
-                  - error_description
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ReqLogin'
-    delete:
-      operationId: logout
-      summary: Logout
-      parameters: []
-      responses:
-        '204':
-          description: 'There is no content to send for this request, but the headers may be useful. '
-        '400':
-          description: The server could not understand the request due to invalid syntax.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    enum:
-                      - not_logged_in
-                  error_description:
-                    type: string
-                required:
-                  - error
-                  - error_description
-  /signup:
-    post:
-      operationId: signup
-      summary: Signup
-      parameters: []
-      responses:
-        '204':
-          description: 'There is no content to send for this request, but the headers may be useful. '
-        '400':
-          description: The server could not understand the request due to invalid syntax.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    enum:
-                      - name_already_used
-                      - name_length_not_enough
-                      - password_length_not_enough
-                      - password_confirmation
-                  error_description:
-                    type: string
-                required:
-                  - error
-                  - error_description
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserCreate'
-  /token/:
-    post:
-      operationId: Token_getToken
+      operationId: OAuthInterface_getToken
       summary: Get a token
       parameters: []
       responses:
@@ -415,8 +337,116 @@ paths:
               required:
                 - client_id
                 - client_secret
+  /session:
+    get:
+      operationId: SessionInterface_me
+      summary: Get session
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session.MeRes'
+      security:
+        - ApiKeyAuth: []
+    post:
+      operationId: SessionInterface_login
+      summary: Login
+      parameters: []
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+          headers:
+            set-cookie:
+              required: true
+              schema:
+                type: string
+        '400':
+          description: The server could not understand the request due to invalid syntax.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: '#/components/schemas/Session.LoginErr'
+                  error_description:
+                    type: string
+                required:
+                  - error
+                  - error_description
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Session.LoginReq'
+    delete:
+      operationId: SessionInterface_logout
+      summary: Logout
+      parameters: []
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+          headers:
+            set-cookie:
+              required: true
+              schema:
+                type: string
+      security:
+        - ApiKeyAuth: []
+  /users/signup:
+    post:
+      operationId: UsersInterface_signup
+      summary: Signup
+      parameters: []
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+          headers:
+            set-cookie:
+              required: true
+              schema:
+                type: string
+        '400':
+          description: The server could not understand the request due to invalid syntax.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: '#/components/schemas/Users.SignupErr'
+                  error_description:
+                    type: string
+                required:
+                  - error
+                  - error_description
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Users.ReqSignup'
 components:
   schemas:
+    Approvals.ApproveErr:
+      type: string
+      enum:
+        - invalid_client
+        - invalid_scope
+    Approvals.ApproveReq:
+      type: object
+      required:
+        - client_id
+        - scope
+      properties:
+        client_id:
+          type: string
+        scope:
+          type: string
     Client:
       type: object
       required:
@@ -425,8 +455,7 @@ components:
         - redirect_urls
       properties:
         id:
-          type: integer
-          format: int64
+          type: string
         name:
           type: string
         redirect_urls:
@@ -445,7 +474,60 @@ components:
           type: array
           items:
             type: string
-    ReqLogin:
+    Clients.GetClientErr:
+      type: string
+      enum:
+        - client_not_found
+    Clients.GetClientRes:
+      type: object
+      required:
+        - client
+      properties:
+        client:
+          $ref: '#/components/schemas/PublicClient'
+    OAuth.AuthorizeErr:
+      type: string
+      enum:
+        - invalid_request
+        - unauthorized_client
+        - access_denied
+        - unsupported_response_type
+        - invalid_scope
+        - server_error
+        - temporarily_unavailable
+    OAuth.AuthorizeReqMultiPart:
+      type: object
+      required:
+        - response_type
+        - client_id
+        - redirect_uri
+        - scope
+      properties:
+        response_type:
+          type: string
+        client_id:
+          type: string
+        redirect_uri:
+          type: string
+        scope:
+          type: string
+        state:
+          type: string
+    PublicClient:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+    Session.LoginErr:
+      type: string
+      enum:
+        - invalid_name_or_password
+    Session.LoginReq:
       type: object
       required:
         - name
@@ -455,19 +537,20 @@ components:
           type: string
         password:
           type: string
-    ReqSignup:
+    Session.LogoutErr:
+      type: string
+      enum:
+        - not_logged_in
+    Session.MeRes:
       type: object
       required:
-        - name
-        - password
-        - password_confirmation
+        - user
       properties:
-        name:
-          type: string
-        password:
-          type: string
-        password_confirmation:
-          type: string
+        user:
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/User'
+          nullable: true
     User:
       type: object
       required:
@@ -479,7 +562,7 @@ components:
           format: int64
         name:
           type: string
-    UserCreate:
+    Users.ReqSignup:
       type: object
       required:
         - name
@@ -492,6 +575,18 @@ components:
           type: string
         password_confirmation:
           type: string
+    Users.SignupErr:
+      type: string
+      enum:
+        - name_length_not_enough
+        - name_already_used
+        - password_length_not_enough
+        - password_confirmation_not_match
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: cookie
+      name: AUTH
 servers:
   - url: https://auth.piny940.com/api/v1
     description: Auth Server

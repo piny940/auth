@@ -27,7 +27,7 @@ func newApprovalScope(db *gorm.DB, opts ...gen.DOOption) approvalScope {
 
 	tableName := _approvalScope.approvalScopeDo.TableName()
 	_approvalScope.ALL = field.NewAsterisk(tableName)
-	_approvalScope.ID = field.NewInt32(tableName, "id")
+	_approvalScope.ScopeID = field.NewInt32(tableName, "scope_id")
 	_approvalScope.ApprovalID = field.NewInt64(tableName, "approval_id")
 
 	_approvalScope.fillFieldMap()
@@ -39,7 +39,7 @@ type approvalScope struct {
 	approvalScopeDo
 
 	ALL        field.Asterisk
-	ID         field.Int32
+	ScopeID    field.Int32
 	ApprovalID field.Int64
 
 	fieldMap map[string]field.Expr
@@ -57,7 +57,7 @@ func (a approvalScope) As(alias string) *approvalScope {
 
 func (a *approvalScope) updateTableName(table string) *approvalScope {
 	a.ALL = field.NewAsterisk(table)
-	a.ID = field.NewInt32(table, "id")
+	a.ScopeID = field.NewInt32(table, "scope_id")
 	a.ApprovalID = field.NewInt64(table, "approval_id")
 
 	a.fillFieldMap()
@@ -76,7 +76,7 @@ func (a *approvalScope) GetFieldByName(fieldName string) (field.OrderExpr, bool)
 
 func (a *approvalScope) fillFieldMap() {
 	a.fieldMap = make(map[string]field.Expr, 2)
-	a.fieldMap["id"] = a.ID
+	a.fieldMap["scope_id"] = a.ScopeID
 	a.fieldMap["approval_id"] = a.ApprovalID
 }
 
