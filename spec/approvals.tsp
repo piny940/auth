@@ -16,6 +16,7 @@ enum ApproveErr {
 }
 
 @route("/account/approvals")
+@useAuth(ApiKeyAuth<ApiKeyLocation.cookie, "auth">)
 interface ApprovalsInterface {
   @summary("Approve a auth request")
   @post
