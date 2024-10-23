@@ -8,6 +8,9 @@ inputs:
   gh-token:
     description: "GitHub token"
     required: true
+  path:
+    description: "Path to Dockerfile"
+    required: true
 
 runs:
   using: composite
@@ -24,6 +27,6 @@ runs:
       uses: docker/build-push-action@v6
       with:
         push: true
-        context: .
-        file: ./Dockerfile
+        context: ${{ inputs.path }}
+        file: ${{ inputs.path }}/Dockerfile
         tags: ${{ inputs.tags }}
