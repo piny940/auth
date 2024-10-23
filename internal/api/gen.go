@@ -26,6 +26,12 @@ const (
 	ApiKeyAuthScopes = "ApiKeyAuth.Scopes"
 )
 
+// Defines values for ApprovalsApproveErr.
+const (
+	ApprovalsApproveErrInvalidClient ApprovalsApproveErr = "invalid_client"
+	ApprovalsApproveErrInvalidScope  ApprovalsApproveErr = "invalid_scope"
+)
+
 // Defines values for ClientsGetClientErr.
 const (
 	ClientNotFound ClientsGetClientErr = "client_not_found"
@@ -33,13 +39,13 @@ const (
 
 // Defines values for OAuthAuthorizeErr.
 const (
-	AccessDenied            OAuthAuthorizeErr = "access_denied"
-	InvalidRequest          OAuthAuthorizeErr = "invalid_request"
-	InvalidScope            OAuthAuthorizeErr = "invalid_scope"
-	ServerError             OAuthAuthorizeErr = "server_error"
-	TemporarilyUnavailable  OAuthAuthorizeErr = "temporarily_unavailable"
-	UnauthorizedClient      OAuthAuthorizeErr = "unauthorized_client"
-	UnsupportedResponseType OAuthAuthorizeErr = "unsupported_response_type"
+	OAuthAuthorizeErrAccessDenied            OAuthAuthorizeErr = "access_denied"
+	OAuthAuthorizeErrInvalidRequest          OAuthAuthorizeErr = "invalid_request"
+	OAuthAuthorizeErrInvalidScope            OAuthAuthorizeErr = "invalid_scope"
+	OAuthAuthorizeErrServerError             OAuthAuthorizeErr = "server_error"
+	OAuthAuthorizeErrTemporarilyUnavailable  OAuthAuthorizeErr = "temporarily_unavailable"
+	OAuthAuthorizeErrUnauthorizedClient      OAuthAuthorizeErr = "unauthorized_client"
+	OAuthAuthorizeErrUnsupportedResponseType OAuthAuthorizeErr = "unsupported_response_type"
 )
 
 // Defines values for SessionLoginErr.
@@ -60,16 +66,13 @@ const (
 	PasswordLengthNotEnough      UsersSignupErr = "password_length_not_enough"
 )
 
+// ApprovalsApproveErr defines model for Approvals.ApproveErr.
+type ApprovalsApproveErr string
+
 // ApprovalsApproveReq defines model for Approvals.ApproveReq.
 type ApprovalsApproveReq struct {
 	ClientId string `json:"client_id"`
 	Scope    string `json:"scope"`
-}
-
-// ApprovalsRes4xx defines model for Approvals.Res4xx.
-type ApprovalsRes4xx struct {
-	Error            string `json:"error"`
-	ErrorDescription string `json:"error_description"`
 }
 
 // Client defines model for Client.
@@ -504,7 +507,10 @@ func (response ApprovalsInterfaceApprove204Response) VisitApprovalsInterfaceAppr
 	return nil
 }
 
-type ApprovalsInterfaceApprove400JSONResponse ApprovalsRes4xx
+type ApprovalsInterfaceApprove400JSONResponse struct {
+	Error            ApprovalsApproveErr `json:"error"`
+	ErrorDescription string              `json:"error_description"`
+}
 
 func (response ApprovalsInterfaceApprove400JSONResponse) VisitApprovalsInterfaceApproveResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -1280,33 +1286,33 @@ func (sh *strictHandler) UsersInterfaceSignup(ctx echo.Context) error {
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

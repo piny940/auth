@@ -17,7 +17,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Approvals.Res4xx'
+                type: object
+                properties:
+                  error:
+                    $ref: '#/components/schemas/Approvals.ApproveErr'
+                  error_description:
+                    type: string
+                required:
+                  - error
+                  - error_description
       requestBody:
         required: true
         content:
@@ -424,6 +432,11 @@ paths:
               $ref: '#/components/schemas/Users.ReqSignup'
 components:
   schemas:
+    Approvals.ApproveErr:
+      type: string
+      enum:
+        - invalid_client
+        - invalid_scope
     Approvals.ApproveReq:
       type: object
       required:
@@ -433,16 +446,6 @@ components:
         client_id:
           type: string
         scope:
-          type: string
-    Approvals.Res4xx:
-      type: object
-      required:
-        - error
-        - error_description
-      properties:
-        error:
-          type: string
-        error_description:
           type: string
     Client:
       type: object

@@ -10,9 +10,9 @@ model ApproveReq {
   client_id: string;
   scope: string;
 }
-model Res4xx {
-  error: string;
-  error_description: string;
+enum ApproveErr {
+  invalid_client,
+  invalid_scope,
 }
 
 @route("/account/approvals")
@@ -23,6 +23,7 @@ interface ApprovalsInterface {
     @statusCode statusCode: 204;
   } | {
     @statusCode statusCode: 400;
-    @body body: Res4xx;
+    error: ApproveErr;
+    error_description: string;
   };
 }

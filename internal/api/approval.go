@@ -7,7 +7,6 @@ import (
 	"strings"
 )
 
-// ApprovalsInterfaceApprove implements StrictServerInterface.
 func (s *Server) ApprovalsInterfaceApprove(ctx context.Context, request ApprovalsInterfaceApproveRequestObject) (ApprovalsInterfaceApproveResponseObject, error) {
 	user, err := CurrentUser(ctx)
 	if err != nil {
@@ -20,13 +19,13 @@ func (s *Server) ApprovalsInterfaceApprove(ctx context.Context, request Approval
 	err = s.AuthUsecase.Approve(user, oauth.ClientID(request.Body.ClientId), scopes)
 	if errors.Is(err, oauth.ErrInvalidClientID) {
 		return ApprovalsInterfaceApprove400JSONResponse{
-			Error:            "invalid_client",
+			Error:            ApprovalsApproveErrInvalidClient,
 			ErrorDescription: err.Error(),
 		}, nil
 	}
 	if errors.Is(err, oauth.ErrInvalidScope) {
 		return ApprovalsInterfaceApprove400JSONResponse{
-			Error:            "invalid_scope",
+			Error:            ApprovalsApproveErrInvalidScope,
 			ErrorDescription: err.Error(),
 		}, nil
 	}

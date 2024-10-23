@@ -43,13 +43,13 @@ func (s *Server) OAuthInterfaceAuthorize(ctx context.Context, request OAuthInter
 	err = s.AuthUsecase.Request(user, toDAuthParams(request.Params))
 	if errors.Is(err, oauth.ErrInvalidRequestType) {
 		return OAuthInterfaceAuthorize400JSONResponse{
-			Error:            UnsupportedResponseType,
+			Error:            OAuthAuthorizeErrUnsupportedResponseType,
 			ErrorDescription: "unsupported_response_type",
 		}, nil
 	}
 	if errors.Is(err, oauth.ErrInvalidClientID) {
 		return OAuthInterfaceAuthorize400JSONResponse{
-			Error:            InvalidRequest,
+			Error:            OAuthAuthorizeErrInvalidRequest,
 			ErrorDescription: err.Error(),
 		}, nil
 	}
@@ -58,7 +58,7 @@ func (s *Server) OAuthInterfaceAuthorize(ctx context.Context, request OAuthInter
 			"next":              this,
 			"client_id":         request.Params.ClientId,
 			"scope":             request.Params.Scope,
-			"error":             string(AccessDenied),
+			"error":             string(OAuthAuthorizeErrAccessDenied),
 			"error_description": "access_denied",
 		})
 		return OAuthInterfaceAuthorize302Response{
@@ -69,13 +69,13 @@ func (s *Server) OAuthInterfaceAuthorize(ctx context.Context, request OAuthInter
 	}
 	if errors.Is(err, oauth.ErrInvalidScope) {
 		return OAuthInterfaceAuthorize400JSONResponse{
-			Error:            InvalidScope,
+			Error:            OAuthAuthorizeErrInvalidScope,
 			ErrorDescription: "invalid_scope",
 		}, nil
 	}
 	if errors.Is(err, oauth.ErrInvalidRedirectURI) {
 		return OAuthInterfaceAuthorize400JSONResponse{
-			Error:            InvalidRequest,
+			Error:            OAuthAuthorizeErrInvalidRequest,
 			ErrorDescription: "redirect_uri is invalid",
 		}, nil
 	}

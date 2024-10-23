@@ -149,13 +149,11 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** @enum {string} */
+        "Approvals.ApproveErr": "invalid_client" | "invalid_scope";
         "Approvals.ApproveReq": {
             client_id: string;
             scope: string;
-        };
-        "Approvals.Res4xx": {
-            error: string;
-            error_description: string;
         };
         Client: {
             id: string;
@@ -242,7 +240,10 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Approvals.Res4xx"];
+                    "application/json": {
+                        error: components["schemas"]["Approvals.ApproveErr"];
+                        error_description: string;
+                    };
                 };
             };
         };
