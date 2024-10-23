@@ -8,8 +8,8 @@ const TableNameApprovalScope = "approval_scopes"
 
 // ApprovalScope mapped from table <approval_scopes>
 type ApprovalScope struct {
-	ID         int32 `gorm:"column:id;primaryKey" json:"id"`
-	ApprovalID int64 `gorm:"column:approval_id;not null" json:"approval_id"`
+	ScopeID    int32 `gorm:"column:scope_id;primaryKey" json:"scope_id"`
+	ApprovalID int64 `gorm:"column:approval_id;primaryKey" json:"approval_id"`
 }
 
 // TableName ApprovalScope's table name

@@ -7,6 +7,7 @@ import (
 	"auth/internal/infrastructure/model"
 	"auth/internal/infrastructure/query"
 	"errors"
+	"slices"
 
 	"gorm.io/gorm"
 )
@@ -15,6 +16,8 @@ type ApprovalRepo struct {
 	db    *infrastructure.DB
 	query *query.Query
 }
+
+const APPROVAL_SCOPE_BATCH_SIZE = 20
 
 var scopeMap = map[int32]oauth.TypeScope{
 	0: oauth.ScopeOpenID,
@@ -66,21 +69,24 @@ func (a *ApprovalRepo) Create(clientID oauth.ClientID, userID domain.UserID, sco
 	if err != nil {
 		return err
 	}
-	for _, s := range scopes {
-		err := a.query.ApprovalScope.Create(&model.ApprovalScope{
-			ID:         scopeMapReverse[s],
+	compactScopes := slices.Compact(scopes)
+	mScopes := make([]*model.ApprovalScope, 0, len(compactScopes))
+	for _, s := range compactScopes {
+		mScopes = append(mScopes, &model.ApprovalScope{
+			ScopeID:    scopeMapReverse[s],
 			ApprovalID: approval.ID,
 		})
-		if err != nil {
-			return err
-		}
 	}
+	if err := a.query.ApprovalScope.CreateInBatches(mScopes, APPROVAL_SCOPE_BATCH_SIZE); err != nil {
+		return err
+	}
+	return nil
 }
 
 func toDomainApproval(approval *model.Approval, approvalScopes []*model.ApprovalScope) *oauth.Approval {
 	scopes := make([]oauth.TypeScope, 0, len(approvalScopes))
 	for _, s := range approvalScopes {
-		scopes = append(scopes, scopeMap[s.ID])
+		scopes = append(scopes, scopeMap[s.ScopeID])
 	}
 	return &oauth.Approval{
 		ID:        oauth.ApprovalID(approval.ID),

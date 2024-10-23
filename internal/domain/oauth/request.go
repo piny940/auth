@@ -60,10 +60,8 @@ func (s *AuthService) Validate(r *AuthRequest) error {
 	if !slices.Contains(client.RedirectURIs, r.RedirectURI) {
 		return ErrInvalidRedirectURI
 	}
-	for _, scope := range r.Scopes {
-		if !slices.Contains(AllScopes, scope) {
-			return ErrInvalidScope
-		}
+	if err := ValidScopes(r.Scopes); err != nil {
+		return err
 	}
 
 	return nil
@@ -86,6 +84,15 @@ func (s *AuthService) Approved(r *AuthRequest, user *domain.User) (bool, error) 
 		}
 	}
 	return true, nil
+}
+
+func ValidScopes(scopes []TypeScope) error {
+	for _, s := range scopes {
+		if !slices.Contains(AllScopes, s) {
+			return ErrInvalidScope
+		}
+	}
+	return nil
 }
 
 var (

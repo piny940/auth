@@ -9,6 +9,7 @@ tasks:
       - task install:backend
       - task install:frontend
       - task install:spec
+      - task generate
   install:aqua:
     desc: "Install aqua"
     cmds:
