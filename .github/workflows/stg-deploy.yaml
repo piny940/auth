@@ -1,0 +1,34 @@
+name: Build App for Staging
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+  id-token: write
+  packages: write
+
+jobs:
+  stg-build:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    environment: staging # 管理者の承認を必要とする
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/docker-build
+        with:
+          gh-token: ${{ secrets.GITHUB_TOKEN }}
+          github-actor: ${{ github.actor }}
+          tags: ghcr.io/${{ github.repository }}:stg-${{ github.sha }}-${{ github.run_number }}
+  stg-build-main:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/docker-build
+        with:
+          gh-token: ${{ secrets.GITHUB_TOKEN }}
+          github-actor: ${{ github.actor }}
+          tags: ghcr.io/${{ github.repository }}:stg-${{ github.sha }}-${{ github.run_number }}
