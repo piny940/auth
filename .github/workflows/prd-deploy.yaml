@@ -10,6 +10,23 @@ permissions:
   packages: write
 
 jobs:
+  filter:
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.frontend.outputs.frontend }}
+      spec: ${{ steps.spec.outputs.spec }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            frontend:
+              - "frontend/**"
+              - ".github/workflows/prd-deploy.yaml"
+            spec:
+              - "spec/**"
+              - ".github/workflows/prd-deploy.yaml"
   prd-build-backend:
     runs-on: ubuntu-latest
     environment: production
@@ -24,6 +41,8 @@ jobs:
   prd-build-frontend:
     runs-on: ubuntu-latest
     environment: production
+    needs: filter
+    if: needs.filter.outputs.frontend == 'true'
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/docker-build

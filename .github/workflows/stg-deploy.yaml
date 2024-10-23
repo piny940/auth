@@ -11,6 +11,23 @@ permissions:
   packages: write
 
 jobs:
+  filter:
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.frontend.outputs.frontend }}
+      spec: ${{ steps.spec.outputs.spec }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            frontend:
+              - "frontend/**"
+              - ".github/workflows/stg-deploy.yaml"
+            spec:
+              - "spec/**"
+              - ".github/workflows/stg-deploy.yaml"
   stg-build-backend:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
@@ -37,7 +54,8 @@ jobs:
 
   stg-build-frontend:
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
+    needs: filter
+    if: github.event_name == 'pull_request' && needs.filter.outputs.frontend == 'true'
     environment: staging # 管理者の承認を必要とする
     steps:
       - uses: actions/checkout@v4
@@ -51,7 +69,8 @@ jobs:
             - NEXT_PUBLIC_BACKEND_URL=http://stg-auth.default.svc.cluster.local:8080/api/v1
   stg-build-frontend-main:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: filter
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.filter.outputs.frontend == 'true'
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/docker-build
