@@ -22,7 +22,7 @@ func (s *Server) OAuthInterfaceAuthorize(ctx context.Context, request OAuthInter
 		if request.Params.State != nil {
 			query["state"] = *request.Params.State
 		}
-		authorizeUrl, err := url.JoinPath(s.Conf.ServerUrl, "authorize")
+		authorizeUrl, err := url.JoinPath(s.Conf.ServerUrl, "oauth", "authorize")
 		if err != nil {
 			return nil, err
 		}
@@ -45,6 +45,12 @@ func (s *Server) OAuthInterfaceAuthorize(ctx context.Context, request OAuthInter
 		return OAuthInterfaceAuthorize400JSONResponse{
 			Error:            UnsupportedResponseType,
 			ErrorDescription: "unsupported_response_type",
+		}, nil
+	}
+	if errors.Is(err, oauth.ErrInvalidClientID) {
+		return OAuthInterfaceAuthorize400JSONResponse{
+			Error:            InvalidRequest,
+			ErrorDescription: err.Error(),
 		}, nil
 	}
 	if errors.Is(err, usecase.ErrNotApproved) {

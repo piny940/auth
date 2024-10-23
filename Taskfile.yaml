@@ -3,11 +3,12 @@ version: "3"
 tasks:
   install:
     desc: "Install dependencies"
-    deps:
-      - task: install:aqua
-      - task: install:backend
-      - task: install:frontend
-      - task: install:spec
+    cmds:
+      - task install:aqua
+      - task migrate
+      - task install:backend
+      - task install:frontend
+      - task install:spec
   install:aqua:
     desc: "Install aqua"
     cmds:

@@ -55,6 +55,9 @@ func (s *AuthService) Validate(r *AuthRequest) error {
 		return ErrInvalidRequestType
 	}
 	client, err := s.ClientRepo.FindByID(r.ClientID)
+	if errors.Is(err, domain.ErrRecordNotFound) {
+		return ErrInvalidClientID
+	}
 	if err != nil {
 		return err
 	}
@@ -91,6 +94,7 @@ func (s *AuthService) Approved(r *AuthRequest, user *domain.User) (bool, error) 
 
 var (
 	ErrInvalidRequestType = errors.New("invalid request type")
+	ErrInvalidClientID    = errors.New("invalid client id. client not found")
 	ErrInvalidRedirectURI = errors.New("invalid redirect uri")
 	ErrInvalidScope       = errors.New("invalid scope")
 )
