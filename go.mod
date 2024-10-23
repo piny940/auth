@@ -3,7 +3,7 @@ module auth
 go 1.23.2
 
 require (
-	github.com/getkin/kin-openapi v0.127.0
+	github.com/getkin/kin-openapi v0.128.0
 	github.com/google/wire v0.6.0
 	github.com/gorilla/securecookie v1.1.2
 	github.com/gorilla/sessions v1.4.0
