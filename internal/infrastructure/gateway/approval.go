@@ -55,29 +55,56 @@ func (a *ApprovalRepo) Find(clientID oauth.ClientID, userID domain.UserID) (*oau
 }
 
 func (a *ApprovalRepo) Create(clientID oauth.ClientID, userID domain.UserID, scopes []oauth.TypeScope) error {
-	err := a.query.Approval.Create(&model.Approval{
-		ClientID: string(clientID),
-		UserID:   int64(userID),
-	})
-	if err != nil {
-		return err
+	var approval *model.Approval
+	var err error
+	{ // create approval if not exists
+		_, err = a.query.Approval.Where(
+			a.query.Approval.ClientID.Eq(string(clientID)),
+			a.query.Approval.UserID.Eq(int64(userID)),
+		).First()
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			err = a.query.Approval.Create(&model.Approval{
+				ClientID: string(clientID),
+				UserID:   int64(userID),
+			})
+			if err != nil {
+				return err
+			}
+		}
+		if err != nil {
+			return err
+		}
 	}
-	approval, err := a.query.Approval.Where(
+	approval, err = a.query.Approval.Where(
 		a.query.Approval.ClientID.Eq(string(clientID)),
 		a.query.Approval.UserID.Eq(int64(userID)),
 	).First()
 	if err != nil {
 		return err
 	}
+	existMScopes, err := a.query.ApprovalScope.Where(a.query.ApprovalScope.ApprovalID.Eq(approval.ID)).Find()
+	if err != nil {
+		return err
+	}
+	existScopes := make([]oauth.TypeScope, 0, len(existMScopes))
+	for _, s := range existMScopes {
+		existScopes = append(existScopes, scopeMap[s.ScopeID])
+	}
 	compactScopes := slices.Compact(scopes)
-	mScopes := make([]*model.ApprovalScope, 0, len(compactScopes))
+	adds := make([]oauth.TypeScope, 0)
 	for _, s := range compactScopes {
-		mScopes = append(mScopes, &model.ApprovalScope{
+		if !slices.Contains(existScopes, s) {
+			adds = append(adds, s)
+		}
+	}
+	mAdds := make([]*model.ApprovalScope, 0, len(adds))
+	for _, s := range adds {
+		mAdds = append(mAdds, &model.ApprovalScope{
 			ScopeID:    scopeMapReverse[s],
 			ApprovalID: approval.ID,
 		})
 	}
-	if err := a.query.ApprovalScope.CreateInBatches(mScopes, APPROVAL_SCOPE_BATCH_SIZE); err != nil {
+	if err := a.query.ApprovalScope.CreateInBatches(mAdds, APPROVAL_SCOPE_BATCH_SIZE); err != nil {
 		return err
 	}
 	return nil
