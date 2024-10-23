@@ -34,10 +34,6 @@ type AuthRequest struct {
 	State        *string
 }
 
-type IApprovalRepo interface {
-	Find(clientID ClientID, userID domain.UserID) (*Approval, error)
-}
-
 type AuthService struct {
 	ClientRepo   IClientRepo
 	ApprovalRepo IApprovalRepo

@@ -19,6 +19,9 @@ type ApprovalRepo struct {
 var scopeMap = map[int32]oauth.TypeScope{
 	0: oauth.ScopeOpenID,
 }
+var scopeMapReverse = map[oauth.TypeScope]int32{
+	oauth.ScopeOpenID: 0,
+}
 
 func NewApprovalRepo(db *infrastructure.DB) oauth.IApprovalRepo {
 	query := query.Use(db.Client)
@@ -46,6 +49,32 @@ func (a *ApprovalRepo) Find(clientID oauth.ClientID, userID domain.UserID) (*oau
 		return nil, err
 	}
 	return toDomainApproval(approval, scopes), nil
+}
+
+func (a *ApprovalRepo) Create(clientID oauth.ClientID, userID domain.UserID, scopes []oauth.TypeScope) error {
+	err := a.query.Approval.Create(&model.Approval{
+		ClientID: string(clientID),
+		UserID:   int64(userID),
+	})
+	if err != nil {
+		return err
+	}
+	approval, err := a.query.Approval.Where(
+		a.query.Approval.ClientID.Eq(string(clientID)),
+		a.query.Approval.UserID.Eq(int64(userID)),
+	).First()
+	if err != nil {
+		return err
+	}
+	for _, s := range scopes {
+		err := a.query.ApprovalScope.Create(&model.ApprovalScope{
+			ID:         scopeMapReverse[s],
+			ApprovalID: approval.ID,
+		})
+		if err != nil {
+			return err
+		}
+	}
 }
 
 func toDomainApproval(approval *model.Approval, approvalScopes []*model.ApprovalScope) *oauth.Approval {

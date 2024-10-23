@@ -36,6 +36,9 @@ tasks:
   create-migration:
     cmds:
       - cd atlas && atlas migrate diff --env local
+  remove-migration:
+    cmds:
+      - cd atlas && atlas migrate rm --env local
 
   migrate:
     desc: "Migrate database"
