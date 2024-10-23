@@ -65,3 +65,38 @@ func TestUserFindByIdNotFound(t *testing.T) {
 		t.Errorf("unexpected error: %v", err)
 	}
 }
+
+func TestUserFindByName(t *testing.T) {
+	setup(t)
+
+	const name = "test"
+	const password = "test"
+
+	db := infrastructure.GetDB()
+	userRepo := NewUserRepo(db)
+	err := userRepo.Create(name, password)
+	if err != nil {
+		t.Fatal(err)
+	}
+	user, err := userRepo.FindByName(name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if user.Name != name {
+		t.Errorf("unexpected user.Name: %s", user.Name)
+	}
+	if user.EncryptedPassword != password {
+		t.Errorf("unexpected user.EncryptedPassword: %s", user.EncryptedPassword)
+	}
+}
+
+func TestUserFindByNameNotFound(t *testing.T) {
+	setup(t)
+
+	db := infrastructure.GetDB()
+	userRepo := NewUserRepo(db)
+	_, err := userRepo.FindByName("test")
+	if !errors.Is(err, domain.ErrRecordNotFound) {
+		t.Errorf("unexpected error: %v", err)
+	}
+}
