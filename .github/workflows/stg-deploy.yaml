@@ -1,0 +1,64 @@
+name: Build App for Staging
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+  id-token: write
+  packages: write
+
+jobs:
+  stg-build-backend:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    environment: staging # 管理者の承認を必要とする
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/docker-build
+        with:
+          gh-token: ${{ secrets.GITHUB_TOKEN }}
+          github-actor: ${{ github.actor }}
+          tags: ghcr.io/${{ github.repository }}-backend:stg-${{ github.sha }}-${{ github.run_number }}
+          path: "."
+  stg-build-backend-main:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/docker-build
+        with:
+          gh-token: ${{ secrets.GITHUB_TOKEN }}
+          github-actor: ${{ github.actor }}
+          tags: ghcr.io/${{ github.repository }}-backend:stg-${{ github.sha }}-${{ github.run_number }}
+          path: "."
+
+  stg-build-frontend:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    environment: staging # 管理者の承認を必要とする
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/docker-build
+        with:
+          gh-token: ${{ secrets.GITHUB_TOKEN }}
+          github-actor: ${{ github.actor }}
+          tags: ghcr.io/${{ github.repository }}-frontend:stg-${{ github.sha }}-${{ github.run_number }}
+          path: "./frontend"
+          build-args: |
+            - NEXT_PUBLIC_BACKEND_URL=http://stg-auth.default.svc.cluster.local:8080
+  stg-build-frontend-main:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/docker-build
+        with:
+          gh-token: ${{ secrets.GITHUB_TOKEN }}
+          github-actor: ${{ github.actor }}
+          tags: ghcr.io/${{ github.repository }}-frontend:stg-${{ github.sha }}-${{ github.run_number }}
+          path: "./frontend"
+          build-args: |
+            - NEXT_PUBLIC_BACKEND_URL=http://stg-auth.default.svc.cluster.local:8080

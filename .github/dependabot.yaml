@@ -1,0 +1,26 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 2
+    target-branch: main
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 5
+    target-branch: main
+  - package-ecosystem: npm
+    directory: frontend/
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 5
+    target-branch: main
+  - package-ecosystem: npm
+    directory: spec/
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 5
+    target-branch: main
