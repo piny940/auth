@@ -6,6 +6,7 @@ OAuth2.0、OpenID Connect
 
 - dependency: go, task, aqua, db 作成
 - .env ファイル作成
+- .env.test ファイル作成
 
 - task install
 - task dev

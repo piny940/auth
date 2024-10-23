@@ -2,13 +2,14 @@ import "@typespec/http";
 import "@typespec/rest";
 import "@typespec/openapi3";
 
-import "./model.tsp";
-import "./approvals.tsp";
-import "./clients.tsp";
-import "./oauth.tsp";
-import "./session.tsp";
-import "./users.tsp";
-import "./account/clients.tsp";
+import "./specs/model.tsp";
+import "./specs/approvals.tsp";
+import "./specs/clients.tsp";
+import "./specs/oauth.tsp";
+import "./specs/session.tsp";
+import "./specs/users.tsp";
+import "./specs/account/clients.tsp";
+import "./specs/healthz.tsp";
 
 using TypeSpec.Http;
 @service({

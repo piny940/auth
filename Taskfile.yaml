@@ -45,6 +45,7 @@ tasks:
     desc: "Migrate database"
     cmds:
       - cd atlas && atlas migrate apply --env local
+      - cd atlas && atlas migrate apply --env test
 
   dev:
     desc: "Run development server"
@@ -76,3 +77,12 @@ tasks:
     desc: "API doc server for spec"
     cmds:
       - cd spec && pnpm doc
+
+  test:
+    desc: "Run test"
+    cmds:
+      - task test:backend
+  test:
+    desc: "Run test for backend"
+    cmds:
+      - go test ./...

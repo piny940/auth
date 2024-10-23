@@ -196,6 +196,14 @@ paths:
                 required:
                   - error
                   - error_description
+  /healthz:
+    get:
+      operationId: Healthz_check
+      summary: Check health
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
   /oauth/authorize:
     get:
       operationId: OAuthInterface_authorize

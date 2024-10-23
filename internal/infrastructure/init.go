@@ -53,3 +53,8 @@ func Init() {
 func GetDB() *DB {
 	return db
 }
+
+// for test
+func InjectDB(new *DB) {
+	db = new
+}
