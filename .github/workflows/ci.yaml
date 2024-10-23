@@ -44,8 +44,6 @@ jobs:
       - uses: ./.github/actions/setup-server
         with:
           go-version: ${{ env.GO_VERSION }}
-      - name: Copy .env.sample
-        run: cp .env.sample .env.test
       - run: go test ./...
       - name: Build test
         run: go build cmd/main.go
@@ -65,8 +63,6 @@ jobs:
       - uses: ./.github/actions/setup-server
         with:
           go-version: ${{ env.GO_VERSION }}
-      - name: Copy .env.sample
-        run: cp .env.sample .env.test
       - run: go generate ./...
       - name: Check diff
         run: git diff --exit-code
@@ -86,8 +82,6 @@ jobs:
       - uses: ./.github/actions/setup-server
         with:
           go-version: ${{ env.GO_VERSION }}
-      - name: Copy .env.sample
-        run: cp .env.sample .env.test
       - name: Check format
         run: go fmt ./...
 
