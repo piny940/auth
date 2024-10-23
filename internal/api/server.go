@@ -2,6 +2,7 @@ package api
 
 import (
 	"auth/internal/usecase"
+	"context"
 
 	"github.com/kelseyhightower/envconfig"
 )
@@ -31,4 +32,8 @@ func NewServer(authUsecase *usecase.AuthUsecase, clientUC usecase.IClientUsecase
 		ClientUsecase: clientUC,
 		Conf:          conf,
 	}
+}
+
+func (s *Server) HealthzCheck(ctx context.Context, request HealthzCheckRequestObject) (HealthzCheckResponseObject, error) {
+	return HealthzCheck200Response{}, nil
 }
