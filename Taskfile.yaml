@@ -1,6 +1,29 @@
 version: "3"
 
 tasks:
+  install:
+    desc: "Install dependencies"
+    deps:
+      - task: install:aqua
+      - task: install:backend
+      - task: install:frontend
+      - task: install:spec
+  install:aqua:
+    desc: "Install aqua"
+    cmds:
+      - aqua i
+  install:backend:
+    desc: "Install backend dependencies"
+    cmds:
+      - go mod download
+  install:frontend:
+    desc: "Install frontend dependencies"
+    cmds:
+      - cd frontend && pnpm install
+  install:spec:
+    desc: "Install spec dependencies"
+    cmds:
+      - cd spec && pnpm install
   generate:
     desc: "Generate codes"
     cmds:
