@@ -160,6 +160,9 @@ table "auth_codes" {
   column "user_id" {
     type = bigint
   }
+  column "redirect_uri" {
+    type = varchar(255)
+  }
   column "expires_at" {
     type = timestamptz
   }

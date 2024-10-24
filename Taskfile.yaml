@@ -46,6 +46,11 @@ tasks:
     cmds:
       - cd atlas && atlas migrate apply --env local
       - cd atlas && atlas migrate apply --env test
+  migrate:down:
+    desc: "Down migrate database"
+    cmds:
+      - cd atlas && atlas migrate down --env local
+      - cd atlas && atlas migrate down --env test
 
   dev:
     desc: "Run development server"

@@ -31,6 +31,7 @@ erDiagram
     varchar value
     varchar client_id FK
     bigint user_id FK
+    varchar redirect_uri
     timestamptz expires_at
     timestamptz created_at
     timestamptz updated_at
