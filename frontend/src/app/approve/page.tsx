@@ -3,13 +3,14 @@ import { client } from '@/utils/client'
 import { Box, Button, Container, Typography } from '@mui/material'
 
 type Props = {
-  searchParams: {
+  searchParams: Promise<{
     next: string
     scope: string
     client_id: string
-  }
+  }>
 }
-export default async function Page({ searchParams: query }: Props) {
+export default async function Page(props: Props) {
+  const query = await props.searchParams
   if (!query.scope || !query.client_id || !query.next) {
     throw new Error('invalid query')
   }
