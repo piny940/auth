@@ -11,6 +11,9 @@ inputs:
   path:
     description: "Path to Dockerfile"
     required: true
+  build-args:
+    description: "Build arguments"
+    required: false
 
 runs:
   using: composite
@@ -30,3 +33,4 @@ runs:
         context: ${{ inputs.path }}
         file: ${{ inputs.path }}/Dockerfile
         tags: ${{ inputs.tags }}
+        build-args: ${{ inputs.build-args }}
