@@ -20,12 +20,14 @@ import (
 func NewServer() *api.Server {
 	db := infrastructure.GetDB()
 	iUserRepo := gateway.NewUserRepo(db)
-	iApprovalRepo := gateway.NewApprovalRepo(db)
 	userService := domain.NewUserService(iUserRepo)
 	iClientRepo := gateway.NewClientRepo(db)
+	iApprovalRepo := gateway.NewApprovalRepo(db)
 	iAuthCodeRepo := gateway.NewAuthCodeRepo(db)
-	authService := oauth.NewAuthService(iClientRepo, iApprovalRepo, iAuthCodeRepo)
-	authUsecase := usecase.NewAuthUsecase(iUserRepo, iApprovalRepo, userService, authService, iAuthCodeRepo)
+	requestService := oauth.NewRequestService(iClientRepo, iApprovalRepo, iAuthCodeRepo)
+	authCodeService := oauth.NewAuthCodeService(iAuthCodeRepo)
+	approvalService := oauth.NewApprovalService(iApprovalRepo)
+	authUsecase := usecase.NewAuthUsecase(userService, requestService, authCodeService, approvalService, iUserRepo, iApprovalRepo, iAuthCodeRepo)
 	iClientUsecase := usecase.NewClientUsecase(iClientRepo)
 	server := api.NewServer(authUsecase, iClientUsecase)
 	return server

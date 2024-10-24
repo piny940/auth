@@ -21,6 +21,12 @@ type AuthCodeService struct {
 	AuthCodeRepo IAuthCodeRepo
 }
 
+func NewAuthCodeService(authCodeRepo IAuthCodeRepo) *AuthCodeService {
+	return &AuthCodeService{
+		AuthCodeRepo: authCodeRepo,
+	}
+}
+
 func (s *AuthCodeService) IssueAuthCode(clientID ClientID, userID domain.UserID, scopes []TypeScope) (*AuthCode, error) {
 	const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	b := make([]byte, AUTH_CODE_LEN)

@@ -86,17 +86,7 @@ func (u *AuthUsecase) Request(user *domain.User, req *oauth.AuthRequest) (*oauth
 }
 
 func (u *AuthUsecase) Approve(user *domain.User, clientID oauth.ClientID, scopes []oauth.TypeScope) error {
-	_, err := u.AuthService.ClientRepo.FindByID(clientID)
-	if err != nil {
-		return err
-	}
-	if err := oauth.ValidScopes(scopes); err != nil {
-		return err
-	}
-	if err := u.AuthService.ApprovalRepo.Create(clientID, user.ID, scopes); err != nil {
-		return err
-	}
-	return nil
+	return u.ApprovalService.Approve(clientID, user.ID, scopes)
 }
 
 var (
