@@ -84,8 +84,8 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
       - name: Check format
         run: go fmt ./...
-
-  front-test:
+  
+  front-lint:
     runs-on: ubuntu-latest
     needs: filter
     if: ${{ needs.filter.outputs.frontend == 'true' }}
@@ -99,4 +99,38 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: "pnpm"
       - run: cd frontend && pnpm install
-      - run: cd frontend && pnpm test
+      - name: Prettier && ESLint
+        run: cd frontend && if pnpm lint-check |& grep -E "(error|warn)"; then exit 1; fi
+
+  # front-test:
+  #   runs-on: ubuntu-latest
+  #   needs: filter
+  #   if: ${{ needs.filter.outputs.frontend == 'true' }}
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: pnpm/action-setup@v4
+  #       with:
+  #         version: ${{ env.PNPM_VERSION}}
+  #     - uses: actions/setup-node@v4
+  #       with:
+  #         node-version: ${{ env.NODE_VERSION }}
+  #         cache: "pnpm"
+  #     - run: cd frontend && pnpm install
+  #     - run: cd frontend && pnpm test
+
+  spec-lint:
+    runs-on: ubuntu-latest
+    needs: filter
+    if: ${{ needs.filter.outputs.spec == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION}}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+      - run: cd spec && pnpm install
+      - name: Prettier && ESLint
+        run: cd spec && pnpm lint-check
