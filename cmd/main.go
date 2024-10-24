@@ -5,6 +5,7 @@ package main
 
 import (
 	"auth/internal/api"
+	"auth/internal/domain/oauth"
 	"auth/internal/infrastructure"
 	"auth/internal/server"
 
@@ -15,6 +16,7 @@ func main() {
 	godotenv.Load()
 	infrastructure.Init()
 	api.Init()
+	oauth.Init()
 	e := server.Init()
 
 	server.Start(e)

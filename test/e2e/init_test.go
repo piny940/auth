@@ -5,6 +5,7 @@ package e2e
 
 import (
 	"auth/internal/api"
+	"auth/internal/domain/oauth"
 	"auth/internal/infrastructure"
 	"auth/internal/server"
 	"net/http/httptest"
@@ -36,6 +37,7 @@ func newServer(t *testing.T) *httptest.Server {
 	tx := baseClient.Begin()
 	infrastructure.InjectDB(&infrastructure.DB{Client: tx})
 	api.Init()
+	oauth.Init()
 	e := server.Init()
 	return httptest.NewServer(e)
 }
