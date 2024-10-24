@@ -10,6 +10,23 @@ permissions:
   packages: write
 
 jobs:
+  filter:
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+      spec: ${{ steps.filter.outputs.spec }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            frontend:
+              - "frontend/**"
+              - ".github/workflows/prd-deploy.yaml"
+            spec:
+              - "spec/**"
+              - ".github/workflows/prd-deploy.yaml"
   prd-build-backend:
     runs-on: ubuntu-latest
     environment: production
@@ -24,6 +41,8 @@ jobs:
   prd-build-frontend:
     runs-on: ubuntu-latest
     environment: production
+    needs: filter
+    if: needs.filter.outputs.frontend == 'true'
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/docker-build
@@ -33,4 +52,4 @@ jobs:
           tags: ghcr.io/${{ github.repository }}-frontend:1.0.${{ github.run_number }}
           path: "./frontend"
           build-args: |
-            - NEXT_PUBLIC_BACKEND_URL=http://auth.default.svc.cluster.local:8080
+            NEXT_PUBLIC_BACKEND_URL=https://auth.piny940.com/api/v1
