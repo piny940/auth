@@ -19,13 +19,6 @@ type ApprovalRepo struct {
 
 const APPROVAL_SCOPE_BATCH_SIZE = 20
 
-var scopeMap = map[int32]oauth.TypeScope{
-	0: oauth.ScopeOpenID,
-}
-var scopeMapReverse = map[oauth.TypeScope]int32{
-	oauth.ScopeOpenID: 0,
-}
-
 func NewApprovalRepo(db *infrastructure.DB) oauth.IApprovalRepo {
 	query := query.Use(db.Client)
 	return &ApprovalRepo{

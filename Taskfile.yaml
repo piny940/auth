@@ -29,7 +29,7 @@ tasks:
   generate:
     desc: "Generate codes"
     cmds:
-      - task create-migration
+      - task migrate:create
       - cd spec && pnpm compile
       - go generate ./...
       - cd frontend && pnpm codegen
