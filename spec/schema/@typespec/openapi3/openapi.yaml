@@ -304,20 +304,44 @@ paths:
   /oauth/token:
     post:
       operationId: OAuthInterface_getToken
-      summary: Get a token
-      parameters: []
+      summary: Get token
+      parameters:
+        - name: grant_type
+          in: query
+          required: true
+          schema:
+            type: string
+          explode: false
+        - name: code
+          in: query
+          required: true
+          schema:
+            type: string
+          explode: false
+        - name: redirect_uri
+          in: query
+          required: true
+          schema:
+            type: string
+          explode: false
+        - name: client_id
+          in: query
+          required: true
+          schema:
+            type: string
+          explode: false
       responses:
         '200':
           description: The request has succeeded.
-          content:
-            application/json:
+          headers:
+            cache-control:
+              required: true
               schema:
-                type: object
-                properties:
-                  token:
-                    type: string
-                required:
-                  - token
+                $ref: '#/components/schemas/OAuth.TokenCacheControlHeader'
+            pragma:
+              required: true
+              schema:
+                $ref: '#/components/schemas/OAuth.TokenPragmaHeader'
         '400':
           description: The server could not understand the request due to invalid syntax.
           content:
@@ -338,15 +362,9 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                client_id:
-                  type: string
-                client_secret:
-                  type: string
-              required:
-                - client_id
-                - client_secret
+              $ref: '#/components/schemas/OAuth.TokenRes'
+      security:
+        - BasicAuth: []
   /session:
     get:
       operationId: SessionInterface_me
@@ -523,6 +541,35 @@ components:
           type: string
         state:
           type: string
+    OAuth.TokenCacheControlHeader:
+      type: string
+      enum:
+        - no-store
+    OAuth.TokenPragmaHeader:
+      type: string
+      enum:
+        - no-store
+    OAuth.TokenRes:
+      type: object
+      required:
+        - access_token
+        - token_type
+        - expires_in
+      properties:
+        access_token:
+          type: string
+        token_type:
+          $ref: '#/components/schemas/OAuth.TokenTokenType'
+        expires_in:
+          type: integer
+          format: int32
+        id_token:
+          type: string
+          title: Id token, if scope includes 'openid'
+    OAuth.TokenTokenType:
+      type: string
+      enum:
+        - Bearer
     PublicClient:
       type: object
       required:
@@ -597,6 +644,9 @@ components:
       type: apiKey
       in: cookie
       name: auth
+    BasicAuth:
+      type: http
+      scheme: basic
 servers:
   - url: https://auth.piny940.com/api/v1
     description: Auth Server

@@ -23,6 +23,23 @@ enum AuthorizeErr {
   server_error,
   temporarily_unavailable,
 }
+model TokenRes {
+  access_token: string;
+  token_type: TokenTokenType;
+  expires_in: int32;
+  
+  @summary("Id token, if scope includes 'openid'")
+  id_token?: string;
+}
+enum TokenTokenType {
+  Bearer,
+}
+enum TokenCacheControlHeader {
+  no_store: "no-store"
+}
+enum TokenPragmaHeader {
+  no_store: "no-store"
+}
 
 @route("/oauth")
 interface OAuthInterface {
@@ -67,10 +84,18 @@ interface OAuthInterface {
 
   @route("/token")
   @post
-  @summary("Get a token")
-  getToken(client_id: string, client_secret: string): {
+  @summary("Get token")
+  @useAuth(BasicAuth)
+  getToken(
+    @query grant_type: string,
+    @query code: string,
+    @query redirect_uri: string,
+    @query client_id: string,
+    @body body: TokenRes
+  ): {
     @statusCode statusCode: 200;
-    token: string;
+    @header cacheControl: TokenCacheControlHeader;
+    @header pragma: TokenPragmaHeader;
   } | {
     @statusCode statusCode: 400;
     error: int32;
