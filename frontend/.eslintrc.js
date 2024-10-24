@@ -26,5 +26,4 @@ module.exports = {
     '@typescript-eslint/no-confusing-void-expression': 'off',
     'object-shorthand': 'off',
   },
-  ignores: ['node_modules/', '.next/', 'next-env.d.ts', 'next.config.mjs', 'pnpm-lock.yaml'],
 }
