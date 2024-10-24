@@ -96,16 +96,21 @@ func (s *AuthService) Approved(r *AuthRequest, user *domain.User) (bool, error) 
 }
 
 func (s *AuthService) IssueAuthCode(clientID ClientID, userID domain.UserID, scopes []TypeScope) (*AuthCode, error) {
-	v := make([]byte, AUTH_CODE_LEN)
-	if _, err := rand.Read(v); err != nil {
+	const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	b := make([]byte, AUTH_CODE_LEN)
+	if _, err := rand.Read(b); err != nil {
 		return nil, err
 	}
+	var code string
+	for _, v := range b {
+		code += string(letters[int(v)%len(letters)])
+	}
 	expiresAt := time.Now().Add(AUTH_CODE_TTL)
-	if err := s.AuthCodeRepo.Create(string(v), clientID, userID, scopes, expiresAt); err != nil {
+	if err := s.AuthCodeRepo.Create(code, clientID, userID, scopes, expiresAt); err != nil {
 		return nil, err
 	}
 	return &AuthCode{
-		Value:     string(v),
+		Value:     code,
 		ClientID:  clientID,
 		UserID:    userID,
 		ExpiresAt: expiresAt,
