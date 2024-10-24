@@ -44,11 +44,9 @@ func (c *clientRepo) FindByID(id ClientID) (*Client, error) {
 	panic("unimplemented")
 }
 
-func TestAuthServiceIssueAuthCode(t *testing.T) {
-	s := &AuthService{
+func TestAuthCodeServiceIssueAuthCode(t *testing.T) {
+	s := &AuthCodeService{
 		AuthCodeRepo: &authCodeRepo{authCodes: []*AuthCode{}},
-		ApprovalRepo: &approvalRepo{},
-		ClientRepo:   &clientRepo{},
 	}
 	client := &Client{ID: "client_id"}
 	user := &domain.User{ID: 1}
