@@ -40,7 +40,7 @@ func (s *Server) OAuthInterfaceAuthorize(ctx context.Context, request OAuthInter
 	if err != nil {
 		return nil, err
 	}
-	err = s.AuthUsecase.Request(user, toDAuthParams(request.Params))
+	code, err := s.AuthUsecase.Request(user, toDAuthParams(request.Params))
 	if errors.Is(err, oauth.ErrInvalidRequestType) {
 		return OAuthInterfaceAuthorize400JSONResponse{
 			Error:            OAuthAuthorizeErrUnsupportedResponseType,
@@ -82,10 +82,16 @@ func (s *Server) OAuthInterfaceAuthorize(ctx context.Context, request OAuthInter
 	if err != nil {
 		return nil, err
 	}
-	// TODO: attach auth code
+	query := map[string]string{
+		"code": code.Value,
+	}
+	if request.Params.State != nil {
+		query["state"] = *request.Params.State
+	}
+	url := request.Params.RedirectUri + "?" + toQueryString(query)
 	return OAuthInterfaceAuthorize302Response{
 		Headers: OAuthInterfaceAuthorize302ResponseHeaders{
-			Location: request.Params.RedirectUri,
+			Location: url,
 		},
 	}, nil
 }
