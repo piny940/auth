@@ -11,6 +11,7 @@ type AuthUsecase struct {
 	ApprovalRepo oauth.IApprovalRepo
 	UserService  *domain.UserService
 	AuthService  *oauth.AuthService
+	AuthCodeRepo oauth.IAuthCodeRepo
 }
 
 func NewAuthUsecase(
@@ -18,12 +19,14 @@ func NewAuthUsecase(
 	approvalRepo oauth.IApprovalRepo,
 	userSvc *domain.UserService,
 	authSvc *oauth.AuthService,
+	authCodeRepo oauth.IAuthCodeRepo,
 ) *AuthUsecase {
 	return &AuthUsecase{
 		UserRepo:     userRepo,
 		ApprovalRepo: approvalRepo,
 		UserService:  userSvc,
 		AuthService:  authSvc,
+		AuthCodeRepo: authCodeRepo,
 	}
 }
 
@@ -61,19 +64,19 @@ func (u *AuthUsecase) SignUp(username, password, passwordConfirmation string) (*
 	return user, nil
 }
 
-func (u *AuthUsecase) Request(user *domain.User, req *oauth.AuthRequest) error {
+func (u *AuthUsecase) Request(user *domain.User, req *oauth.AuthRequest) (*oauth.AuthCode, error) {
 	err := u.AuthService.Validate(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	ok, err := u.AuthService.Approved(req, user)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if !ok {
-		return ErrNotApproved
+		return nil, ErrNotApproved
 	}
-	return nil
+	return u.AuthService.IssueAuthCode(req.ClientID, user.ID, req.Scopes)
 }
 
 func (u *AuthUsecase) Approve(user *domain.User, clientID oauth.ClientID, scopes []oauth.TypeScope) error {

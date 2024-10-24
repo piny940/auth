@@ -22,6 +22,7 @@ func (r *registry) NewServer() *api.Server {
 		domain.NewUserService,
 		oauth.NewAuthService,
 		gateway.NewClientRepo,
+		gateway.NewAuthCodeRepo,
 		usecase.NewClientUsecase,
 		infrastructure.GetDB,
 	)

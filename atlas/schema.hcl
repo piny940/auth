@@ -130,12 +130,81 @@ table "approval_scopes" {
   column "approval_id" {
     type = bigint
   }
+  column "created_at" {
+    type = timestamptz
+  }
+  column "updated_at" {
+    type = timestamptz
+  }
   primary_key {
     columns = [column.scope_id, column.approval_id]
   }
   foreign_key "approval_id" {
     columns = [column.approval_id]
     ref_columns = [table.approvals.column.id]
+    on_update = NO_ACTION
+    on_delete = CASCADE
+  }
+}
+table "auth_codes" {
+  schema = schema.public
+  column "id" {
+    type = bigserial
+  }
+  column "value" {
+    type = varchar(32)
+  }
+  column "client_id" {
+    type = varchar(16)
+  }
+  column "user_id" {
+    type = bigint
+  }
+  column "expires_at" {
+    type = timestamptz
+  }
+  column "created_at" {
+    type = timestamptz
+  }
+  column "updated_at" {
+    type = timestamptz
+  }
+  primary_key {
+    columns = [column.id]
+  }
+  foreign_key "client_id" {
+    columns = [column.client_id]
+    ref_columns = [table.clients.column.id]
+    on_update = NO_ACTION
+    on_delete = CASCADE
+  }
+  foreign_key "user_id" {
+    columns = [column.user_id]
+    ref_columns = [table.users.column.id]
+    on_update = NO_ACTION
+    on_delete = CASCADE
+  }
+}
+table "auth_code_scopes" {
+  schema = schema.public
+  column "scope_id" {
+    type = int
+  }
+  column "auth_code_id" {
+    type = bigint
+  }
+  column "created_at" {
+    type = timestamptz
+  }
+  column "updated_at" {
+    type = timestamptz
+  }
+  primary_key {
+    columns = [column.scope_id, column.auth_code_id]
+  }
+  foreign_key "auth_code_id" {
+    columns = [column.auth_code_id]
+    ref_columns = [table.auth_codes.column.id]
     on_update = NO_ACTION
     on_delete = CASCADE
   }

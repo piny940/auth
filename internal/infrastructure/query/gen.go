@@ -19,6 +19,8 @@ var (
 	Q             = new(Query)
 	Approval      *approval
 	ApprovalScope *approvalScope
+	AuthCode      *authCode
+	AuthCodeScope *authCodeScope
 	Client        *client
 	RedirectURI   *redirectURI
 	User          *user
@@ -28,6 +30,8 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	*Q = *Use(db, opts...)
 	Approval = &Q.Approval
 	ApprovalScope = &Q.ApprovalScope
+	AuthCode = &Q.AuthCode
+	AuthCodeScope = &Q.AuthCodeScope
 	Client = &Q.Client
 	RedirectURI = &Q.RedirectURI
 	User = &Q.User
@@ -38,6 +42,8 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		db:            db,
 		Approval:      newApproval(db, opts...),
 		ApprovalScope: newApprovalScope(db, opts...),
+		AuthCode:      newAuthCode(db, opts...),
+		AuthCodeScope: newAuthCodeScope(db, opts...),
 		Client:        newClient(db, opts...),
 		RedirectURI:   newRedirectURI(db, opts...),
 		User:          newUser(db, opts...),
@@ -49,6 +55,8 @@ type Query struct {
 
 	Approval      approval
 	ApprovalScope approvalScope
+	AuthCode      authCode
+	AuthCodeScope authCodeScope
 	Client        client
 	RedirectURI   redirectURI
 	User          user
@@ -61,6 +69,8 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		db:            db,
 		Approval:      q.Approval.clone(db),
 		ApprovalScope: q.ApprovalScope.clone(db),
+		AuthCode:      q.AuthCode.clone(db),
+		AuthCodeScope: q.AuthCodeScope.clone(db),
 		Client:        q.Client.clone(db),
 		RedirectURI:   q.RedirectURI.clone(db),
 		User:          q.User.clone(db),
@@ -80,6 +90,8 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		db:            db,
 		Approval:      q.Approval.replaceDB(db),
 		ApprovalScope: q.ApprovalScope.replaceDB(db),
+		AuthCode:      q.AuthCode.replaceDB(db),
+		AuthCodeScope: q.AuthCodeScope.replaceDB(db),
 		Client:        q.Client.replaceDB(db),
 		RedirectURI:   q.RedirectURI.replaceDB(db),
 		User:          q.User.replaceDB(db),
@@ -89,6 +101,8 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 type queryCtx struct {
 	Approval      IApprovalDo
 	ApprovalScope IApprovalScopeDo
+	AuthCode      IAuthCodeDo
+	AuthCodeScope IAuthCodeScopeDo
 	Client        IClientDo
 	RedirectURI   IRedirectURIDo
 	User          IUserDo
@@ -98,6 +112,8 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
 		Approval:      q.Approval.WithContext(ctx),
 		ApprovalScope: q.ApprovalScope.WithContext(ctx),
+		AuthCode:      q.AuthCode.WithContext(ctx),
+		AuthCodeScope: q.AuthCodeScope.WithContext(ctx),
 		Client:        q.Client.WithContext(ctx),
 		RedirectURI:   q.RedirectURI.WithContext(ctx),
 		User:          q.User.WithContext(ctx),

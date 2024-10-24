@@ -8,17 +8,17 @@ import (
 	"time"
 )
 
-const TableNameApprovalScope = "approval_scopes"
+const TableNameAuthCodeScope = "auth_code_scopes"
 
-// ApprovalScope mapped from table <approval_scopes>
-type ApprovalScope struct {
+// AuthCodeScope mapped from table <auth_code_scopes>
+type AuthCodeScope struct {
 	ScopeID    int32     `gorm:"column:scope_id;primaryKey" json:"scope_id"`
-	ApprovalID int64     `gorm:"column:approval_id;primaryKey" json:"approval_id"`
+	AuthCodeID int64     `gorm:"column:auth_code_id;primaryKey" json:"auth_code_id"`
 	CreatedAt  time.Time `gorm:"column:created_at;not null" json:"created_at"`
 	UpdatedAt  time.Time `gorm:"column:updated_at;not null" json:"updated_at"`
 }
 
-// TableName ApprovalScope's table name
-func (*ApprovalScope) TableName() string {
-	return TableNameApprovalScope
+// TableName AuthCodeScope's table name
+func (*AuthCodeScope) TableName() string {
+	return TableNameAuthCodeScope
 }

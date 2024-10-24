@@ -29,15 +29,15 @@ tasks:
   generate:
     desc: "Generate codes"
     cmds:
-      - task create-migration
+      - task migrate:create
       - cd spec && pnpm compile
       - go generate ./...
       - cd frontend && pnpm codegen
 
-  create-migration:
+  migrate:create:
     cmds:
-      - cd atlas && atlas migrate diff --env local
-  remove-migration:
+      - cd atlas && atlas migrate diff {{.CLI_ARGS}} --env local
+  migrate:remove:
     cmds:
       - cd atlas && atlas migrate rm --env local
 
