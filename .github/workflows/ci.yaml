@@ -94,10 +94,12 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           version: ${{ env.PNPM_VERSION}}
+          package_json_file: "frontend/package.json"
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: "pnpm"
+          cache-dependency-path: "spec/package.json"
       - run: cd frontend && pnpm install
       - name: Prettier && ESLint
         run: cd frontend && if pnpm lint-check |& grep -E "(error|warn)"; then exit 1; fi
@@ -127,10 +129,12 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           version: ${{ env.PNPM_VERSION}}
+          package_json_file: "spec/package.json"
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: "pnpm"
+          cache-dependency-path: "spec/package.json"
       - run: cd spec && pnpm install
       - name: Prettier && ESLint
         run: cd spec && pnpm lint-check
