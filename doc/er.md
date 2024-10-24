@@ -24,6 +24,7 @@ erDiagram
     bigint client_id FK
     bigint user_id FK
     timestamp expires_at
+    int[] scopes
     timestamp created_at
     timestamp updated_at
   }
@@ -34,7 +35,6 @@ erDiagram
     varchar refresh_token
     timestamp expires_at
     varchar auth_code
-    int[] scopes
     timestamp created_at
     timestamp updated_at
   }
