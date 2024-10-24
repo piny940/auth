@@ -14,8 +14,8 @@ jobs:
   filter:
     runs-on: ubuntu-latest
     outputs:
-      frontend: ${{ steps.frontend.outputs.frontend }}
-      spec: ${{ steps.spec.outputs.spec }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+      spec: ${{ steps.filter.outputs.spec }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
