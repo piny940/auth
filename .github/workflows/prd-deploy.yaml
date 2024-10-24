@@ -52,4 +52,4 @@ jobs:
           tags: ghcr.io/${{ github.repository }}-frontend:1.0.${{ github.run_number }}
           path: "./frontend"
           build-args: |
-            - NEXT_PUBLIC_BACKEND_URL=http://auth.default.svc.cluster.local:8080/api/v1
+            - NEXT_PUBLIC_BACKEND_URL=https://auth.piny940.com/api/v1

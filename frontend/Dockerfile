@@ -7,7 +7,7 @@ FROM node:${NODE_VERSION}-alpine AS base
 
 WORKDIR /usr/src/app
 
-ENV PNPM_HOME="/pnpm"
+ENV PNPM_HOME "/pnpm"
 ENV PATH "$PNPM_HOME:$PATH"
 
 RUN corepack enable
