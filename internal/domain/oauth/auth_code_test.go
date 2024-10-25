@@ -14,7 +14,12 @@ type authCodeRepo struct {
 var _ IAuthCodeRepo = &authCodeRepo{}
 
 func (a *authCodeRepo) Find(value string) (*AuthCode, error) {
-	panic("unimplemented")
+	for _, code := range a.authCodes {
+		if code.Value == value {
+			return code, nil
+		}
+	}
+	return nil, domain.ErrRecordNotFound
 }
 
 func (a *authCodeRepo) Create(value string, clientID ClientID, userID domain.UserID, scopes []TypeScope, expiresAt time.Time, redirectURI string) error {
@@ -39,14 +44,6 @@ func (a *approvalRepo) Create(clientID ClientID, userID domain.UserID, scopes []
 }
 
 func (a *approvalRepo) Find(clientID ClientID, userID domain.UserID) (*Approval, error) {
-	panic("unimplemented")
-}
-
-type clientRepo struct{}
-
-var _ IClientRepo = &clientRepo{}
-
-func (c *clientRepo) FindByID(id ClientID) (*Client, error) {
 	panic("unimplemented")
 }
 
@@ -82,5 +79,45 @@ func TestAuthCodeServiceIssueAuthCode(t *testing.T) {
 	}
 	if code1.Value == code2.Value {
 		t.Errorf("want different value, got same value")
+	}
+}
+
+func TestAuthCodeVerify(t *testing.T) {
+	now := time.Now()
+	oauthCodes := []*AuthCode{
+		{"active", "client_id", 1, now.Add(time.Minute), false, "redirect_uri", []TypeScope{"scope1", "scope2"}},
+		{"used", "client_id", 1, now.Add(time.Minute), true, "redirect_uri", []TypeScope{"scope1", "scope2"}},
+		{"expired", "client_id", 1, now.Add(-time.Minute), false, "redirect_uri", []TypeScope{"scope1", "scope2"}},
+	}
+	suites := []struct {
+		Name        string
+		Value       string
+		ClientID    ClientID
+		RedirectURI string
+		WantError   bool
+	}{
+		{"valid", "active", "client_id", "redirect_uri", false},
+		{"used", "used", "client_id", "redirect_uri", true},
+		{"expired", "expired", "client_id", "redirect_uri", true},
+		{"not found", "not_found", "client_id", "redirect_uri", true},
+		{"invalid client id", "active", "invalid_client_id", "redirect_uri", true},
+		{"invalid redirect url", "active", "client_id", "invalid_redirect_uri", true},
+	}
+	for _, suit := range suites {
+		t.Run(suit.Name, func(t *testing.T) {
+			s := &AuthCodeService{
+				AuthCodeRepo: &authCodeRepo{authCodes: oauthCodes},
+			}
+			_, err := s.Verify(suit.Value, suit.ClientID, suit.RedirectURI)
+			if suit.WantError {
+				if err == nil {
+					t.Error("want error, got nil")
+				}
+				return
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+		})
 	}
 }
