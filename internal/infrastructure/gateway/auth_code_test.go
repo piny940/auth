@@ -6,6 +6,7 @@ import (
 	"auth/internal/infrastructure"
 	"auth/internal/infrastructure/model"
 	"auth/internal/infrastructure/query"
+	"errors"
 	"testing"
 	"time"
 )
@@ -56,5 +57,72 @@ func TestAuthCodeCreate(t *testing.T) {
 	}
 	if actual.Used {
 		t.Errorf("unexpected actual.Used: %t", actual.Used)
+	}
+	actualScopes, err := query.AuthCodeScope.Where(
+		query.AuthCodeScope.AuthCodeID.Eq(actual.ID),
+	).Find()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(actualScopes) != 1 { // 重複は排除される
+		t.Fatalf("unexpected len(actualScopes): %d", len(actualScopes))
+	}
+	if actualScopes[0].ScopeID != scopeMapReverse[oauth.ScopeOpenID] {
+		t.Errorf("unexpected actualScopes[0].ScopeID: %d", actualScopes[0].ScopeID)
+	}
+}
+
+func TestAuthCodeFind(t *testing.T) {
+	setup(t)
+
+	db := infrastructure.GetDB()
+	query := query.Use(db.Client)
+	authCodeRepo := NewAuthCodeRepo(db)
+	scopes := []oauth.TypeScope{oauth.ScopeOpenID, oauth.ScopeOpenID}
+	expiresAt := time.Now()
+	clientID := "test_client_id"
+	userID := int64(1)
+	value := "test_value"
+	query.User.Create(&model.User{ID: userID, Name: "test", EncryptedPassword: "test"})
+	query.Client.Create(&model.Client{ID: clientID, EncryptedSecret: "", UserID: 1})
+	err := authCodeRepo.Create(value, oauth.ClientID(clientID), domain.UserID(userID), scopes, expiresAt, "test_redirect_uri")
+	if err != nil {
+		t.Fatal(err)
+	}
+	authCode, err := authCodeRepo.Find(value)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if authCode.ClientID != oauth.ClientID(clientID) {
+		t.Errorf("unexpected authCode.ClientID: %s", authCode.ClientID)
+	}
+	if authCode.UserID != domain.UserID(userID) {
+		t.Errorf("unexpected authCode.UserID: %d", authCode.UserID)
+	}
+	if authCode.ExpiresAt.Unix() != expiresAt.Unix() { // DBはnano秒精度を持たないため秒単位で比較する
+		t.Errorf("expected ExpiresAt: %s, but got %s", expiresAt, authCode.ExpiresAt)
+	}
+	if authCode.RedirectURI != "test_redirect_uri" {
+		t.Errorf("unexpected authCode.RedirectURI: %s", authCode.RedirectURI)
+	}
+	if authCode.Used {
+		t.Errorf("unexpected authCode.Used: %t", authCode.Used)
+	}
+	if len(authCode.Scopes) != 1 {
+		t.Fatalf("unexpected len(authCode.Scopes): %d", len(authCode.Scopes))
+	}
+	if authCode.Scopes[0] != oauth.ScopeOpenID {
+		t.Errorf("unexpected authCode.Scopes[0]: %s", authCode.Scopes[0])
+	}
+}
+
+func TestAuthCodeRepoFindEmpty(t *testing.T) {
+	setup(t)
+
+	db := infrastructure.GetDB()
+	authCodeRepo := NewAuthCodeRepo(db)
+	_, err := authCodeRepo.Find("test")
+	if !errors.Is(err, domain.ErrRecordNotFound) {
+		t.Errorf("unexpected error: %v", err)
 	}
 }
