@@ -8,11 +8,11 @@ type Config struct {
 	Issuer                  string `required:"true"`
 }
 
-var config = &Config{}
-
-func Init() {
-	err := envconfig.Process("oauth", config)
+func NewConfig() *Config {
+	conf := &Config{}
+	err := envconfig.Process("oauth", conf)
 	if err != nil {
 		panic(err)
 	}
+	return conf
 }

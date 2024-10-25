@@ -23,7 +23,7 @@ const (
 	ACCESS_TOKEN_JTI_LEN = 32
 )
 
-func NewTokenService() *TokenService {
+func NewTokenService(config *Config) *TokenService {
 	rsaPrivateKey, err := jwt.ParseRSAPrivateKeyFromPEMWithPassword(
 		[]byte(config.RsaPrivateKey),
 		config.RsaPrivateKeyPassPhrase,
@@ -37,7 +37,7 @@ func NewTokenService() *TokenService {
 	}
 }
 
-func (s *TokenService) IssueAccessToken(authCode AuthCode, scopes []TypeScope) (*AccessToken, error) {
+func (s *TokenService) IssueAccessToken(_ *AuthCode, scopes []TypeScope) (*AccessToken, error) {
 	const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	b := make([]byte, ACCESS_TOKEN_JTI_LEN)
 	if _, err := rand.Read(b); err != nil {
