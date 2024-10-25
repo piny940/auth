@@ -82,7 +82,7 @@ func (u *AuthUsecase) Request(user *domain.User, req *oauth.AuthRequest) (*oauth
 	if !ok {
 		return nil, ErrNotApproved
 	}
-	return u.AuthCodeService.IssueAuthCode(req.ClientID, user.ID, req.Scopes)
+	return u.AuthCodeService.IssueAuthCode(req.ClientID, user.ID, req.Scopes, req.RedirectURI)
 }
 
 func (u *AuthUsecase) Approve(user *domain.User, clientID oauth.ClientID, scopes []oauth.TypeScope) error {

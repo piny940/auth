@@ -13,13 +13,19 @@ type authCodeRepo struct {
 
 var _ IAuthCodeRepo = &authCodeRepo{}
 
-func (a *authCodeRepo) Create(value string, clientID ClientID, userID domain.UserID, scopes []TypeScope, expiresAt time.Time) error {
+func (a *authCodeRepo) Find(value string) (*AuthCode, error) {
+	panic("unimplemented")
+}
+
+func (a *authCodeRepo) Create(value string, clientID ClientID, userID domain.UserID, scopes []TypeScope, expiresAt time.Time, redirectURI string) error {
 	a.authCodes = append(a.authCodes, &AuthCode{
-		Value:     value,
-		ClientID:  clientID,
-		UserID:    userID,
-		ExpiresAt: expiresAt,
-		Scopes:    scopes,
+		Value:       value,
+		ClientID:    clientID,
+		UserID:      userID,
+		ExpiresAt:   expiresAt,
+		Used:        false,
+		RedirectURI: redirectURI,
+		Scopes:      scopes,
 	})
 	return nil
 }
@@ -51,7 +57,7 @@ func TestAuthCodeServiceIssueAuthCode(t *testing.T) {
 	client := &Client{ID: "client_id"}
 	user := &domain.User{ID: 1}
 	scopes := []TypeScope{"scope1", "scope2"}
-	code1, err := s.IssueAuthCode(client.ID, user.ID, scopes)
+	code1, err := s.IssueAuthCode(client.ID, user.ID, scopes, "redirect_uri")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -67,7 +73,10 @@ func TestAuthCodeServiceIssueAuthCode(t *testing.T) {
 	if code1.ExpiresAt.IsZero() {
 		t.Error("want non-zero, got zero")
 	}
-	code2, err := s.IssueAuthCode(client.ID, user.ID, scopes)
+	if code1.Used {
+		t.Error("want false, got true")
+	}
+	code2, err := s.IssueAuthCode(client.ID, user.ID, scopes, "redirect_uri")
 	if err != nil {
 		t.Fatal(err)
 	}

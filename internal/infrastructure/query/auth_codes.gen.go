@@ -32,6 +32,7 @@ func newAuthCode(db *gorm.DB, opts ...gen.DOOption) authCode {
 	_authCode.ClientID = field.NewString(tableName, "client_id")
 	_authCode.UserID = field.NewInt64(tableName, "user_id")
 	_authCode.RedirectURI = field.NewString(tableName, "redirect_uri")
+	_authCode.Used = field.NewBool(tableName, "used")
 	_authCode.ExpiresAt = field.NewTime(tableName, "expires_at")
 	_authCode.CreatedAt = field.NewTime(tableName, "created_at")
 	_authCode.UpdatedAt = field.NewTime(tableName, "updated_at")
@@ -50,6 +51,7 @@ type authCode struct {
 	ClientID    field.String
 	UserID      field.Int64
 	RedirectURI field.String
+	Used        field.Bool
 	ExpiresAt   field.Time
 	CreatedAt   field.Time
 	UpdatedAt   field.Time
@@ -74,6 +76,7 @@ func (a *authCode) updateTableName(table string) *authCode {
 	a.ClientID = field.NewString(table, "client_id")
 	a.UserID = field.NewInt64(table, "user_id")
 	a.RedirectURI = field.NewString(table, "redirect_uri")
+	a.Used = field.NewBool(table, "used")
 	a.ExpiresAt = field.NewTime(table, "expires_at")
 	a.CreatedAt = field.NewTime(table, "created_at")
 	a.UpdatedAt = field.NewTime(table, "updated_at")
@@ -93,12 +96,13 @@ func (a *authCode) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (a *authCode) fillFieldMap() {
-	a.fieldMap = make(map[string]field.Expr, 8)
+	a.fieldMap = make(map[string]field.Expr, 9)
 	a.fieldMap["id"] = a.ID
 	a.fieldMap["value"] = a.Value
 	a.fieldMap["client_id"] = a.ClientID
 	a.fieldMap["user_id"] = a.UserID
 	a.fieldMap["redirect_uri"] = a.RedirectURI
+	a.fieldMap["used"] = a.Used
 	a.fieldMap["expires_at"] = a.ExpiresAt
 	a.fieldMap["created_at"] = a.CreatedAt
 	a.fieldMap["updated_at"] = a.UpdatedAt
