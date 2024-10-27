@@ -12,7 +12,8 @@ import (
 )
 
 type AccessToken struct {
-	Value string
+	Value     string
+	ExpiresAt time.Time
 }
 
 type TokenService struct {
@@ -59,9 +60,10 @@ func (s *TokenService) IssueAccessToken(authCode *AuthCode) (*AccessToken, error
 	if err != nil {
 		return nil, err
 	}
+	expiresAt := time.Now().Add(ACCESS_TOKEN_TTL)
 	raw := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{
 		"iss":   s.issuer,
-		"exp":   time.Now().Add(ACCESS_TOKEN_TTL).Unix(),
+		"exp":   expiresAt.Unix(),
 		"iat":   time.Now().Unix(),
 		"sub":   fmt.Sprintf("id:%d;name:%s", user.ID, user.Name),
 		"jti":   jti,
@@ -73,6 +75,7 @@ func (s *TokenService) IssueAccessToken(authCode *AuthCode) (*AccessToken, error
 	}
 
 	return &AccessToken{
-		Value: token,
+		Value:     token,
+		ExpiresAt: expiresAt,
 	}, nil
 }

@@ -51,12 +51,15 @@ func TestClientCorrectSecret(t *testing.T) {
 				t.Fatal(err)
 			}
 			client := &Client{EncryptedSecret: string(hash)}
-			correct, err := client.SecretCorrect(suit.ToCompare)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if correct != (suit.ToCompare == secret) {
-				t.Errorf("unexpected result: %v", correct)
+			err = client.SecretCorrect(suit.ToCompare)
+			if suit.ToCompare == secret {
+				if err != nil {
+					t.Fatal(err)
+				}
+			} else {
+				if !errors.Is(err, ErrInvalidClientSecret) {
+					t.Errorf("unexpected error: %v", err)
+				}
 			}
 		})
 	}

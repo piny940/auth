@@ -198,7 +198,15 @@ export interface components {
         /** @enum {string} */
         "OAuth.TokenCacheControlHeader": "no-store";
         /** @enum {string} */
+        "OAuth.TokenErr": "invalid_request";
+        /** @enum {string} */
         "OAuth.TokenPragmaHeader": "no-store";
+        "OAuth.TokenReq": {
+            grant_type: string;
+            code: string;
+            redirect_uri: string;
+            client_id: string;
+        };
         "OAuth.TokenRes": {
             access_token: string;
             token_type: components["schemas"]["OAuth.TokenTokenType"];
@@ -556,19 +564,16 @@ export interface operations {
     };
     OAuthInterface_getToken: {
         parameters: {
-            query: {
-                grant_type: string;
-                code: string;
-                redirect_uri: string;
-                client_id: string;
+            query?: never;
+            header: {
+                authorization: string;
             };
-            header?: never;
             path?: never;
             cookie?: never;
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["OAuth.TokenRes"];
+                "application/x-www-form-urlencoded": components["schemas"]["OAuth.TokenReq"];
             };
         };
         responses: {
@@ -579,7 +584,9 @@ export interface operations {
                     pragma: components["schemas"]["OAuth.TokenPragmaHeader"];
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["OAuth.TokenRes"];
+                };
             };
             /** @description The server could not understand the request due to invalid syntax. */
             400: {
@@ -588,8 +595,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        /** Format: int32 */
-                        error: number;
+                        error: components["schemas"]["OAuth.TokenErr"];
                         error_description: string;
                     };
                 };

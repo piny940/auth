@@ -306,30 +306,11 @@ paths:
       operationId: OAuthInterface_getToken
       summary: Get token
       parameters:
-        - name: grant_type
-          in: query
+        - name: authorization
+          in: header
           required: true
           schema:
             type: string
-          explode: false
-        - name: code
-          in: query
-          required: true
-          schema:
-            type: string
-          explode: false
-        - name: redirect_uri
-          in: query
-          required: true
-          schema:
-            type: string
-          explode: false
-        - name: client_id
-          in: query
-          required: true
-          schema:
-            type: string
-          explode: false
       responses:
         '200':
           description: The request has succeeded.
@@ -342,6 +323,10 @@ paths:
               required: true
               schema:
                 $ref: '#/components/schemas/OAuth.TokenPragmaHeader'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OAuth.TokenRes'
         '400':
           description: The server could not understand the request due to invalid syntax.
           content:
@@ -350,8 +335,7 @@ paths:
                 type: object
                 properties:
                   error:
-                    type: integer
-                    format: int32
+                    $ref: '#/components/schemas/OAuth.TokenErr'
                   error_description:
                     type: string
                 required:
@@ -360,9 +344,9 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/OAuth.TokenRes'
+              $ref: '#/components/schemas/OAuth.TokenReq'
       security:
         - BasicAuth: []
   /session:
@@ -545,10 +529,30 @@ components:
       type: string
       enum:
         - no-store
+    OAuth.TokenErr:
+      type: string
+      enum:
+        - invalid_request
     OAuth.TokenPragmaHeader:
       type: string
       enum:
         - no-store
+    OAuth.TokenReq:
+      type: object
+      required:
+        - grant_type
+        - code
+        - redirect_uri
+        - client_id
+      properties:
+        grant_type:
+          type: string
+        code:
+          type: string
+        redirect_uri:
+          type: string
+        client_id:
+          type: string
     OAuth.TokenRes:
       type: object
       required:

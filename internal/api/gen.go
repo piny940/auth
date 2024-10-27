@@ -54,6 +54,11 @@ const (
 	OAuthTokenCacheControlHeaderNoStore OAuthTokenCacheControlHeader = "no-store"
 )
 
+// Defines values for OAuthTokenErr.
+const (
+	InvalidRequest OAuthTokenErr = "invalid_request"
+)
+
 // Defines values for OAuthTokenPragmaHeader.
 const (
 	OAuthTokenPragmaHeaderNoStore OAuthTokenPragmaHeader = "no-store"
@@ -127,8 +132,19 @@ type OAuthAuthorizeReqMultiPart struct {
 // OAuthTokenCacheControlHeader defines model for OAuth.TokenCacheControlHeader.
 type OAuthTokenCacheControlHeader string
 
+// OAuthTokenErr defines model for OAuth.TokenErr.
+type OAuthTokenErr string
+
 // OAuthTokenPragmaHeader defines model for OAuth.TokenPragmaHeader.
 type OAuthTokenPragmaHeader string
+
+// OAuthTokenReq defines model for OAuth.TokenReq.
+type OAuthTokenReq struct {
+	ClientId    string `json:"client_id"`
+	Code        string `json:"code"`
+	GrantType   string `json:"grant_type"`
+	RedirectUri string `json:"redirect_uri"`
+}
 
 // OAuthTokenRes defines model for OAuth.TokenRes.
 type OAuthTokenRes struct {
@@ -206,10 +222,7 @@ type OAuthInterfaceAuthorizeParams struct {
 
 // OAuthInterfaceGetTokenParams defines parameters for OAuthInterfaceGetToken.
 type OAuthInterfaceGetTokenParams struct {
-	GrantType   string `form:"grant_type" json:"grant_type"`
-	Code        string `form:"code" json:"code"`
-	RedirectUri string `form:"redirect_uri" json:"redirect_uri"`
-	ClientId    string `form:"client_id" json:"client_id"`
+	Authorization string `json:"authorization"`
 }
 
 // ApprovalsInterfaceApproveJSONRequestBody defines body for ApprovalsInterfaceApprove for application/json ContentType.
@@ -224,8 +237,8 @@ type AccountClientsUpdateClientJSONRequestBody AccountClientsUpdateClientJSONBod
 // OAuthInterfacePostAuthorizeMultipartRequestBody defines body for OAuthInterfacePostAuthorize for multipart/form-data ContentType.
 type OAuthInterfacePostAuthorizeMultipartRequestBody = OAuthAuthorizeReqMultiPart
 
-// OAuthInterfaceGetTokenJSONRequestBody defines body for OAuthInterfaceGetToken for application/json ContentType.
-type OAuthInterfaceGetTokenJSONRequestBody = OAuthTokenRes
+// OAuthInterfaceGetTokenFormdataRequestBody defines body for OAuthInterfaceGetToken for application/x-www-form-urlencoded ContentType.
+type OAuthInterfaceGetTokenFormdataRequestBody = OAuthTokenReq
 
 // SessionInterfaceLoginJSONRequestBody defines body for SessionInterfaceLogin for application/json ContentType.
 type SessionInterfaceLoginJSONRequestBody = SessionLoginReq
@@ -455,32 +468,24 @@ func (w *ServerInterfaceWrapper) OAuthInterfaceGetToken(ctx echo.Context) error 
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params OAuthInterfaceGetTokenParams
-	// ------------- Required query parameter "grant_type" -------------
 
-	err = runtime.BindQueryParameter("form", false, true, "grant_type", ctx.QueryParams(), &params.GrantType)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter grant_type: %s", err))
-	}
+	headers := ctx.Request().Header
+	// ------------- Required header parameter "authorization" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("authorization")]; found {
+		var Authorization string
+		n := len(valueList)
+		if n != 1 {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Expected one value for authorization, got %d", n))
+		}
 
-	// ------------- Required query parameter "code" -------------
+		err = runtime.BindStyledParameterWithOptions("simple", "authorization", valueList[0], &Authorization, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: true})
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter authorization: %s", err))
+		}
 
-	err = runtime.BindQueryParameter("form", false, true, "code", ctx.QueryParams(), &params.Code)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter code: %s", err))
-	}
-
-	// ------------- Required query parameter "redirect_uri" -------------
-
-	err = runtime.BindQueryParameter("form", false, true, "redirect_uri", ctx.QueryParams(), &params.RedirectUri)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter redirect_uri: %s", err))
-	}
-
-	// ------------- Required query parameter "client_id" -------------
-
-	err = runtime.BindQueryParameter("form", false, true, "client_id", ctx.QueryParams(), &params.ClientId)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter client_id: %s", err))
+		params.Authorization = Authorization
+	} else {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Header parameter authorization is required, but not found"))
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
@@ -840,7 +845,7 @@ func (response OAuthInterfacePostAuthorize400JSONResponse) VisitOAuthInterfacePo
 
 type OAuthInterfaceGetTokenRequestObject struct {
 	Params OAuthInterfaceGetTokenParams
-	Body   *OAuthInterfaceGetTokenJSONRequestBody
+	Body   *OAuthInterfaceGetTokenFormdataRequestBody
 }
 
 type OAuthInterfaceGetTokenResponseObject interface {
@@ -852,20 +857,23 @@ type OAuthInterfaceGetToken200ResponseHeaders struct {
 	Pragma       OAuthTokenPragmaHeader
 }
 
-type OAuthInterfaceGetToken200Response struct {
+type OAuthInterfaceGetToken200JSONResponse struct {
+	Body    OAuthTokenRes
 	Headers OAuthInterfaceGetToken200ResponseHeaders
 }
 
-func (response OAuthInterfaceGetToken200Response) VisitOAuthInterfaceGetTokenResponse(w http.ResponseWriter) error {
+func (response OAuthInterfaceGetToken200JSONResponse) VisitOAuthInterfaceGetTokenResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("cache-control", fmt.Sprint(response.Headers.CacheControl))
 	w.Header().Set("pragma", fmt.Sprint(response.Headers.Pragma))
 	w.WriteHeader(200)
-	return nil
+
+	return json.NewEncoder(w).Encode(response.Body)
 }
 
 type OAuthInterfaceGetToken400JSONResponse struct {
-	Error            int32  `json:"error"`
-	ErrorDescription string `json:"error_description"`
+	Error            OAuthTokenErr `json:"error"`
+	ErrorDescription string        `json:"error_description"`
 }
 
 func (response OAuthInterfaceGetToken400JSONResponse) VisitOAuthInterfaceGetTokenResponse(w http.ResponseWriter) error {
@@ -1285,11 +1293,15 @@ func (sh *strictHandler) OAuthInterfaceGetToken(ctx echo.Context, params OAuthIn
 
 	request.Params = params
 
-	var body OAuthInterfaceGetTokenJSONRequestBody
-	if err := ctx.Bind(&body); err != nil {
+	if form, err := ctx.FormParams(); err == nil {
+		var body OAuthInterfaceGetTokenFormdataRequestBody
+		if err := runtime.BindForm(&body, form, nil, nil); err != nil {
+			return err
+		}
+		request.Body = &body
+	} else {
 		return err
 	}
-	request.Body = &body
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
 		return sh.ssi.OAuthInterfaceGetToken(ctx.Request().Context(), request.(OAuthInterfaceGetTokenRequestObject))
@@ -1417,37 +1429,37 @@ func (sh *strictHandler) UsersInterfaceSignup(ctx echo.Context) error {
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"4fXF+v8BAAD//yqBLE4rLwAA",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

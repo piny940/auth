@@ -23,6 +23,8 @@ func (r *registry) NewServer() *api.Server {
 		oauth.NewApprovalService,
 		oauth.NewAuthCodeService,
 		oauth.NewRequestService,
+		oauth.NewTokenService,
+		oauth.NewConfig,
 		gateway.NewClientRepo,
 		gateway.NewAuthCodeRepo,
 		usecase.NewClientUsecase,

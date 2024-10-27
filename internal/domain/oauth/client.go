@@ -21,15 +21,15 @@ type IClientRepo interface {
 	FindByID(id ClientID) (*Client, error)
 }
 
-func (c *Client) SecretCorrect(secret string) (bool, error) {
+func (c *Client) SecretCorrect(secret string) error {
 	err := bcrypt.CompareHashAndPassword([]byte(c.EncryptedSecret), []byte(secret))
 	if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
-		return false, nil
+		return ErrInvalidClientSecret
 	}
 	if err != nil {
-		return false, err
+		return err
 	}
-	return true, nil
+	return nil
 }
 
 func EncryptClientSecret(raw string) (string, error) {
@@ -39,3 +39,7 @@ func EncryptClientSecret(raw string) (string, error) {
 	}
 	return string(hash), nil
 }
+
+var (
+	ErrInvalidClientSecret = errors.New("invalid client secret")
+)
