@@ -16,8 +16,7 @@ API スキーマ：<http://piny940.github.io/auth/>
 
 ### DB
 
-マイグレーションファイル作成：`cd atlas && atlas migrate diff {migration name} --env local`
-
-マイグレーション実行：`cd atlas && atlas migrate apply --env local`
-
-DB リセット：`cd atlas && atlas schema clean --env local`
+- マイグレーションファイル作成：`task migrate:create -- {name}`
+  - 作成取り消し：`task migrate:remove`
+- マイグレーション実行：`task migrate`
+  - マイグレーション取り消し：`task migrate:down`
