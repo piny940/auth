@@ -1,7 +1,7 @@
 import { IDToken } from "./types"
 
 export const verifyIDToken = (token: IDToken) => {
-  if (token.iss !== process.env.NEXT_PUBLIC_ISSUER) {
+  if (token.iss !== process.env.TOKEN_ISSUER) {
     throw new Error("issuer is not valid")
   }
   if (token.aud !== process.env.NEXT_PUBLIC_CLIENT_ID) {

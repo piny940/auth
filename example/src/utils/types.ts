@@ -6,3 +6,7 @@ export type IDToken = {
   jti: string
   sub: string
 }
+export type User = {
+  id: string
+  name: string
+}
