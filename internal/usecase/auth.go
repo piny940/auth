@@ -77,7 +77,7 @@ func (u *AuthUsecase) SignUp(username, password, passwordConfirmation string) (*
 	return user, nil
 }
 
-func (u *AuthUsecase) Request(user *domain.User, req *oauth.AuthRequest) (*oauth.AuthCode, error) {
+func (u *AuthUsecase) RequestAuthorization(user *domain.User, req *oauth.AuthRequest) (*oauth.AuthCode, error) {
 	err := u.RequestService.Validate(req)
 	if err != nil {
 		return nil, err
@@ -109,7 +109,7 @@ const (
 	GrantTypeAuthorizationCode TypeGrantType = "authorization_code"
 )
 
-func (u *AuthUsecase) GetToken(req *TokenRequest) (*oauth.AccessToken, error) {
+func (u *AuthUsecase) RequestToken(req *TokenRequest) (*oauth.AccessToken, error) {
 	if req.GrantType != string(GrantTypeAuthorizationCode) {
 		return nil, ErrInvalidGrantType
 	}

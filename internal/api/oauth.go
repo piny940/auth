@@ -42,7 +42,7 @@ func (s *Server) OAuthInterfaceAuthorize(ctx context.Context, request OAuthInter
 	if err != nil {
 		return nil, err
 	}
-	code, err := s.AuthUsecase.Request(user, toDAuthParams(request.Params))
+	code, err := s.AuthUsecase.RequestAuthorization(user, toDAuthParams(request.Params))
 	if errors.Is(err, oauth.ErrInvalidRequestType) {
 		return OAuthInterfaceAuthorize400JSONResponse{
 			Error:            OAuthAuthorizeErrUnsupportedResponseType,
@@ -100,7 +100,7 @@ func (s *Server) OAuthInterfaceAuthorize(ctx context.Context, request OAuthInter
 
 // OAuthInterfaceGetToken implements StrictServerInterface.
 func (s *Server) OAuthInterfaceGetToken(ctx context.Context, request OAuthInterfaceGetTokenRequestObject) (OAuthInterfaceGetTokenResponseObject, error) {
-	accessToken, err := s.AuthUsecase.GetToken(&usecase.TokenRequest{
+	accessToken, err := s.AuthUsecase.RequestToken(&usecase.TokenRequest{
 		GrantType:    request.Body.GrantType,
 		AuthCode:     request.Body.Code,
 		RedirectURI:  request.Body.RedirectUri,
