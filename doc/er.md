@@ -1,6 +1,13 @@
 ```mermaid
 erDiagram
-  blogs ||--o| qiita_articles : "Qiita記事"
+  users ||--o{ clients : "クライアント"
+  clients ||--o{ redirect_uris : ""
+  users ||--o{ auth_codes : "認可した"
+  clients ||--o{ auth_codes : "認可された"
+  auth_codes ||--o{ auth_code_scopes : ""
+  users ||--o{ approvals : "承認した"
+  clients ||--o{ approvals : "承認された"
+  approvals ||--o{ approval_scopes : ""
 
   users {
     bigserial id PK
