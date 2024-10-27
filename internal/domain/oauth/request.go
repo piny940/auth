@@ -4,7 +4,6 @@ import (
 	"auth/internal/domain"
 	"errors"
 	"slices"
-	"time"
 )
 
 type TypeResponseType string
@@ -30,11 +29,6 @@ type RequestService struct {
 	ApprovalRepo IApprovalRepo
 	AuthCodeRepo IAuthCodeRepo
 }
-
-const (
-	AUTH_CODE_TTL = 5 * time.Minute
-	AUTH_CODE_LEN = 32
-)
 
 func NewRequestService(clientRepo IClientRepo, approvalRepo IApprovalRepo, authCodeRepo IAuthCodeRepo) *RequestService {
 	return &RequestService{

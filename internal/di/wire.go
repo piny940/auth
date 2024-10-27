@@ -8,12 +8,13 @@ import (
 	"auth/internal/domain/oauth"
 	"auth/internal/infrastructure"
 	"auth/internal/infrastructure/gateway"
+	"auth/internal/middleware"
 	"auth/internal/usecase"
 
 	"github.com/google/wire"
 )
 
-func (r *registry) NewServer() *api.Server {
+func NewServer() *api.Server {
 	wire.Build(
 		api.NewServer,
 		usecase.NewAuthUsecase,
@@ -29,6 +30,15 @@ func (r *registry) NewServer() *api.Server {
 		gateway.NewClientRepo,
 		gateway.NewAuthCodeRepo,
 		usecase.NewClientUsecase,
+		infrastructure.GetDB,
+	)
+	return nil
+}
+
+func NewAuthMiddleware() *middleware.AuthMiddleware {
+	wire.Build(
+		middleware.NewAuthMiddleware,
+		gateway.NewClientRepo,
 		infrastructure.GetDB,
 	)
 	return nil

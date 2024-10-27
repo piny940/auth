@@ -16,6 +16,12 @@ type AuthCode struct {
 	RedirectURI string
 	Scopes      []TypeScope
 }
+
+const (
+	AUTH_CODE_TTL = 5 * time.Minute
+	AUTH_CODE_LEN = 32
+)
+
 type IAuthCodeRepo interface {
 	Find(value string) (*AuthCode, error)
 	Create(value string, clientID ClientID, userID domain.UserID, scopes []TypeScope, expiresAt time.Time, redirectURI string) error

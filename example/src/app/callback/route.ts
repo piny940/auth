@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     throw new Error("CLIENT_SECRET is not set")
   }
   const secret = Buffer.from(
-    `${process.env.NEXT_PUBLIC_CLIENT_ID}:${process.env.CLIENT_SECRET}}`
+    `${process.env.NEXT_PUBLIC_CLIENT_ID}:${process.env.CLIENT_SECRET}`
   )
   const res = await fetch(
     path.join(process.env.NEXT_PUBLIC_API_URL, "oauth", "token"),

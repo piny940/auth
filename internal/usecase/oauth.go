@@ -52,11 +52,10 @@ func (u *OAuthUsecase) Approve(user *domain.User, clientID oauth.ClientID, scope
 }
 
 type TokenRequest struct {
-	GrantType    string
-	AuthCode     string
-	RedirectURI  string
-	ClientID     oauth.ClientID
-	ClientSecret string
+	GrantType   string
+	AuthCode    string
+	RedirectURI string
+	ClientID    oauth.ClientID
 }
 type TypeGrantType string
 
@@ -67,13 +66,6 @@ const (
 func (u *OAuthUsecase) RequestToken(req *TokenRequest) (*oauth.AccessToken, *oauth.IDToken, error) {
 	if req.GrantType != string(GrantTypeAuthorizationCode) {
 		return nil, nil, ErrInvalidGrantType
-	}
-	client, err := u.ClientRepo.FindByID(req.ClientID)
-	if err != nil {
-		return nil, nil, fmt.Errorf("client not found: %w", err)
-	}
-	if err := client.SecretCorrect(req.ClientSecret); err != nil {
-		return nil, nil, fmt.Errorf("invalid client secret: %w", err)
 	}
 	authCode, err := u.AuthCodeService.Verify(req.AuthCode, req.ClientID, req.RedirectURI)
 	if err != nil {

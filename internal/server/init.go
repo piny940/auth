@@ -39,7 +39,7 @@ func Init() *echo.Echo {
 		AllowCredentials: true,
 	}))
 	e.Use(myMiddleware.Session())
-	e.Use(myMiddleware.AuthMiddleware())
+	e.Use(di.NewAuthMiddleware().Auth())
 	api.RegisterHandlers(e, api.NewStrictHandler(di.NewServer(), nil))
 
 	return e
