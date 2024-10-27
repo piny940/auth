@@ -100,7 +100,7 @@ func (s *Server) OAuthInterfaceAuthorize(ctx context.Context, request OAuthInter
 
 // OAuthInterfaceGetToken implements StrictServerInterface.
 func (s *Server) OAuthInterfaceGetToken(ctx context.Context, request OAuthInterfaceGetTokenRequestObject) (OAuthInterfaceGetTokenResponseObject, error) {
-	accessToken, err := s.OAuthUsecase.RequestToken(&usecase.TokenRequest{
+	accessToken, idToken, err := s.OAuthUsecase.RequestToken(&usecase.TokenRequest{
 		GrantType:    request.Body.GrantType,
 		AuthCode:     request.Body.Code,
 		RedirectURI:  request.Body.RedirectUri,
@@ -122,9 +122,14 @@ func (s *Server) OAuthInterfaceGetToken(ctx context.Context, request OAuthInterf
 	if err != nil {
 		return nil, err
 	}
+	var idTokenStr *string
+	if idToken != nil {
+		idTokenStr = &idToken.Value
+	}
 	return OAuthInterfaceGetToken200JSONResponse{
 		Body: OAuthTokenRes{
 			AccessToken: accessToken.Value,
+			IdToken:     idTokenStr,
 			TokenType:   Bearer,
 			ExpiresIn:   int32(time.Until(accessToken.ExpiresAt).Seconds()),
 		},

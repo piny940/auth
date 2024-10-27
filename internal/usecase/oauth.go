@@ -5,6 +5,7 @@ import (
 	"auth/internal/domain/oauth"
 	"errors"
 	"fmt"
+	"slices"
 )
 
 type OAuthUsecase struct {
@@ -63,26 +64,34 @@ const (
 	GrantTypeAuthorizationCode TypeGrantType = "authorization_code"
 )
 
-func (u *OAuthUsecase) RequestToken(req *TokenRequest) (*oauth.AccessToken, error) {
+func (u *OAuthUsecase) RequestToken(req *TokenRequest) (*oauth.AccessToken, *oauth.IDToken, error) {
 	if req.GrantType != string(GrantTypeAuthorizationCode) {
-		return nil, ErrInvalidGrantType
+		return nil, nil, ErrInvalidGrantType
 	}
 	client, err := u.ClientRepo.FindByID(req.ClientID)
 	if err != nil {
-		return nil, fmt.Errorf("client not found: %w", err)
+		return nil, nil, fmt.Errorf("client not found: %w", err)
 	}
 	if err := client.SecretCorrect(req.ClientSecret); err != nil {
-		return nil, fmt.Errorf("invalid client secret: %w", err)
+		return nil, nil, fmt.Errorf("invalid client secret: %w", err)
 	}
 	authCode, err := u.AuthCodeService.Verify(req.AuthCode, req.ClientID, req.RedirectURI)
 	if err != nil {
-		return nil, fmt.Errorf("invalid auth code: %w", err)
+		return nil, nil, fmt.Errorf("invalid auth code: %w", err)
 	}
 	accessToken, err := u.TokenService.IssueAccessToken(authCode)
 	if err != nil {
-		return nil, fmt.Errorf("failed to issue access token: %w", err)
+		return nil, nil, fmt.Errorf("failed to issue access token: %w", err)
 	}
-	return accessToken, nil
+	if slices.Contains(authCode.Scopes, oauth.ScopeOpenID) {
+		idToken, err := u.TokenService.IssueIDToken(authCode)
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to issue id token: %w", err)
+		}
+		return accessToken, idToken, nil
+	} else {
+		return accessToken, nil, nil
+	}
 }
 
 var (
