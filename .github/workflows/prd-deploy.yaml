@@ -79,7 +79,7 @@ jobs:
           cache: "pnpm"
           cache-dependency-path: "spec/package.json"
       - name: Build doc
-        run: cd spec && pnpm run export
+        run: cd spec && pnpm run export && ls
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
