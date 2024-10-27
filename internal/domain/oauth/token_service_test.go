@@ -75,6 +75,62 @@ func TestTokenServiceIssueAccessToken(t *testing.T) {
 	}
 }
 
+func TestTokenServiceIssueIDToken(t *testing.T) {
+	const TIME_GAP = time.Minute // 許容する誤差
+	const issuer = "auth.example.com"
+	const userID = 1
+	const userName = "test"
+	const clientID = "test_client"
+	users := []*domain.User{
+		{ID: userID, Name: userName, EncryptedPassword: "test"},
+	}
+	tokenSvc := NewTokenService(&Config{
+		RsaPrivateKey:           RSA_PRIVATE_KEY,
+		RsaPrivateKeyPassphrase: RSA_PASS_PHRASE,
+		Issuer:                  issuer,
+	}, &userRepo{Users: users})
+	authCode := &AuthCode{
+		UserID:   userID,
+		ClientID: clientID,
+		Scopes:   []TypeScope{ScopeOpenID, ScopeOpenID},
+	}
+	token, err := tokenSvc.IssueIDToken(authCode)
+	if err != nil {
+		t.Fatal(err)
+	}
+	pubKey, err := jwt.ParseRSAPublicKeyFromPEM([]byte(RSA_PUBLIC_KEY))
+	if err != nil {
+		t.Fatal(err)
+	}
+	tok, err := jwt.Parse(token.Value, func(token *jwt.Token) (interface{}, error) {
+		return pubKey, nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	claims := tok.Claims.(jwt.MapClaims)
+	if claims["iss"] != issuer {
+		t.Errorf("expected: %s, got: %s", issuer, claims["iss"])
+	}
+	if !(time.Now().Add(ID_TOKEN_TTL).Add(-TIME_GAP).Unix() < int64(claims["exp"].(float64)) &&
+		int64(claims["exp"].(float64)) < time.Now().Add(ID_TOKEN_TTL).Add(TIME_GAP).Unix()) {
+		t.Errorf("exp is invalid")
+	}
+	if claims["sub"] != fmt.Sprintf("id:%d;name:%s", userID, userName) {
+		t.Errorf("sub is invalid. expected: id:%d;name:%s, got: %s", userID, userName, claims["sub"])
+	}
+	if claims["aud"] != clientID {
+		t.Errorf("aud is invalid")
+	}
+	if !(time.Now().Add(-TIME_GAP).Unix() < int64(claims["iat"].(float64)) &&
+		int64(claims["iat"].(float64)) < time.Now().Add(TIME_GAP).Unix()) {
+		t.Errorf("iat is invalid")
+	}
+	if len(claims["jti"].(string)) != ACCESS_TOKEN_JTI_LEN {
+		t.Errorf("jti is invalid")
+	}
+}
+
 const (
 	RSA_PRIVATE_KEY = `-----BEGIN RSA PRIVATE KEY-----
 Proc-Type: 4,ENCRYPTED

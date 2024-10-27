@@ -30,5 +30,6 @@
   "aud": "{client_id}",
   "exp": 0000000000,
   "iat": 0000000000, // トークン発行日時
+  "jti": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", // 32字のランダム文字列
 }
 ```
