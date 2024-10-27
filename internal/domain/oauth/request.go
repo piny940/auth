@@ -2,7 +2,6 @@ package oauth
 
 import (
 	"auth/internal/domain"
-	"crypto/rand"
 	"errors"
 	"slices"
 	"time"
@@ -18,16 +17,6 @@ var AllResponseTypes = []TypeResponseType{
 	ResponseTypeCode,
 }
 
-type TypeScope string
-
-const (
-	ScopeOpenID TypeScope = "openid"
-)
-
-var AllScopes = []TypeScope{
-	ScopeOpenID,
-}
-
 type AuthRequest struct {
 	ResponseType TypeResponseType
 	ClientID     ClientID
@@ -36,7 +25,7 @@ type AuthRequest struct {
 	State        *string
 }
 
-type AuthService struct {
+type RequestService struct {
 	ClientRepo   IClientRepo
 	ApprovalRepo IApprovalRepo
 	AuthCodeRepo IAuthCodeRepo
@@ -47,15 +36,15 @@ const (
 	AUTH_CODE_LEN = 32
 )
 
-func NewAuthService(clientRepo IClientRepo, approvalRepo IApprovalRepo, authCodeRepo IAuthCodeRepo) *AuthService {
-	return &AuthService{
+func NewRequestService(clientRepo IClientRepo, approvalRepo IApprovalRepo, authCodeRepo IAuthCodeRepo) *RequestService {
+	return &RequestService{
 		ClientRepo:   clientRepo,
 		ApprovalRepo: approvalRepo,
 		AuthCodeRepo: authCodeRepo,
 	}
 }
 
-func (s *AuthService) Validate(r *AuthRequest) error {
+func (s *RequestService) Validate(r *AuthRequest) error {
 	if !slices.Contains(AllResponseTypes, r.ResponseType) {
 		return ErrInvalidRequestType
 	}
@@ -73,57 +62,6 @@ func (s *AuthService) Validate(r *AuthRequest) error {
 		return err
 	}
 
-	return nil
-}
-
-func (s *AuthService) Approved(r *AuthRequest, user *domain.User) (bool, error) {
-	approval, err := s.ApprovalRepo.Find(r.ClientID, user.ID)
-	if errors.Is(err, domain.ErrRecordNotFound) {
-		return false, nil
-	}
-	if err != nil {
-		return false, err
-	}
-	if approval == nil {
-		return false, nil
-	}
-	for _, scope := range r.Scopes {
-		if !slices.Contains(approval.Scopes, scope) {
-			return false, nil
-		}
-	}
-	return true, nil
-}
-
-func (s *AuthService) IssueAuthCode(clientID ClientID, userID domain.UserID, scopes []TypeScope) (*AuthCode, error) {
-	const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	b := make([]byte, AUTH_CODE_LEN)
-	if _, err := rand.Read(b); err != nil {
-		return nil, err
-	}
-	var code string
-	for _, v := range b {
-		code += string(letters[int(v)%len(letters)])
-	}
-	expiresAt := time.Now().Add(AUTH_CODE_TTL)
-	if err := s.AuthCodeRepo.Create(code, clientID, userID, scopes, expiresAt); err != nil {
-		return nil, err
-	}
-	return &AuthCode{
-		Value:     code,
-		ClientID:  clientID,
-		UserID:    userID,
-		ExpiresAt: expiresAt,
-		Scopes:    scopes,
-	}, nil
-}
-
-func ValidScopes(scopes []TypeScope) error {
-	for _, s := range scopes {
-		if !slices.Contains(AllScopes, s) {
-			return ErrInvalidScope
-		}
-	}
 	return nil
 }
 

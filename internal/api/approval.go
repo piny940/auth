@@ -16,7 +16,7 @@ func (s *Server) ApprovalsInterfaceApprove(ctx context.Context, request Approval
 	for _, s := range strings.Split(request.Body.Scope, " ") {
 		scopes = append(scopes, oauth.TypeScope(s))
 	}
-	err = s.AuthUsecase.Approve(user, oauth.ClientID(request.Body.ClientId), scopes)
+	err = s.OAuthUsecase.Approve(user, oauth.ClientID(request.Body.ClientId), scopes)
 	if errors.Is(err, oauth.ErrInvalidClientID) {
 		return ApprovalsInterfaceApprove400JSONResponse{
 			Error:            ApprovalsApproveErrInvalidClient,

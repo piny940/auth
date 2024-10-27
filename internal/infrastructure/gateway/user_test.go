@@ -43,7 +43,7 @@ func TestUserFindById(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	user, err := userRepo.FindByID(created.ID)
+	user, err := userRepo.FindByID(domain.UserID(created.ID))
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -25,8 +25,8 @@ func NewUserRepo(db *infrastructure.DB) domain.IUserRepo {
 	}
 }
 
-func (u *userRepo) FindByID(id int64) (*domain.User, error) {
-	user, err := u.query.User.Where(u.query.User.ID.Eq(id)).First()
+func (u *userRepo) FindByID(id domain.UserID) (*domain.User, error) {
+	user, err := u.query.User.Where(u.query.User.ID.Eq(int64(id))).First()
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, domain.ErrRecordNotFound
 	}

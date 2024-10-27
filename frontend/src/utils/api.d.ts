@@ -118,7 +118,7 @@ export interface paths {
     }
     get?: never
     put?: never
-    /** Get a token */
+    /** Get token */
     post: operations['OAuthInterface_getToken']
     delete?: never
     options?: never
@@ -202,6 +202,28 @@ export interface components {
       scope: string
       state?: string
     }
+    /** @enum {string} */
+    'OAuth.TokenCacheControlHeader': 'no-store'
+    /** @enum {string} */
+    'OAuth.TokenErr': 'invalid_request'
+    /** @enum {string} */
+    'OAuth.TokenPragmaHeader': 'no-store'
+    'OAuth.TokenReq': {
+      grant_type: string
+      code: string
+      redirect_uri: string
+      client_id: string
+    }
+    'OAuth.TokenRes': {
+      access_token: string
+      token_type: components['schemas']['OAuth.TokenTokenType']
+      /** Format: int32 */
+      expires_in: number
+      /** Id token, if scope includes 'openid' */
+      id_token?: string
+    }
+    /** @enum {string} */
+    'OAuth.TokenTokenType': 'Bearer'
     PublicClient: {
       id: string
       name: string
@@ -554,28 +576,27 @@ export interface operations {
   OAuthInterface_getToken: {
     parameters: {
       query?: never
-      header?: never
+      header: {
+        authorization: string
+      }
       path?: never
       cookie?: never
     }
     requestBody: {
       content: {
-        'application/json': {
-          client_id: string
-          client_secret: string
-        }
+        'application/x-www-form-urlencoded': components['schemas']['OAuth.TokenReq']
       }
     }
     responses: {
       /** @description The request has succeeded. */
       200: {
         headers: {
+          'cache-control': components['schemas']['OAuth.TokenCacheControlHeader']
+          pragma: components['schemas']['OAuth.TokenPragmaHeader']
           [name: string]: unknown
         }
         content: {
-          'application/json': {
-            token: string
-          }
+          'application/json': components['schemas']['OAuth.TokenRes']
         }
       }
       /** @description The server could not understand the request due to invalid syntax. */
@@ -585,8 +606,7 @@ export interface operations {
         }
         content: {
           'application/json': {
-            /** Format: int32 */
-            error: number
+            error: components['schemas']['OAuth.TokenErr']
             error_description: string
           }
         }

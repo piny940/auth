@@ -8,7 +8,8 @@ import (
 )
 
 type Server struct {
-	AuthUsecase   *usecase.AuthUsecase
+	UserUsecase   *usecase.UserUsecase
+	OAuthUsecase  *usecase.OAuthUsecase
 	ClientUsecase usecase.IClientUsecase
 	Conf          *Config
 }
@@ -21,14 +22,15 @@ type Config struct {
 
 var _ StrictServerInterface = &Server{}
 
-func NewServer(authUsecase *usecase.AuthUsecase, clientUC usecase.IClientUsecase) *Server {
+func NewServer(userUsecase *usecase.UserUsecase, oauthUsecase *usecase.OAuthUsecase, clientUC usecase.IClientUsecase) *Server {
 	conf := &Config{}
 	err := envconfig.Process("api", conf)
 	if err != nil {
 		panic(err)
 	}
 	return &Server{
-		AuthUsecase:   authUsecase,
+		UserUsecase:   userUsecase,
+		OAuthUsecase:  oauthUsecase,
 		ClientUsecase: clientUC,
 		Conf:          conf,
 	}

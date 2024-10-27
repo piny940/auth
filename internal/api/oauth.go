@@ -1,12 +1,14 @@
 package api
 
 import (
+	"auth/internal/domain"
 	"auth/internal/domain/oauth"
 	"auth/internal/usecase"
 	"context"
 	"errors"
 	"net/url"
 	"strings"
+	"time"
 )
 
 func (s *Server) OAuthInterfaceAuthorize(ctx context.Context, request OAuthInterfaceAuthorizeRequestObject) (OAuthInterfaceAuthorizeResponseObject, error) {
@@ -40,7 +42,7 @@ func (s *Server) OAuthInterfaceAuthorize(ctx context.Context, request OAuthInter
 	if err != nil {
 		return nil, err
 	}
-	code, err := s.AuthUsecase.Request(user, toDAuthParams(request.Params))
+	code, err := s.OAuthUsecase.RequestAuthorization(user, toDAuthParams(request.Params))
 	if errors.Is(err, oauth.ErrInvalidRequestType) {
 		return OAuthInterfaceAuthorize400JSONResponse{
 			Error:            OAuthAuthorizeErrUnsupportedResponseType,
@@ -98,7 +100,35 @@ func (s *Server) OAuthInterfaceAuthorize(ctx context.Context, request OAuthInter
 
 // OAuthInterfaceGetToken implements StrictServerInterface.
 func (s *Server) OAuthInterfaceGetToken(ctx context.Context, request OAuthInterfaceGetTokenRequestObject) (OAuthInterfaceGetTokenResponseObject, error) {
-	panic("unimplemented")
+	accessToken, err := s.OAuthUsecase.RequestToken(&usecase.TokenRequest{
+		GrantType:    request.Body.GrantType,
+		AuthCode:     request.Body.Code,
+		RedirectURI:  request.Body.RedirectUri,
+		ClientID:     oauth.ClientID(request.Body.ClientId),
+		ClientSecret: request.Params.Authorization,
+	})
+	if errors.Is(err, usecase.ErrInvalidGrantType) ||
+		errors.Is(err, domain.ErrRecordNotFound) ||
+		errors.Is(err, oauth.ErrInvalidClientSecret) ||
+		errors.Is(err, oauth.ErrInvalidClientID) ||
+		errors.Is(err, oauth.ErrExpiredAuthCode) ||
+		errors.Is(err, oauth.ErrUsedAuthCode) ||
+		errors.Is(err, oauth.ErrInvalidRedirectURI) {
+		return OAuthInterfaceGetToken400JSONResponse{
+			Error:            InvalidRequest,
+			ErrorDescription: "invalid grant type",
+		}, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return OAuthInterfaceGetToken200JSONResponse{
+		Body: OAuthTokenRes{
+			AccessToken: accessToken.Value,
+			TokenType:   Bearer,
+			ExpiresIn:   int32(time.Until(accessToken.ExpiresAt).Seconds()),
+		},
+	}, nil
 }
 
 // OAuthInterfacePostAuthorize implements StrictServerInterface.

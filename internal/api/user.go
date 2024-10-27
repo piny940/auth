@@ -7,7 +7,7 @@ import (
 )
 
 func (s *Server) UsersInterfaceSignup(ctx context.Context, request UsersInterfaceSignupRequestObject) (UsersInterfaceSignupResponseObject, error) {
-	user, err := s.AuthUsecase.SignUp(
+	user, err := s.UserUsecase.SignUp(
 		request.Body.Name, request.Body.Password, request.Body.PasswordConfirmation,
 	)
 	if errors.Is(err, domain.ErrNameLengthNotEnough) {

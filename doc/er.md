@@ -31,7 +31,9 @@ erDiagram
     varchar value
     varchar client_id FK
     bigint user_id FK
+    varchar redirect_uri
     timestamptz expires_at
+    bool used
     timestamptz created_at
     timestamptz updated_at
   }
@@ -41,9 +43,16 @@ erDiagram
     timestamptz created_at
     timestamptz updated_at
   }
-  tokens {
+  access_tokens {
     bigserial id PK
-    bigint client_id FK
+    varchar value_sha256
+    timestamptz expires_at
+    varchar auth_code
+    timestamptz created_at
+    timestamptz updated_at
+  }
+  id_tokens {
+    bigserial id PK
     varchar value
     varchar refresh_token
     timestamptz expires_at

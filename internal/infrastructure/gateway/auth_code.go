@@ -6,8 +6,11 @@ import (
 	"auth/internal/infrastructure"
 	"auth/internal/infrastructure/model"
 	"auth/internal/infrastructure/query"
+	"errors"
 	"slices"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type AuthCodeRepo struct {
@@ -25,12 +28,31 @@ func NewAuthCodeRepo(db *infrastructure.DB) oauth.IAuthCodeRepo {
 	}
 }
 
-func (a *AuthCodeRepo) Create(value string, clientID oauth.ClientID, userID domain.UserID, scopes []oauth.TypeScope, expiresAt time.Time) error {
+func (a *AuthCodeRepo) Find(value string) (*oauth.AuthCode, error) {
+	authCode, err := a.query.AuthCode.Where(a.query.AuthCode.Value.Eq(value)).First()
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, domain.ErrRecordNotFound
+	}
+	if err != nil {
+		return nil, err
+	}
+	mScopes, err := a.query.AuthCodeScope.Where(
+		a.query.AuthCodeScope.AuthCodeID.Eq(authCode.ID),
+	).Find()
+	if err != nil {
+		return nil, err
+	}
+	return toDomainAuthCode(authCode, mScopes), nil
+}
+
+func (a *AuthCodeRepo) Create(value string, clientID oauth.ClientID, userID domain.UserID, scopes []oauth.TypeScope, expiresAt time.Time, redirectURI string) error {
 	err := a.query.AuthCode.Create(&model.AuthCode{
-		Value:     value,
-		ClientID:  string(clientID),
-		UserID:    int64(userID),
-		ExpiresAt: expiresAt,
+		Value:       value,
+		ClientID:    string(clientID),
+		UserID:      int64(userID),
+		ExpiresAt:   expiresAt,
+		Used:        false,
+		RedirectURI: redirectURI,
 	})
 	if err != nil {
 		return err
@@ -56,4 +78,20 @@ func (a *AuthCodeRepo) Create(value string, clientID oauth.ClientID, userID doma
 		return err
 	}
 	return nil
+}
+
+func toDomainAuthCode(m *model.AuthCode, mScopes []*model.AuthCodeScope) *oauth.AuthCode {
+	scopes := make([]oauth.TypeScope, 0, len(mScopes))
+	for _, s := range mScopes {
+		scopes = append(scopes, scopeMap[s.ScopeID])
+	}
+	return &oauth.AuthCode{
+		Value:       m.Value,
+		ClientID:    oauth.ClientID(m.ClientID),
+		UserID:      domain.UserID(m.UserID),
+		ExpiresAt:   m.ExpiresAt,
+		Used:        m.Used,
+		RedirectURI: m.RedirectURI,
+		Scopes:      scopes,
+	}
 }

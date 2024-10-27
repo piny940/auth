@@ -24,6 +24,7 @@ import (
 
 const (
 	ApiKeyAuthScopes = "ApiKeyAuth.Scopes"
+	BasicAuthScopes  = "BasicAuth.Scopes"
 )
 
 // Defines values for ApprovalsApproveErr.
@@ -46,6 +47,26 @@ const (
 	OAuthAuthorizeErrTemporarilyUnavailable  OAuthAuthorizeErr = "temporarily_unavailable"
 	OAuthAuthorizeErrUnauthorizedClient      OAuthAuthorizeErr = "unauthorized_client"
 	OAuthAuthorizeErrUnsupportedResponseType OAuthAuthorizeErr = "unsupported_response_type"
+)
+
+// Defines values for OAuthTokenCacheControlHeader.
+const (
+	OAuthTokenCacheControlHeaderNoStore OAuthTokenCacheControlHeader = "no-store"
+)
+
+// Defines values for OAuthTokenErr.
+const (
+	InvalidRequest OAuthTokenErr = "invalid_request"
+)
+
+// Defines values for OAuthTokenPragmaHeader.
+const (
+	OAuthTokenPragmaHeaderNoStore OAuthTokenPragmaHeader = "no-store"
+)
+
+// Defines values for OAuthTokenTokenType.
+const (
+	Bearer OAuthTokenTokenType = "Bearer"
 )
 
 // Defines values for SessionLoginErr.
@@ -107,6 +128,34 @@ type OAuthAuthorizeReqMultiPart struct {
 	Scope        string  `json:"scope"`
 	State        *string `json:"state,omitempty"`
 }
+
+// OAuthTokenCacheControlHeader defines model for OAuth.TokenCacheControlHeader.
+type OAuthTokenCacheControlHeader string
+
+// OAuthTokenErr defines model for OAuth.TokenErr.
+type OAuthTokenErr string
+
+// OAuthTokenPragmaHeader defines model for OAuth.TokenPragmaHeader.
+type OAuthTokenPragmaHeader string
+
+// OAuthTokenReq defines model for OAuth.TokenReq.
+type OAuthTokenReq struct {
+	ClientId    string `json:"client_id"`
+	Code        string `json:"code"`
+	GrantType   string `json:"grant_type"`
+	RedirectUri string `json:"redirect_uri"`
+}
+
+// OAuthTokenRes defines model for OAuth.TokenRes.
+type OAuthTokenRes struct {
+	AccessToken string              `json:"access_token"`
+	ExpiresIn   int32               `json:"expires_in"`
+	IdToken     *string             `json:"id_token,omitempty"`
+	TokenType   OAuthTokenTokenType `json:"token_type"`
+}
+
+// OAuthTokenTokenType defines model for OAuth.TokenTokenType.
+type OAuthTokenTokenType string
 
 // PublicClient defines model for PublicClient.
 type PublicClient struct {
@@ -171,10 +220,9 @@ type OAuthInterfaceAuthorizeParams struct {
 	State        *string `form:"state,omitempty" json:"state,omitempty"`
 }
 
-// OAuthInterfaceGetTokenJSONBody defines parameters for OAuthInterfaceGetToken.
-type OAuthInterfaceGetTokenJSONBody struct {
-	ClientId     string `json:"client_id"`
-	ClientSecret string `json:"client_secret"`
+// OAuthInterfaceGetTokenParams defines parameters for OAuthInterfaceGetToken.
+type OAuthInterfaceGetTokenParams struct {
+	Authorization string `json:"authorization"`
 }
 
 // ApprovalsInterfaceApproveJSONRequestBody defines body for ApprovalsInterfaceApprove for application/json ContentType.
@@ -189,8 +237,8 @@ type AccountClientsUpdateClientJSONRequestBody AccountClientsUpdateClientJSONBod
 // OAuthInterfacePostAuthorizeMultipartRequestBody defines body for OAuthInterfacePostAuthorize for multipart/form-data ContentType.
 type OAuthInterfacePostAuthorizeMultipartRequestBody = OAuthAuthorizeReqMultiPart
 
-// OAuthInterfaceGetTokenJSONRequestBody defines body for OAuthInterfaceGetToken for application/json ContentType.
-type OAuthInterfaceGetTokenJSONRequestBody OAuthInterfaceGetTokenJSONBody
+// OAuthInterfaceGetTokenFormdataRequestBody defines body for OAuthInterfaceGetToken for application/x-www-form-urlencoded ContentType.
+type OAuthInterfaceGetTokenFormdataRequestBody = OAuthTokenReq
 
 // SessionInterfaceLoginJSONRequestBody defines body for SessionInterfaceLogin for application/json ContentType.
 type SessionInterfaceLoginJSONRequestBody = SessionLoginReq
@@ -227,9 +275,9 @@ type ServerInterface interface {
 	// Authorization Request
 	// (POST /oauth/authorize)
 	OAuthInterfacePostAuthorize(ctx echo.Context) error
-	// Get a token
+	// Get token
 	// (POST /oauth/token)
-	OAuthInterfaceGetToken(ctx echo.Context) error
+	OAuthInterfaceGetToken(ctx echo.Context, params OAuthInterfaceGetTokenParams) error
 	// Logout
 	// (DELETE /session)
 	SessionInterfaceLogout(ctx echo.Context) error
@@ -416,8 +464,32 @@ func (w *ServerInterfaceWrapper) OAuthInterfacePostAuthorize(ctx echo.Context) e
 func (w *ServerInterfaceWrapper) OAuthInterfaceGetToken(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(BasicAuthScopes, []string{})
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params OAuthInterfaceGetTokenParams
+
+	headers := ctx.Request().Header
+	// ------------- Required header parameter "authorization" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("authorization")]; found {
+		var Authorization string
+		n := len(valueList)
+		if n != 1 {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Expected one value for authorization, got %d", n))
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "authorization", valueList[0], &Authorization, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: true})
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter authorization: %s", err))
+		}
+
+		params.Authorization = Authorization
+	} else {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Header parameter authorization is required, but not found"))
+	}
+
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.OAuthInterfaceGetToken(ctx)
+	err = w.Handler.OAuthInterfaceGetToken(ctx, params)
 	return err
 }
 
@@ -772,27 +844,36 @@ func (response OAuthInterfacePostAuthorize400JSONResponse) VisitOAuthInterfacePo
 }
 
 type OAuthInterfaceGetTokenRequestObject struct {
-	Body *OAuthInterfaceGetTokenJSONRequestBody
+	Params OAuthInterfaceGetTokenParams
+	Body   *OAuthInterfaceGetTokenFormdataRequestBody
 }
 
 type OAuthInterfaceGetTokenResponseObject interface {
 	VisitOAuthInterfaceGetTokenResponse(w http.ResponseWriter) error
 }
 
+type OAuthInterfaceGetToken200ResponseHeaders struct {
+	CacheControl OAuthTokenCacheControlHeader
+	Pragma       OAuthTokenPragmaHeader
+}
+
 type OAuthInterfaceGetToken200JSONResponse struct {
-	Token string `json:"token"`
+	Body    OAuthTokenRes
+	Headers OAuthInterfaceGetToken200ResponseHeaders
 }
 
 func (response OAuthInterfaceGetToken200JSONResponse) VisitOAuthInterfaceGetTokenResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("cache-control", fmt.Sprint(response.Headers.CacheControl))
+	w.Header().Set("pragma", fmt.Sprint(response.Headers.Pragma))
 	w.WriteHeader(200)
 
-	return json.NewEncoder(w).Encode(response)
+	return json.NewEncoder(w).Encode(response.Body)
 }
 
 type OAuthInterfaceGetToken400JSONResponse struct {
-	Error            int32  `json:"error"`
-	ErrorDescription string `json:"error_description"`
+	Error            OAuthTokenErr `json:"error"`
+	ErrorDescription string        `json:"error_description"`
 }
 
 func (response OAuthInterfaceGetToken400JSONResponse) VisitOAuthInterfaceGetTokenResponse(w http.ResponseWriter) error {
@@ -936,7 +1017,7 @@ type StrictServerInterface interface {
 	// Authorization Request
 	// (POST /oauth/authorize)
 	OAuthInterfacePostAuthorize(ctx context.Context, request OAuthInterfacePostAuthorizeRequestObject) (OAuthInterfacePostAuthorizeResponseObject, error)
-	// Get a token
+	// Get token
 	// (POST /oauth/token)
 	OAuthInterfaceGetToken(ctx context.Context, request OAuthInterfaceGetTokenRequestObject) (OAuthInterfaceGetTokenResponseObject, error)
 	// Logout
@@ -1207,14 +1288,20 @@ func (sh *strictHandler) OAuthInterfacePostAuthorize(ctx echo.Context) error {
 }
 
 // OAuthInterfaceGetToken operation middleware
-func (sh *strictHandler) OAuthInterfaceGetToken(ctx echo.Context) error {
+func (sh *strictHandler) OAuthInterfaceGetToken(ctx echo.Context, params OAuthInterfaceGetTokenParams) error {
 	var request OAuthInterfaceGetTokenRequestObject
 
-	var body OAuthInterfaceGetTokenJSONRequestBody
-	if err := ctx.Bind(&body); err != nil {
+	request.Params = params
+
+	if form, err := ctx.FormParams(); err == nil {
+		var body OAuthInterfaceGetTokenFormdataRequestBody
+		if err := runtime.BindForm(&body, form, nil, nil); err != nil {
+			return err
+		}
+		request.Body = &body
+	} else {
 		return err
 	}
-	request.Body = &body
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
 		return sh.ssi.OAuthInterfaceGetToken(ctx.Request().Context(), request.(OAuthInterfaceGetTokenRequestObject))
@@ -1342,34 +1429,37 @@ func (sh *strictHandler) UsersInterfaceSignup(ctx echo.Context) error {
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"10/x5mLzdwAAAP//ZYuBYVsrAAA=",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
