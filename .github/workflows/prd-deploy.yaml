@@ -85,7 +85,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: "./spec/out/index.html"
+          path: "./spec/out"
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
