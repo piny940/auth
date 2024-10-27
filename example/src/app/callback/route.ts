@@ -1,5 +1,8 @@
 import { NextRequest } from "next/server"
 import path from "path"
+import jwt from "jsonwebtoken"
+import { IDToken } from "@/utils/types"
+import { verifyIDToken } from "@/utils/token"
 
 export async function GET(request: NextRequest) {
   if (!process.env.NEXT_PUBLIC_API_URL) {
@@ -17,6 +20,9 @@ export async function GET(request: NextRequest) {
   }
   if (!process.env.CLIENT_SECRET) {
     throw new Error("CLIENT_SECRET is not set")
+  }
+  if (!process.env.SERVER_PUBLIC_KEY) {
+    throw new Error("SERVER_PUBLIC_KEY is not set")
   }
   const secret = Buffer.from(
     `${process.env.NEXT_PUBLIC_CLIENT_ID}:${process.env.CLIENT_SECRET}`
@@ -38,6 +44,14 @@ export async function GET(request: NextRequest) {
     }
   )
   const json = await res.json()
-  console.log(json)
+  const idToken = jwt.verify(
+    json.id_token,
+    process.env.SERVER_PUBLIC_KEY
+  ) as IDToken
+  try {
+    verifyIDToken(idToken)
+  } catch (e) {
+    throw new Error(e as string)
+  }
   return new Response()
 }
