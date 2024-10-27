@@ -1,8 +1,8 @@
 name: Build App for Production
 on:
   push:
-    # branches:
-    #   - main
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -32,32 +32,32 @@ jobs:
             spec:
               - "spec/**"
               - ".github/workflows/prd-deploy.yaml"
-  # prd-build-backend:
-  #   runs-on: ubuntu-latest
-  #   environment: production
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: ./.github/actions/docker-build
-  #       with:
-  #         gh-token: ${{ secrets.GITHUB_TOKEN }}
-  #         github-actor: ${{ github.actor }}
-  #         tags: ghcr.io/${{ github.repository }}-backend:1.0.${{ github.run_number }}
-  #         path: "."
-  # prd-build-frontend:
-  #   runs-on: ubuntu-latest
-  #   environment: production
-  #   needs: filter
-  #   if: needs.filter.outputs.frontend == 'true'
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: ./.github/actions/docker-build
-  #       with:
-  #         gh-token: ${{ secrets.GITHUB_TOKEN }}
-  #         github-actor: ${{ github.actor }}
-  #         tags: ghcr.io/${{ github.repository }}-frontend:1.0.${{ github.run_number }}
-  #         path: "./frontend"
-  #         build-args: |
-  #           NEXT_PUBLIC_BACKEND_URL=https://auth.piny940.com/api/v1
+  prd-build-backend:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/docker-build
+        with:
+          gh-token: ${{ secrets.GITHUB_TOKEN }}
+          github-actor: ${{ github.actor }}
+          tags: ghcr.io/${{ github.repository }}-backend:1.0.${{ github.run_number }}
+          path: "."
+  prd-build-frontend:
+    runs-on: ubuntu-latest
+    environment: production
+    needs: filter
+    if: needs.filter.outputs.frontend == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/docker-build
+        with:
+          gh-token: ${{ secrets.GITHUB_TOKEN }}
+          github-actor: ${{ github.actor }}
+          tags: ghcr.io/${{ github.repository }}-frontend:1.0.${{ github.run_number }}
+          path: "./frontend"
+          build-args: |
+            NEXT_PUBLIC_BACKEND_URL=https://auth.piny940.com/api/v1
 
   build-doc:
     runs-on: ubuntu-latest
