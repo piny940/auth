@@ -12,6 +12,7 @@ import (
 	"auth/internal/domain/oauth"
 	"auth/internal/infrastructure"
 	"auth/internal/infrastructure/gateway"
+	"auth/internal/middleware"
 	"auth/internal/usecase"
 )
 
@@ -27,11 +28,18 @@ func NewServer() *api.Server {
 	iAuthCodeRepo := gateway.NewAuthCodeRepo(db)
 	requestService := oauth.NewRequestService(iClientRepo, iApprovalRepo, iAuthCodeRepo)
 	authCodeService := oauth.NewAuthCodeService(iAuthCodeRepo)
-	approvalService := oauth.NewApprovalService(iApprovalRepo)
+	approvalService := oauth.NewApprovalService(iApprovalRepo, iClientRepo)
 	config := oauth.NewConfig()
 	tokenService := oauth.NewTokenService(config, iUserRepo)
 	oAuthUsecase := usecase.NewOAuthUsecase(requestService, authCodeService, approvalService, tokenService, iClientRepo)
 	iClientUsecase := usecase.NewClientUsecase(iClientRepo)
 	server := api.NewServer(userUsecase, oAuthUsecase, iClientUsecase)
 	return server
+}
+
+func NewAuthMiddleware() *middleware.AuthMiddleware {
+	db := infrastructure.GetDB()
+	iClientRepo := gateway.NewClientRepo(db)
+	authMiddleware := middleware.NewAuthMiddleware(iClientRepo)
+	return authMiddleware
 }

@@ -6,6 +6,8 @@ import (
 	"auth/internal/usecase"
 	"context"
 	"errors"
+	"fmt"
+	"log/slog"
 	"net/url"
 	"strings"
 	"time"
@@ -101,22 +103,31 @@ func (s *Server) OAuthInterfaceAuthorize(ctx context.Context, request OAuthInter
 // OAuthInterfaceGetToken implements StrictServerInterface.
 func (s *Server) OAuthInterfaceGetToken(ctx context.Context, request OAuthInterfaceGetTokenRequestObject) (OAuthInterfaceGetTokenResponseObject, error) {
 	accessToken, idToken, err := s.OAuthUsecase.RequestToken(&usecase.TokenRequest{
-		GrantType:    request.Body.GrantType,
-		AuthCode:     request.Body.Code,
-		RedirectURI:  request.Body.RedirectUri,
-		ClientID:     oauth.ClientID(request.Body.ClientId),
-		ClientSecret: request.Params.Authorization,
+		GrantType:   request.Body.GrantType,
+		AuthCode:    request.Body.Code,
+		RedirectURI: request.Body.RedirectUri,
+		ClientID:    oauth.ClientID(request.Body.ClientId),
 	})
-	if errors.Is(err, usecase.ErrInvalidGrantType) ||
-		errors.Is(err, domain.ErrRecordNotFound) ||
-		errors.Is(err, oauth.ErrInvalidClientSecret) ||
-		errors.Is(err, oauth.ErrInvalidClientID) ||
-		errors.Is(err, oauth.ErrExpiredAuthCode) ||
-		errors.Is(err, oauth.ErrUsedAuthCode) ||
-		errors.Is(err, oauth.ErrInvalidRedirectURI) {
+	if errors.Is(err, usecase.ErrInvalidGrantType) {
 		return OAuthInterfaceGetToken400JSONResponse{
 			Error:            InvalidRequest,
 			ErrorDescription: "invalid grant type",
+		}, nil
+	}
+	if errors.Is(err, oauth.ErrInvalidRedirectURI) {
+		return OAuthInterfaceGetToken400JSONResponse{
+			Error:            InvalidRequest,
+			ErrorDescription: "invalid redirect uri",
+		}, nil
+	}
+	if errors.Is(err, domain.ErrRecordNotFound) ||
+		errors.Is(err, oauth.ErrInvalidClientID) ||
+		errors.Is(err, oauth.ErrExpiredAuthCode) ||
+		errors.Is(err, oauth.ErrUsedAuthCode) {
+		slog.Info(fmt.Sprintf("invalid auth code: %s", err.Error()))
+		return OAuthInterfaceGetToken400JSONResponse{
+			Error:            InvalidRequest,
+			ErrorDescription: "invalid auth code",
 		}, nil
 	}
 	if err != nil {

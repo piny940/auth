@@ -4,7 +4,7 @@
   "private": true,
   "packageManager": "pnpm@9.12.2",
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev --turbopack --port 3001",
     "build": "next build",
     "start": "next start",
     "codegen": "npx openapi-typescript ../spec/schema/@typespec/openapi3/openapi.yaml --output ./src/utils/api.d.ts",

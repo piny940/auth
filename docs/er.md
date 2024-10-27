@@ -22,7 +22,6 @@ erDiagram
     varchar encrypted_secret
     bigint user_id FK
     varchar name
-    varchar[] redirect_urls
     timestamptz created_at
     timestamptz updated_at
   }
