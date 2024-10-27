@@ -1,6 +1,9 @@
 # Auth
 
-OAuth2.0、OpenID Connect
+OAuth2.0・OpenID Connect プロバイダを作ってみた
+
+ER 図: [docs/er.md](docs/er.md)
+API スキーマ：<http://piny940.github.io/auth/>
 
 ## 開発
 
