@@ -9,6 +9,7 @@ tasks:
       - task install:backend
       - task install:frontend
       - task install:spec
+      - task install:example
       - task generate
   install:aqua:
     desc: "Install aqua"
@@ -26,6 +27,10 @@ tasks:
     desc: "Install spec dependencies"
     cmds:
       - cd spec && pnpm install
+  install:example:
+    desc: "Install example dependencies"
+    cmds:
+      - cd example && pnpm install
   generate:
     desc: "Generate codes"
     cmds:
@@ -58,6 +63,7 @@ tasks:
       - task: dev:backend
       - task: dev:frontend
       - task: dev:spec
+      - task: dev:example
 
   dev:backend:
     desc: "Run development server for backend"
@@ -68,6 +74,11 @@ tasks:
     desc: "Run development server for frontend"
     cmds:
       - cd frontend && pnpm dev
+  
+  dev:example:
+    desc: "Run development server for example"
+    cmds:
+      - cd example && pnpm dev
 
   dev:spec:
     desc: "Run development server for spec"
