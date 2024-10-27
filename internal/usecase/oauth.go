@@ -7,77 +7,31 @@ import (
 	"fmt"
 )
 
-type AuthUsecase struct {
-	UserService     *domain.UserService
+type OAuthUsecase struct {
 	RequestService  *oauth.RequestService
 	AuthCodeService *oauth.AuthCodeService
 	ApprovalService *oauth.ApprovalService
 	TokenService    *oauth.TokenService
-	UserRepo        domain.IUserRepo
-	ApprovalRepo    oauth.IApprovalRepo
-	AuthCodeRepo    oauth.IAuthCodeRepo
 	ClientRepo      oauth.IClientRepo
 }
 
-func NewAuthUsecase(
-	userSvc *domain.UserService,
-	requestSvc *oauth.RequestService,
+func NewOAuthUsecase(
+	reqSvc *oauth.RequestService,
 	authCodeSvc *oauth.AuthCodeService,
 	approvalSvc *oauth.ApprovalService,
 	tokenSvc *oauth.TokenService,
-	userRepo domain.IUserRepo,
-	approvalRepo oauth.IApprovalRepo,
-	authCodeRepo oauth.IAuthCodeRepo,
 	clientRepo oauth.IClientRepo,
-) *AuthUsecase {
-	return &AuthUsecase{
-		UserService:     userSvc,
-		RequestService:  requestSvc,
+) *OAuthUsecase {
+	return &OAuthUsecase{
+		RequestService:  reqSvc,
 		AuthCodeService: authCodeSvc,
 		ApprovalService: approvalSvc,
 		TokenService:    tokenSvc,
-		UserRepo:        userRepo,
-		ApprovalRepo:    approvalRepo,
-		AuthCodeRepo:    authCodeRepo,
 		ClientRepo:      clientRepo,
 	}
 }
 
-func (u *AuthUsecase) Login(username, password string) (*domain.User, error) {
-	user, err := u.UserRepo.FindByName(username)
-	if err != nil {
-		return nil, err
-	}
-	ok, err := user.PasswordMatch(password)
-	if err != nil {
-		return nil, err
-	}
-	if !ok {
-		return nil, ErrPasswordNotMatch
-	}
-	return user, nil
-}
-
-func (u *AuthUsecase) SignUp(username, password, passwordConfirmation string) (*domain.User, error) {
-	if err := u.UserService.Validate(username, password, passwordConfirmation); err != nil {
-		return nil, err
-	}
-	hash, err := domain.EncryptPassword(password)
-	if err != nil {
-		return nil, err
-	}
-	err = u.UserRepo.Create(username, hash)
-	if err != nil {
-		return nil, err
-	}
-	user, err := u.UserRepo.FindByName(username)
-	if err != nil {
-		return nil, err
-	}
-	return user, nil
-}
-
-func (u *AuthUsecase) RequestAuthorization(user *domain.User, req *oauth.AuthRequest) (*oauth.AuthCode, error) {
+func (u *OAuthUsecase) RequestAuthorization(user *domain.User, req *oauth.AuthRequest) (*oauth.AuthCode, error) {
 	err := u.RequestService.Validate(req)
 	if err != nil {
 		return nil, err
@@ -92,7 +46,7 @@ func (u *AuthUsecase) RequestAuthorization(user *domain.User, req *oauth.AuthReq
 	return u.AuthCodeService.IssueAuthCode(req.ClientID, user.ID, req.Scopes, req.RedirectURI)
 }
 
-func (u *AuthUsecase) Approve(user *domain.User, clientID oauth.ClientID, scopes []oauth.TypeScope) error {
+func (u *OAuthUsecase) Approve(user *domain.User, clientID oauth.ClientID, scopes []oauth.TypeScope) error {
 	return u.ApprovalService.Approve(clientID, user.ID, scopes)
 }
 
@@ -109,7 +63,7 @@ const (
 	GrantTypeAuthorizationCode TypeGrantType = "authorization_code"
 )
 
-func (u *AuthUsecase) RequestToken(req *TokenRequest) (*oauth.AccessToken, error) {
+func (u *OAuthUsecase) RequestToken(req *TokenRequest) (*oauth.AccessToken, error) {
 	if req.GrantType != string(GrantTypeAuthorizationCode) {
 		return nil, ErrInvalidGrantType
 	}

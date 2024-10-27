@@ -17,6 +17,7 @@ func (r *registry) NewServer() *api.Server {
 	wire.Build(
 		api.NewServer,
 		usecase.NewAuthUsecase,
+		usecase.NewOAuthUsecase,
 		gateway.NewApprovalRepo,
 		gateway.NewUserRepo,
 		domain.NewUserService,
