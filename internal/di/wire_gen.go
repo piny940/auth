@@ -27,7 +27,7 @@ func NewServer() *api.Server {
 	iAuthCodeRepo := gateway.NewAuthCodeRepo(db)
 	requestService := oauth.NewRequestService(iClientRepo, iApprovalRepo, iAuthCodeRepo)
 	authCodeService := oauth.NewAuthCodeService(iAuthCodeRepo)
-	approvalService := oauth.NewApprovalService(iApprovalRepo)
+	approvalService := oauth.NewApprovalService(iApprovalRepo, iClientRepo)
 	config := oauth.NewConfig()
 	tokenService := oauth.NewTokenService(config, iUserRepo)
 	oAuthUsecase := usecase.NewOAuthUsecase(requestService, authCodeService, approvalService, tokenService, iClientRepo)

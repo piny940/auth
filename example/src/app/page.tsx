@@ -1,5 +1,4 @@
 import Link from "next/link"
-import path from "path"
 
 export default function Home() {
   if (!process.env.NEXT_PUBLIC_APP_URL) {
@@ -8,7 +7,7 @@ export default function Home() {
   if (!process.env.NEXT_PUBLIC_API_URL) {
     throw new Error("NEXT_PUBLIC_API_URL is not set")
   }
-  const redirectUri = path.join(process.env.NEXT_PUBLIC_APP_URL, "callback")
+  const redirectUri = process.env.NEXT_PUBLIC_APP_URL + "/callback"
   const link = `${process.env.NEXT_PUBLIC_API_URL}/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_CLIENT_ID}&response_type=code&redirect_uri=${redirectUri}&scope=openid`
   return (
     <main className="m-20">

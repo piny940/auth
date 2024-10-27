@@ -26,9 +26,10 @@ type ApprovalService struct {
 	ClientRepo   IClientRepo
 }
 
-func NewApprovalService(approvalRepo IApprovalRepo) *ApprovalService {
+func NewApprovalService(approvalRepo IApprovalRepo, clientRepo IClientRepo) *ApprovalService {
 	return &ApprovalService{
 		ApprovalRepo: approvalRepo,
+		ClientRepo:   clientRepo,
 	}
 }
 func (s *ApprovalService) Approved(r *AuthRequest, user *domain.User) (bool, error) {

@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
         client_id: process.env.NEXT_PUBLIC_CLIENT_ID,
         code: code,
         grant_type: "authorization_code",
-        redirect_uri: path.join(process.env.NEXT_PUBLIC_APP_URL, "callback"),
+        redirect_uri: process.env.NEXT_PUBLIC_APP_URL + "/callback",
       }),
     }
   )
