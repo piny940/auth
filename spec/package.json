@@ -6,22 +6,24 @@
     "compile": "tsp compile .",
     "dev": "tsp compile . --watch",
     "doc": "redocly preview-docs schema/@typespec/openapi3/openapi.yaml",
+    "export": "npx @redocly/cli build-docs schema/@typespec/openapi3/openapi.yaml",
     "lint": "tsp format '**/*.tsp'",
     "lint-check": "tsp format --check '**/*.tsp'"
   },
   "peerDependencies": {
+    "@redocly/cli": "^1.25.7",
     "@typespec/compiler": "latest",
     "@typespec/http": "latest",
     "@typespec/openapi3": "latest",
-    "@typespec/rest": "latest",
-    "@redocly/cli": "^1.25.7"
+    "@typespec/rest": "latest"
   },
   "devDependencies": {
     "@typespec/compiler": "latest",
     "@typespec/http": "latest",
     "@typespec/openapi3": "latest",
     "@typespec/prettier-plugin-typespec": "^0.61.0",
-    "@typespec/rest": "latest"
+    "@typespec/rest": "latest",
+    "redoc-cli": "^0.13.21"
   },
   "private": true
 }
