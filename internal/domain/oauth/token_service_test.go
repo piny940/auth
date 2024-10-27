@@ -13,7 +13,7 @@ func TestNewTokenService(t *testing.T) {
 	const issuer = "auth.example.com"
 	tokenSvc := NewTokenService(&Config{
 		RsaPrivateKey:           RSA_PRIVATE_KEY,
-		RsaPrivateKeyPassPhrase: RSA_PASS_PHRASE,
+		RsaPrivateKeyPassphrase: RSA_PASS_PHRASE,
 		Issuer:                  issuer,
 	}, &userRepo{})
 	if tokenSvc.issuer != issuer {
@@ -31,7 +31,7 @@ func TestTokenServiceIssueAccessToken(t *testing.T) {
 	}
 	tokenSvc := NewTokenService(&Config{
 		RsaPrivateKey:           RSA_PRIVATE_KEY,
-		RsaPrivateKeyPassPhrase: RSA_PASS_PHRASE,
+		RsaPrivateKeyPassphrase: RSA_PASS_PHRASE,
 		Issuer:                  issuer,
 	}, &userRepo{Users: users})
 	authCode := &AuthCode{

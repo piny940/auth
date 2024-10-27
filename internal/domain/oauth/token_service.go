@@ -30,7 +30,7 @@ const (
 func NewTokenService(config *Config, userRepo domain.IUserRepo) *TokenService {
 	rsaPrivateKey, err := jwt.ParseRSAPrivateKeyFromPEMWithPassword(
 		[]byte(config.RsaPrivateKey),
-		config.RsaPrivateKeyPassPhrase,
+		config.RsaPrivateKeyPassphrase,
 	)
 	if err != nil {
 		panic(err)
