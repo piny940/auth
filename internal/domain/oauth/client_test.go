@@ -7,14 +7,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type clientRepo struct{}
-
-var _ IClientRepo = &clientRepo{}
-
-func (c *clientRepo) FindByID(id ClientID) (*Client, error) {
-	panic("unimplemented")
-}
-
 func TestEncryptClientSecret(t *testing.T) {
 	suites := []struct {
 		Name      string

@@ -7,46 +7,6 @@ import (
 	"time"
 )
 
-type authCodeRepo struct {
-	authCodes []*AuthCode
-}
-
-var _ IAuthCodeRepo = &authCodeRepo{}
-
-func (a *authCodeRepo) Find(value string) (*AuthCode, error) {
-	for _, code := range a.authCodes {
-		if code.Value == value {
-			return code, nil
-		}
-	}
-	return nil, domain.ErrRecordNotFound
-}
-
-func (a *authCodeRepo) Create(value string, clientID ClientID, userID domain.UserID, scopes []TypeScope, expiresAt time.Time, redirectURI string) error {
-	a.authCodes = append(a.authCodes, &AuthCode{
-		Value:       value,
-		ClientID:    clientID,
-		UserID:      userID,
-		ExpiresAt:   expiresAt,
-		Used:        false,
-		RedirectURI: redirectURI,
-		Scopes:      scopes,
-	})
-	return nil
-}
-
-type approvalRepo struct{}
-
-var _ IApprovalRepo = &approvalRepo{}
-
-func (a *approvalRepo) Create(clientID ClientID, userID domain.UserID, scopes []TypeScope) error {
-	panic("unimplemented")
-}
-
-func (a *approvalRepo) Find(clientID ClientID, userID domain.UserID) (*Approval, error) {
-	panic("unimplemented")
-}
-
 func TestAuthCodeServiceIssueAuthCode(t *testing.T) {
 	s := &AuthCodeService{
 		AuthCodeRepo: &authCodeRepo{authCodes: []*AuthCode{}},

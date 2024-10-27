@@ -1,6 +1,7 @@
 package oauth
 
 import (
+	"auth/internal/domain"
 	"fmt"
 	"testing"
 	"time"
@@ -14,7 +15,7 @@ func TestNewTokenService(t *testing.T) {
 		RsaPrivateKey:           RSA_PRIVATE_KEY,
 		RsaPrivateKeyPassPhrase: RSA_PASS_PHRASE,
 		Issuer:                  issuer,
-	})
+	}, &userRepo{})
 	if tokenSvc.issuer != issuer {
 		t.Errorf("expected: %s, got: %s", issuer, tokenSvc.issuer)
 	}
@@ -23,13 +24,21 @@ func TestNewTokenService(t *testing.T) {
 func TestTokenServiceIssueAccessToken(t *testing.T) {
 	const TIME_GAP = time.Minute // 許容する誤差
 	const issuer = "auth.example.com"
+	const userID = 1
+	const userName = "test"
+	users := []*domain.User{
+		{ID: userID, Name: userName, EncryptedPassword: "test"},
+	}
 	tokenSvc := NewTokenService(&Config{
 		RsaPrivateKey:           RSA_PRIVATE_KEY,
 		RsaPrivateKeyPassPhrase: RSA_PASS_PHRASE,
 		Issuer:                  issuer,
-	})
-	authCode := &AuthCode{}
-	token, err := tokenSvc.IssueAccessToken(authCode, []TypeScope{ScopeOpenID, ScopeOpenID})
+	}, &userRepo{Users: users})
+	authCode := &AuthCode{
+		UserID: 1,
+		Scopes: []TypeScope{ScopeOpenID, ScopeOpenID},
+	}
+	token, err := tokenSvc.IssueAccessToken(authCode)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -50,6 +59,9 @@ func TestTokenServiceIssueAccessToken(t *testing.T) {
 	if !(time.Now().Add(ACCESS_TOKEN_TTL).Add(-TIME_GAP).Unix() < int64(claims["exp"].(float64)) &&
 		int64(claims["exp"].(float64)) < time.Now().Add(ACCESS_TOKEN_TTL).Add(TIME_GAP).Unix()) {
 		t.Errorf("exp is invalid")
+	}
+	if claims["sub"] != fmt.Sprintf("id:%d;name:%s", userID, userName) {
+		t.Errorf("sub is invalid. expected: id:%d;name:%s, got: %s", userID, userName, claims["sub"])
 	}
 	if !(time.Now().Add(-TIME_GAP).Unix() < int64(claims["iat"].(float64)) &&
 		int64(claims["iat"].(float64)) < time.Now().Add(TIME_GAP).Unix()) {

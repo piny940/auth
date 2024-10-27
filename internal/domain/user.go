@@ -17,7 +17,7 @@ type User struct {
 	UpdatedAt         time.Time
 }
 type IUserRepo interface {
-	FindByID(id int64) (*User, error)
+	FindByID(id UserID) (*User, error)
 	FindByName(name string) (*User, error)
 	Create(name, encryptedPassword string) error
 }
