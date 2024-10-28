@@ -11,9 +11,7 @@ model User {
   password_confirmation: string;
 }
 model Client {
-  @visibility("read", "update")
   id: string;
-
   name: string;
   redirect_urls: string[];
 }

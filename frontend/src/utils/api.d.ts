@@ -39,7 +39,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/account/clients:id/{id}': {
+  '/account/clients/{id}': {
     parameters: {
       query?: never
       header?: never
@@ -48,8 +48,7 @@ export interface paths {
     }
     get?: never
     put?: never
-    /** Update a client */
-    post: operations['AccountClients_updateClient']
+    post?: never
     /** Delete a client */
     delete: operations['AccountClients_deleteClient']
     options?: never
@@ -166,6 +165,16 @@ export interface paths {
 export type webhooks = Record<string, never>
 export interface components {
   schemas: {
+    'AccountClients.CreateClientReq': {
+      name: string
+      redirect_urls: string[]
+    }
+    'AccountClients.CreatedClient': {
+      id: string
+      name: string
+      secret: string
+      redirect_urls: string[]
+    }
     /** @enum {string} */
     'Approvals.ApproveErr': 'invalid_client' | 'invalid_scope'
     'Approvals.ApproveReq': {
@@ -174,10 +183,6 @@ export interface components {
     }
     Client: {
       id: string
-      name: string
-      redirect_urls: string[]
-    }
-    ClientCreate: {
       name: string
       redirect_urls: string[]
     }
@@ -301,9 +306,7 @@ export interface operations {
   AccountClients_listClients: {
     parameters: {
       query?: never
-      header: {
-        cookie: string
-      }
+      header?: never
       path?: never
       cookie?: never
     }
@@ -332,7 +335,7 @@ export interface operations {
     requestBody: {
       content: {
         'application/json': {
-          client: components['schemas']['ClientCreate']
+          client: components['schemas']['AccountClients.CreateClientReq']
         }
       }
     }
@@ -344,48 +347,7 @@ export interface operations {
         }
         content: {
           'application/json': {
-            client: components['schemas']['Client']
-          }
-        }
-      }
-      /** @description The server could not understand the request due to invalid syntax. */
-      400: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': {
-            error: string
-          }
-        }
-      }
-    }
-  }
-  AccountClients_updateClient: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: number
-      }
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        'application/json': {
-          client: components['schemas']['ClientCreate']
-        }
-      }
-    }
-    responses: {
-      /** @description The request has succeeded. */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': {
-            client: components['schemas']['Client']
+            client: components['schemas']['AccountClients.CreatedClient']
           }
         }
       }
@@ -407,7 +369,7 @@ export interface operations {
       query?: never
       header?: never
       path: {
-        id: number
+        id: string
       }
       cookie?: never
     }

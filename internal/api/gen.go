@@ -87,6 +87,20 @@ const (
 	PasswordLengthNotEnough      UsersSignupErr = "password_length_not_enough"
 )
 
+// AccountClientsCreateClientReq defines model for AccountClients.CreateClientReq.
+type AccountClientsCreateClientReq struct {
+	Name         string   `json:"name"`
+	RedirectUrls []string `json:"redirect_urls"`
+}
+
+// AccountClientsCreatedClient defines model for AccountClients.CreatedClient.
+type AccountClientsCreatedClient struct {
+	Id           string   `json:"id"`
+	Name         string   `json:"name"`
+	RedirectUrls []string `json:"redirect_urls"`
+	Secret       string   `json:"secret"`
+}
+
 // ApprovalsApproveErr defines model for Approvals.ApproveErr.
 type ApprovalsApproveErr string
 
@@ -99,12 +113,6 @@ type ApprovalsApproveReq struct {
 // Client defines model for Client.
 type Client struct {
 	Id           string   `json:"id"`
-	Name         string   `json:"name"`
-	RedirectUrls []string `json:"redirect_urls"`
-}
-
-// ClientCreate defines model for ClientCreate.
-type ClientCreate struct {
 	Name         string   `json:"name"`
 	RedirectUrls []string `json:"redirect_urls"`
 }
@@ -196,19 +204,9 @@ type UsersReqSignup struct {
 // UsersSignupErr defines model for Users.SignupErr.
 type UsersSignupErr string
 
-// AccountClientsListClientsParams defines parameters for AccountClientsListClients.
-type AccountClientsListClientsParams struct {
-	Cookie string `json:"cookie"`
-}
-
 // AccountClientsCreateClientJSONBody defines parameters for AccountClientsCreateClient.
 type AccountClientsCreateClientJSONBody struct {
-	Client ClientCreate `json:"client"`
-}
-
-// AccountClientsUpdateClientJSONBody defines parameters for AccountClientsUpdateClient.
-type AccountClientsUpdateClientJSONBody struct {
-	Client ClientCreate `json:"client"`
+	Client AccountClientsCreateClientReq `json:"client"`
 }
 
 // OAuthInterfaceAuthorizeParams defines parameters for OAuthInterfaceAuthorize.
@@ -231,9 +229,6 @@ type ApprovalsInterfaceApproveJSONRequestBody = ApprovalsApproveReq
 // AccountClientsCreateClientJSONRequestBody defines body for AccountClientsCreateClient for application/json ContentType.
 type AccountClientsCreateClientJSONRequestBody AccountClientsCreateClientJSONBody
 
-// AccountClientsUpdateClientJSONRequestBody defines body for AccountClientsUpdateClient for application/json ContentType.
-type AccountClientsUpdateClientJSONRequestBody AccountClientsUpdateClientJSONBody
-
 // OAuthInterfacePostAuthorizeMultipartRequestBody defines body for OAuthInterfacePostAuthorize for multipart/form-data ContentType.
 type OAuthInterfacePostAuthorizeMultipartRequestBody = OAuthAuthorizeReqMultiPart
 
@@ -253,16 +248,13 @@ type ServerInterface interface {
 	ApprovalsInterfaceApprove(ctx echo.Context) error
 	// Get all clients
 	// (GET /account/clients)
-	AccountClientsListClients(ctx echo.Context, params AccountClientsListClientsParams) error
+	AccountClientsListClients(ctx echo.Context) error
 	// Create a new client
 	// (POST /account/clients)
 	AccountClientsCreateClient(ctx echo.Context) error
 	// Delete a client
-	// (DELETE /account/clients:id/{id})
-	AccountClientsDeleteClient(ctx echo.Context, id int64) error
-	// Update a client
-	// (POST /account/clients:id/{id})
-	AccountClientsUpdateClient(ctx echo.Context, id int64) error
+	// (DELETE /account/clients/{id})
+	AccountClientsDeleteClient(ctx echo.Context, id string) error
 	// Get a client
 	// (GET /clients/{id})
 	ClientsInterfaceGetClient(ctx echo.Context, id string) error
@@ -312,36 +304,18 @@ func (w *ServerInterfaceWrapper) ApprovalsInterfaceApprove(ctx echo.Context) err
 func (w *ServerInterfaceWrapper) AccountClientsListClients(ctx echo.Context) error {
 	var err error
 
-	// Parameter object where we will unmarshal all parameters from the context
-	var params AccountClientsListClientsParams
-
-	headers := ctx.Request().Header
-	// ------------- Required header parameter "cookie" -------------
-	if valueList, found := headers[http.CanonicalHeaderKey("cookie")]; found {
-		var Cookie string
-		n := len(valueList)
-		if n != 1 {
-			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Expected one value for cookie, got %d", n))
-		}
-
-		err = runtime.BindStyledParameterWithOptions("simple", "cookie", valueList[0], &Cookie, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: true})
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter cookie: %s", err))
-		}
-
-		params.Cookie = Cookie
-	} else {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Header parameter cookie is required, but not found"))
-	}
+	ctx.Set(ApiKeyAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.AccountClientsListClients(ctx, params)
+	err = w.Handler.AccountClientsListClients(ctx)
 	return err
 }
 
 // AccountClientsCreateClient converts echo context to params.
 func (w *ServerInterfaceWrapper) AccountClientsCreateClient(ctx echo.Context) error {
 	var err error
+
+	ctx.Set(ApiKeyAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.AccountClientsCreateClient(ctx)
@@ -352,31 +326,17 @@ func (w *ServerInterfaceWrapper) AccountClientsCreateClient(ctx echo.Context) er
 func (w *ServerInterfaceWrapper) AccountClientsDeleteClient(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "id" -------------
-	var id int64
+	var id string
 
 	err = runtime.BindStyledParameterWithOptions("simple", "id", ctx.Param("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
 	}
+
+	ctx.Set(ApiKeyAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.AccountClientsDeleteClient(ctx, id)
-	return err
-}
-
-// AccountClientsUpdateClient converts echo context to params.
-func (w *ServerInterfaceWrapper) AccountClientsUpdateClient(ctx echo.Context) error {
-	var err error
-	// ------------- Path parameter "id" -------------
-	var id int64
-
-	err = runtime.BindStyledParameterWithOptions("simple", "id", ctx.Param("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
-	}
-
-	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.AccountClientsUpdateClient(ctx, id)
 	return err
 }
 
@@ -564,8 +524,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.POST(baseURL+"/account/approvals", wrapper.ApprovalsInterfaceApprove)
 	router.GET(baseURL+"/account/clients", wrapper.AccountClientsListClients)
 	router.POST(baseURL+"/account/clients", wrapper.AccountClientsCreateClient)
-	router.DELETE(baseURL+"/account/clients:id/:id", wrapper.AccountClientsDeleteClient)
-	router.POST(baseURL+"/account/clients:id/:id", wrapper.AccountClientsUpdateClient)
+	router.DELETE(baseURL+"/account/clients/:id", wrapper.AccountClientsDeleteClient)
 	router.GET(baseURL+"/clients/:id", wrapper.ClientsInterfaceGetClient)
 	router.GET(baseURL+"/healthz", wrapper.HealthzCheck)
 	router.GET(baseURL+"/oauth/authorize", wrapper.OAuthInterfaceAuthorize)
@@ -607,7 +566,6 @@ func (response ApprovalsInterfaceApprove400JSONResponse) VisitApprovalsInterface
 }
 
 type AccountClientsListClientsRequestObject struct {
-	Params AccountClientsListClientsParams
 }
 
 type AccountClientsListClientsResponseObject interface {
@@ -634,7 +592,7 @@ type AccountClientsCreateClientResponseObject interface {
 }
 
 type AccountClientsCreateClient201JSONResponse struct {
-	Client Client `json:"client"`
+	Client AccountClientsCreatedClient `json:"client"`
 }
 
 func (response AccountClientsCreateClient201JSONResponse) VisitAccountClientsCreateClientResponse(w http.ResponseWriter) error {
@@ -656,7 +614,7 @@ func (response AccountClientsCreateClient400JSONResponse) VisitAccountClientsCre
 }
 
 type AccountClientsDeleteClientRequestObject struct {
-	Id int64 `json:"id"`
+	Id string `json:"id"`
 }
 
 type AccountClientsDeleteClientResponseObject interface {
@@ -676,37 +634,6 @@ type AccountClientsDeleteClient400JSONResponse struct {
 }
 
 func (response AccountClientsDeleteClient400JSONResponse) VisitAccountClientsDeleteClientResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type AccountClientsUpdateClientRequestObject struct {
-	Id   int64 `json:"id"`
-	Body *AccountClientsUpdateClientJSONRequestBody
-}
-
-type AccountClientsUpdateClientResponseObject interface {
-	VisitAccountClientsUpdateClientResponse(w http.ResponseWriter) error
-}
-
-type AccountClientsUpdateClient200JSONResponse struct {
-	Client Client `json:"client"`
-}
-
-func (response AccountClientsUpdateClient200JSONResponse) VisitAccountClientsUpdateClientResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type AccountClientsUpdateClient400JSONResponse struct {
-	Error string `json:"error"`
-}
-
-func (response AccountClientsUpdateClient400JSONResponse) VisitAccountClientsUpdateClientResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(400)
 
@@ -1000,11 +927,8 @@ type StrictServerInterface interface {
 	// (POST /account/clients)
 	AccountClientsCreateClient(ctx context.Context, request AccountClientsCreateClientRequestObject) (AccountClientsCreateClientResponseObject, error)
 	// Delete a client
-	// (DELETE /account/clients:id/{id})
+	// (DELETE /account/clients/{id})
 	AccountClientsDeleteClient(ctx context.Context, request AccountClientsDeleteClientRequestObject) (AccountClientsDeleteClientResponseObject, error)
-	// Update a client
-	// (POST /account/clients:id/{id})
-	AccountClientsUpdateClient(ctx context.Context, request AccountClientsUpdateClientRequestObject) (AccountClientsUpdateClientResponseObject, error)
 	// Get a client
 	// (GET /clients/{id})
 	ClientsInterfaceGetClient(ctx context.Context, request ClientsInterfaceGetClientRequestObject) (ClientsInterfaceGetClientResponseObject, error)
@@ -1076,10 +1000,8 @@ func (sh *strictHandler) ApprovalsInterfaceApprove(ctx echo.Context) error {
 }
 
 // AccountClientsListClients operation middleware
-func (sh *strictHandler) AccountClientsListClients(ctx echo.Context, params AccountClientsListClientsParams) error {
+func (sh *strictHandler) AccountClientsListClients(ctx echo.Context) error {
 	var request AccountClientsListClientsRequestObject
-
-	request.Params = params
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
 		return sh.ssi.AccountClientsListClients(ctx.Request().Context(), request.(AccountClientsListClientsRequestObject))
@@ -1130,7 +1052,7 @@ func (sh *strictHandler) AccountClientsCreateClient(ctx echo.Context) error {
 }
 
 // AccountClientsDeleteClient operation middleware
-func (sh *strictHandler) AccountClientsDeleteClient(ctx echo.Context, id int64) error {
+func (sh *strictHandler) AccountClientsDeleteClient(ctx echo.Context, id string) error {
 	var request AccountClientsDeleteClientRequestObject
 
 	request.Id = id
@@ -1148,37 +1070,6 @@ func (sh *strictHandler) AccountClientsDeleteClient(ctx echo.Context, id int64) 
 		return err
 	} else if validResponse, ok := response.(AccountClientsDeleteClientResponseObject); ok {
 		return validResponse.VisitAccountClientsDeleteClientResponse(ctx.Response())
-	} else if response != nil {
-		return fmt.Errorf("unexpected response type: %T", response)
-	}
-	return nil
-}
-
-// AccountClientsUpdateClient operation middleware
-func (sh *strictHandler) AccountClientsUpdateClient(ctx echo.Context, id int64) error {
-	var request AccountClientsUpdateClientRequestObject
-
-	request.Id = id
-
-	var body AccountClientsUpdateClientJSONRequestBody
-	if err := ctx.Bind(&body); err != nil {
-		return err
-	}
-	request.Body = &body
-
-	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.AccountClientsUpdateClient(ctx.Request().Context(), request.(AccountClientsUpdateClientRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "AccountClientsUpdateClient")
-	}
-
-	response, err := handler(ctx, request)
-
-	if err != nil {
-		return err
-	} else if validResponse, ok := response.(AccountClientsUpdateClientResponseObject); ok {
-		return validResponse.VisitAccountClientsUpdateClientResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
@@ -1429,37 +1320,37 @@ func (sh *strictHandler) UsersInterfaceSignup(ctx echo.Context) error {
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
+	"dExVPiEFn9z9jtfX6/8HAAD//6yEIeKuLQAA",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
