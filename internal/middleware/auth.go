@@ -50,8 +50,8 @@ func (m *AuthMiddleware) authenticate(ctx context.Context, input *openapi3filter
 	return m.cookieAuth(ctx, input)
 }
 
-func (m *AuthMiddleware) cookieAuth(ctx context.Context, _ *openapi3filter.AuthenticationInput) error {
-	_, err := api.CurrentUser(ctx)
+func (m *AuthMiddleware) cookieAuth(_ context.Context, input *openapi3filter.AuthenticationInput) error {
+	_, err := api.CurrentUser(input.RequestValidationInput.Request.Context())
 	return err
 }
 
