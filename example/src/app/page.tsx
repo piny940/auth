@@ -1,5 +1,7 @@
 import Link from "next/link"
 
+export const dynamic = "force-dynamic"
+
 export default function Home() {
   if (!process.env.NEXT_PUBLIC_APP_URL) {
     throw new Error("NEXT_PUBLIC_APP_URL is not set")
