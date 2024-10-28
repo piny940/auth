@@ -11,6 +11,7 @@ const CTX_COOKIE_KEY = "cookie"
 func (s *Server) SessionInterfaceLogin(ctx context.Context, request SessionInterfaceLoginRequestObject) (SessionInterfaceLoginResponseObject, error) {
 	user, err := s.UserUsecase.Login(request.Body.Name, request.Body.Password)
 	if err != nil {
+		s.logger.Infof("failed to login: %v", err)
 		return SessionInterfaceLogin400JSONResponse{
 			Error:            InvalidNameOrPassword,
 			ErrorDescription: "name or password is incorrect",
@@ -18,6 +19,7 @@ func (s *Server) SessionInterfaceLogin(ctx context.Context, request SessionInter
 	}
 	cookie, err := Login(ctx, user)
 	if err != nil {
+		s.logger.Errorf("failed to login: %v", err)
 		return nil, err
 	}
 	return &SessionInterfaceLogin204Response{
@@ -31,6 +33,7 @@ func (s *Server) SessionInterfaceLogin(ctx context.Context, request SessionInter
 func (s *Server) SessionInterfaceLogout(ctx context.Context, request SessionInterfaceLogoutRequestObject) (SessionInterfaceLogoutResponseObject, error) {
 	user, err := CurrentUser(ctx)
 	if err != nil {
+		s.logger.Errorf("failed to get current user: %v", err)
 		return nil, err
 	}
 	if user == nil {
@@ -38,6 +41,7 @@ func (s *Server) SessionInterfaceLogout(ctx context.Context, request SessionInte
 	}
 	cookie, err := Logout(ctx)
 	if err != nil {
+		s.logger.Errorf("failed to logout: %v", err)
 		return nil, err
 	}
 	return &SessionInterfaceLogout204Response{
@@ -51,6 +55,7 @@ func (s *Server) SessionInterfaceLogout(ctx context.Context, request SessionInte
 func (s *Server) SessionInterfaceMe(ctx context.Context, request SessionInterfaceMeRequestObject) (SessionInterfaceMeResponseObject, error) {
 	user, err := CurrentUser(ctx)
 	if err != nil {
+		s.logger.Errorf("failed to get current user: %v", err)
 		return nil, err
 	}
 	return &SessionInterfaceMe200JSONResponse{

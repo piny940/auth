@@ -6,8 +6,6 @@ import (
 	"auth/internal/usecase"
 	"context"
 	"errors"
-	"fmt"
-	"log/slog"
 	"net/url"
 	"strings"
 	"time"
@@ -46,12 +44,14 @@ func (s *Server) OAuthInterfaceAuthorize(ctx context.Context, request OAuthInter
 	}
 	code, err := s.OAuthUsecase.RequestAuthorization(user, toDAuthParams(request.Params))
 	if errors.Is(err, oauth.ErrInvalidRequestType) {
+		s.logger.Infof("invalid request type: %v", err)
 		return OAuthInterfaceAuthorize400JSONResponse{
 			Error:            OAuthAuthorizeErrUnsupportedResponseType,
 			ErrorDescription: "unsupported_response_type",
 		}, nil
 	}
 	if errors.Is(err, oauth.ErrInvalidClientID) {
+		s.logger.Infof("invalid client id: %v", err)
 		return OAuthInterfaceAuthorize400JSONResponse{
 			Error:            OAuthAuthorizeErrInvalidRequest,
 			ErrorDescription: err.Error(),
@@ -72,18 +72,21 @@ func (s *Server) OAuthInterfaceAuthorize(ctx context.Context, request OAuthInter
 		}, nil
 	}
 	if errors.Is(err, oauth.ErrInvalidScope) {
+		s.logger.Infof("invalid scope: %v", err)
 		return OAuthInterfaceAuthorize400JSONResponse{
 			Error:            OAuthAuthorizeErrInvalidScope,
 			ErrorDescription: "invalid_scope",
 		}, nil
 	}
 	if errors.Is(err, oauth.ErrInvalidRedirectURI) {
+		s.logger.Infof("invalid redirect uri: %v", err)
 		return OAuthInterfaceAuthorize400JSONResponse{
 			Error:            OAuthAuthorizeErrInvalidRequest,
 			ErrorDescription: "redirect_uri is invalid",
 		}, nil
 	}
 	if err != nil {
+		s.logger.Errorf("failed to authorize: %v", err)
 		return nil, err
 	}
 	query := map[string]string{
@@ -109,12 +112,14 @@ func (s *Server) OAuthInterfaceGetToken(ctx context.Context, request OAuthInterf
 		ClientID:    oauth.ClientID(request.Body.ClientId),
 	})
 	if errors.Is(err, usecase.ErrInvalidGrantType) {
+		s.logger.Infof("invalid grant type: %v", err)
 		return OAuthInterfaceGetToken400JSONResponse{
 			Error:            InvalidRequest,
 			ErrorDescription: "invalid grant type",
 		}, nil
 	}
 	if errors.Is(err, oauth.ErrInvalidRedirectURI) {
+		s.logger.Infof("invalid redirect uri: %v", err)
 		return OAuthInterfaceGetToken400JSONResponse{
 			Error:            InvalidRequest,
 			ErrorDescription: "invalid redirect uri",
@@ -124,13 +129,14 @@ func (s *Server) OAuthInterfaceGetToken(ctx context.Context, request OAuthInterf
 		errors.Is(err, oauth.ErrInvalidClientID) ||
 		errors.Is(err, oauth.ErrExpiredAuthCode) ||
 		errors.Is(err, oauth.ErrUsedAuthCode) {
-		slog.Info(fmt.Sprintf("invalid auth code: %s", err.Error()))
+		s.logger.Infof("invalid auth code: %v", err)
 		return OAuthInterfaceGetToken400JSONResponse{
 			Error:            InvalidRequest,
 			ErrorDescription: "invalid auth code",
 		}, nil
 	}
 	if err != nil {
+		s.logger.Errorf("failed to get token: %v", err)
 		return nil, err
 	}
 	var idTokenStr *string

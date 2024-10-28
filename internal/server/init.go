@@ -15,6 +15,7 @@ import (
 	"github.com/kelseyhightower/envconfig"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/gommon/log"
 )
 
 var config = &Config{}
@@ -32,6 +33,9 @@ func Init() *echo.Echo {
 	e := echo.New()
 	e.Use(middleware.RequestID())
 	e.Use(middleware.Logger())
+	if l, ok := e.Logger.(*log.Logger); ok {
+		l.SetLevel(log.INFO)
+	}
 	e.Use(middleware.Recover())
 	e.Use(middleware.Secure())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
