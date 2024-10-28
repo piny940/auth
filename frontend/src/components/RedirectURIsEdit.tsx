@@ -37,7 +37,7 @@ export const RedirectURIsEdit = ({
       </Typography>
       <List>
         {fields.map((item, index) => (
-          <ListItem key={item.id}>
+          <ListItem sx={{ display: 'flex' }} key={item.id}>
             <Controller
               control={control}
               name={`redirectURIs.${index}.url`}

@@ -80,7 +80,10 @@ export default function Page() {
                 </IconButton>
               }
               key={client.id}
-              sx={{ bgcolor: 'white' }}
+              sx={{
+                bgcolor: 'white',
+                paddingX: 4,
+              }}
             >
               <Typography variant="h6">{client.name}</Typography>
             </ListItem>
