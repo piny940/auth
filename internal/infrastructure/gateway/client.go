@@ -46,7 +46,7 @@ func (c *ClientRepo) FindByID(id oauth.ClientID) (*oauth.Client, error) {
 
 func (c *ClientRepo) Create(client *oauth.ClientInput) error {
 	err := c.query.Client.Create(&model.Client{
-		ID:              client.ID,
+		ID:              string(client.ID),
 		EncryptedSecret: client.EncryptedSecret,
 		UserID:          int64(client.UserID),
 		Name:            client.Name,
@@ -57,7 +57,7 @@ func (c *ClientRepo) Create(client *oauth.ClientInput) error {
 	redirectUris := make([]*model.RedirectURI, 0, len(client.RedirectURIs))
 	for _, uri := range client.RedirectURIs {
 		redirectUris = append(redirectUris, &model.RedirectURI{
-			ClientID: client.ID,
+			ClientID: string(client.ID),
 			URI:      uri,
 		})
 	}
@@ -66,8 +66,10 @@ func (c *ClientRepo) Create(client *oauth.ClientInput) error {
 	}
 	return nil
 }
-func (c *ClientRepo) Delete(id oauth.ClientID) error {
-	_, err := c.query.Client.Where(c.query.Client.ID.Eq(string(id))).Delete()
+func (c *ClientRepo) Delete(id oauth.ClientID, userID domain.UserID) error {
+	_, err := c.query.Client.Where(
+		c.query.Client.ID.Eq(string(id)), c.query.Client.UserID.Eq(int64(userID)),
+	).Delete()
 	if err != nil {
 		return err
 	}

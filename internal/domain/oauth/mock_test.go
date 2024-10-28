@@ -49,7 +49,16 @@ type clientRepo struct{}
 
 var _ IClientRepo = &clientRepo{}
 
+func (c *clientRepo) Create(client *ClientInput) error {
+	panic("unimplemented")
+}
 func (c *clientRepo) FindByID(id ClientID) (*Client, error) {
+	panic("unimplemented")
+}
+func (c *clientRepo) Delete(id ClientID, userID domain.UserID) error {
+	panic("unimplemented")
+}
+func (c *clientRepo) List(userID domain.UserID) ([]*Client, error) {
 	panic("unimplemented")
 }
 

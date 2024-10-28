@@ -7,12 +7,24 @@ using TypeSpec.Rest;
 
 namespace Auth.AccountClients;
 
+model CreateClientReq {
+  name: string;
+  redirect_urls: string[];
+}
+model CreatedClient {
+  id: string;
+  name: string;
+  secret: string;
+  redirect_urls: string[];
+}
+
 @route("/account/clients")
+@useAuth(ApiKeyAuth<ApiKeyLocation.cookie, "auth">)
 interface AccountClients {
   @route("")
   @get
   @summary("Get all clients")
-  listClients(@header cookie: string): {
+  listClients(): {
     @statusCode statusCode: 200;
     clients: Client[];
   };
@@ -20,20 +32,9 @@ interface AccountClients {
   @route("")
   @post
   @summary("Create a new client")
-  createClient(client: Client): {
+  createClient(client: CreateClientReq): {
     @statusCode statusCode: 201;
-    client: Client;
-  } | {
-    @statusCode statusCode: 400;
-    error: string;
-  };
-
-  @route(":id")
-  @post
-  @summary("Update a client")
-  updateClient(@path id: int64, client: Client): {
-    @statusCode statusCode: 200;
-    client: Client;
+    client: CreatedClient;
   } | {
     @statusCode statusCode: 400;
     error: string;
@@ -42,7 +43,7 @@ interface AccountClients {
   @route(":id")
   @delete
   @summary("Delete a client")
-  deleteClient(@path id: int64): {
+  deleteClient(@path id: string): {
     @statusCode statusCode: 204;
   } | {
     @statusCode statusCode: 400;

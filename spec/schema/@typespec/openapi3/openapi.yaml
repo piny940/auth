@@ -38,12 +38,7 @@ paths:
     get:
       operationId: AccountClients_listClients
       summary: Get all clients
-      parameters:
-        - name: cookie
-          in: header
-          required: true
-          schema:
-            type: string
+      parameters: []
       responses:
         '200':
           description: The request has succeeded.
@@ -58,6 +53,8 @@ paths:
                       $ref: '#/components/schemas/Client'
                 required:
                   - clients
+      security:
+        - ApiKeyAuth: []
     post:
       operationId: AccountClients_createClient
       summary: Create a new client
@@ -71,7 +68,7 @@ paths:
                 type: object
                 properties:
                   client:
-                    $ref: '#/components/schemas/Client'
+                    $ref: '#/components/schemas/AccountClients.CreatedClient'
                 required:
                   - client
         '400':
@@ -93,54 +90,12 @@ paths:
               type: object
               properties:
                 client:
-                  $ref: '#/components/schemas/ClientCreate'
+                  $ref: '#/components/schemas/AccountClients.CreateClientReq'
               required:
                 - client
+      security:
+        - ApiKeyAuth: []
   /account/clients:id/{id}:
-    post:
-      operationId: AccountClients_updateClient
-      summary: Update a client
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '200':
-          description: The request has succeeded.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  client:
-                    $ref: '#/components/schemas/Client'
-                required:
-                  - client
-        '400':
-          description: The server could not understand the request due to invalid syntax.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                required:
-                  - error
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                client:
-                  $ref: '#/components/schemas/ClientCreate'
-              required:
-                - client
     delete:
       operationId: AccountClients_deleteClient
       summary: Delete a client
@@ -149,8 +104,7 @@ paths:
           in: path
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
@@ -165,6 +119,8 @@ paths:
                     type: string
                 required:
                   - error
+      security:
+        - ApiKeyAuth: []
   /clients/{id}:
     get:
       operationId: ClientsInterface_getClient
@@ -444,6 +400,36 @@ paths:
               $ref: '#/components/schemas/Users.ReqSignup'
 components:
   schemas:
+    AccountClients.CreateClientReq:
+      type: object
+      required:
+        - name
+        - redirect_urls
+      properties:
+        name:
+          type: string
+        redirect_urls:
+          type: array
+          items:
+            type: string
+    AccountClients.CreatedClient:
+      type: object
+      required:
+        - id
+        - name
+        - secret
+        - redirect_urls
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        secret:
+          type: string
+        redirect_urls:
+          type: array
+          items:
+            type: string
     Approvals.ApproveErr:
       type: string
       enum:
@@ -468,18 +454,6 @@ components:
       properties:
         id:
           type: string
-        name:
-          type: string
-        redirect_urls:
-          type: array
-          items:
-            type: string
-    ClientCreate:
-      type: object
-      required:
-        - name
-        - redirect_urls
-      properties:
         name:
           type: string
         redirect_urls:
