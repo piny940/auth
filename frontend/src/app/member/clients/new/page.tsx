@@ -1,17 +1,12 @@
 'use client'
-import {
-  RedirectURIsEdit,
-  RedirectURIsFields,
-} from '@/components/RedirectURIsEdit'
+import { ClientForm, ClientInput } from '@/components/ClientForm'
+import { RedirectURIsFields } from '@/components/RedirectURIsEdit'
 import { client } from '@/utils/client'
-import { Box, Button, TextField, Typography } from '@mui/material'
-import { useCallback } from 'react'
-import { Controller, useForm } from 'react-hook-form'
-
-type ClientInput = {
-  name: string
-  redirectUris: string[]
-}
+import { Box, Typography } from '@mui/material'
+import { blue } from '@mui/material/colors'
+import Link from 'next/link'
+import { useCallback, useState } from 'react'
+import { useForm } from 'react-hook-form'
 
 export default function Page() {
   const { handleSubmit, getValues, control } = useForm<ClientInput>({
@@ -26,11 +21,13 @@ export default function Page() {
         redirectURIs: [],
       },
     })
-  const requiredRule = { required: 'このフィールドは必須です。' }
+  const [created, setCreated] = useState<{ id: string; secret: string } | null>(
+    null
+  )
   const submit = useCallback(async () => {
     const c = getValues()
     const redirectURIs = getRedirectURIsValues()
-    const { error } = await client.POST('/account/clients', {
+    const { data, error } = await client.POST('/account/clients', {
       body: {
         client: {
           name: c.name,
@@ -42,38 +39,33 @@ export default function Page() {
       console.error(error)
       return
     }
+    setCreated({ id: data.client.id, secret: data.client.secret })
   }, [getValues, getRedirectURIsValues])
   return (
     <Box>
       <Typography variant="h4">New Client</Typography>
-      <Box
-        onSubmit={handleSubmit(submit)}
-        component="form"
-        sx={{ '> *': { margin: 2 } }}
-      >
-        <Box>
-          <Controller
-            control={control}
-            name="name"
-            rules={requiredRule}
-            render={({ field, fieldState }) => (
-              <TextField
-                fullWidth
-                label="Name"
-                error={fieldState.invalid}
-                helperText={fieldState.error?.message}
-                {...field}
-              />
-            )}
-          />
+      {created ? (
+        <Box m={2}>
+          <Typography variant="h5">
+            Client Created! Save the Client Secret
+          </Typography>
+          <Box m={2}>
+            <Typography>Client ID: {created.id}</Typography>
+            <Typography>Client Secret: {created.secret}</Typography>
+          </Box>
+          <Link href="/member">
+            <Typography sx={{ color: blue[700] }}>
+              Back to member page
+            </Typography>
+          </Link>
         </Box>
-        <RedirectURIsEdit control={redirectURIsControl} />
-        <Box>
-          <Button type="submit" fullWidth variant="contained">
-            Submit
-          </Button>
-        </Box>
-      </Box>
+      ) : (
+        <ClientForm
+          control={control}
+          redirectURIsControl={redirectURIsControl}
+          submit={handleSubmit(submit)}
+        />
+      )}
     </Box>
   )
 }
