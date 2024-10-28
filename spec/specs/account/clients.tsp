@@ -40,7 +40,7 @@ interface AccountClients {
     error: string;
   };
 
-  @route(":id")
+  @route("")
   @delete
   @summary("Delete a client")
   deleteClient(@path id: string): {

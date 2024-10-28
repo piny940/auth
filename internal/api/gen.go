@@ -253,7 +253,7 @@ type ServerInterface interface {
 	// (POST /account/clients)
 	AccountClientsCreateClient(ctx echo.Context) error
 	// Delete a client
-	// (DELETE /account/clients:id/{id})
+	// (DELETE /account/clients/{id})
 	AccountClientsDeleteClient(ctx echo.Context, id string) error
 	// Get a client
 	// (GET /clients/{id})
@@ -524,7 +524,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.POST(baseURL+"/account/approvals", wrapper.ApprovalsInterfaceApprove)
 	router.GET(baseURL+"/account/clients", wrapper.AccountClientsListClients)
 	router.POST(baseURL+"/account/clients", wrapper.AccountClientsCreateClient)
-	router.DELETE(baseURL+"/account/clients:id/:id", wrapper.AccountClientsDeleteClient)
+	router.DELETE(baseURL+"/account/clients/:id", wrapper.AccountClientsDeleteClient)
 	router.GET(baseURL+"/clients/:id", wrapper.ClientsInterfaceGetClient)
 	router.GET(baseURL+"/healthz", wrapper.HealthzCheck)
 	router.GET(baseURL+"/oauth/authorize", wrapper.OAuthInterfaceAuthorize)
@@ -927,7 +927,7 @@ type StrictServerInterface interface {
 	// (POST /account/clients)
 	AccountClientsCreateClient(ctx context.Context, request AccountClientsCreateClientRequestObject) (AccountClientsCreateClientResponseObject, error)
 	// Delete a client
-	// (DELETE /account/clients:id/{id})
+	// (DELETE /account/clients/{id})
 	AccountClientsDeleteClient(ctx context.Context, request AccountClientsDeleteClientRequestObject) (AccountClientsDeleteClientResponseObject, error)
 	// Get a client
 	// (GET /clients/{id})
@@ -1341,16 +1341,16 @@ var swaggerSpec = []string{
 	"qKrUHWIOvGLLnITMSlryMG65SwjHTUf5eO1jr3F5TvSqRhoggryvVKQDjRqwsVQKylxCCq2tTsCf3FRf",
 	"8RZcvseQDTbqa+Q+m1b3rQN3y4psX+tU2s+IQcZRCsCADdT6W7CICIGqs320TweClmqb3aHviATfcoU9",
 	"0KfqfantE1N+/zHSsKEX9AH4QN53CZJwjzQY5TSFsOAGQCIaj0fEIOJfO2HHR4x7fcLVcwxN0Sql1ujG",
-	"Nt24NONs8pWzdcxEAuJtfp8f/Sesqv2oIJrkYEGbwFOoJHza3tQR5S2/CdtRQ/FdDV//zGnyZ4VLNCoi",
-	"LaiUEKnxkcxfJSrqWqtu+T0NNqZHK+OSPcuBaexJyq1kh/ZnLrfamb0FwQyIsNmXnej7I74/z4B+3lEw",
-	"DStCNgHUk0Tx/MiL8kXepG4S7+QptG02d496/ZY/wEMhQkdvQYSBUfSPWwd6tXGQbue0v6+M+h3QbsUe",
-	"mXinbXh0+lWn/fiEQ1/7+aWp19NX26dcllr2v0a43O2XCUXrvkd/Fa2fJowl5jM9g1jvscMzC2+VrEGJ",
-	"6LK6Le66vrTjyIUythlLdt9fcicsL4i2k4XS+QkjlvTPgvsGT8+mp/HLC16eF2wybD3J6eMWb8F+KEcr",
-	"qWozwqDd06wPH1569mkZPJzc39+fBNdzWoCkigEb6oD1hLCXzx2vCO6M7oaVvy2vo4RmcELjjHa/6/Vk",
-	"KDH09ewVYQ57lBNaI90nDgH1RPqlNE4bY4JUBy96eXB7E0dk+1oQ5RStdvs4jMNPn31aGDdgT8qpycDc",
-	"MuRuXsq6HqWvG13VvAf8iAGiPc585C5vBYydJVICFlw+0phnayD9PMqhIwHySSLd1j8HvIiuRQRdiGTO",
-	"gDYTs5lkJ1EbBsU1Zsu59+OAtjtd/4XZoZjtTvVfBGSbaIiEY83cPtYHZnQVXuMRdlqUc30zm4Q22Ljg",
-	"cvXv0+mYqnxCCj65+x2vr9f/DwAA//99rPBEsS0AAA==",
+	"Nt24NPnK2TqmIQHxKr/Pif4TVtVOVBBNcrCgTWAolBE+Z2+KiPKK38TsqKH1rnqvf+Yc+bNiJRoVkRZO",
+	"uvhIJq8SFXWhVff7ngYb06PVcMmG5cAc9iS1VrI9+zPXWu203oJgBkTY7MtO9P0R359nQD/vqJaGVSCb",
+	"6OlJonh+5EX5Cm9Sd4h38hR6NpuLR71+yx/goRChnbcgwsAo+setA73aOEi3bdrfV0b9Dmj3YY9MvNMz",
+	"PDr9qs1+fMKhqf380tTr6avtUy5LLftfI1zu9suEonXTo7+K1k8TxhLDmZ5BrPfM4ZmFt0rWoER0WV0V",
+	"d91d2nHkQhnbjCW7Ly+5E5YXRNvJQun8hBFL+mfBfVOnZ9PQ+OUFL88LNhm2HuP0cYu3YD+Uc5VUtRlh",
+	"0G5o1ocPLz379AseTu7v70+C6zktQFLFgA11wHo82MvnjlcEd+Z2w8rfltdRQjM4oXFAu9/1ejKUmPh6",
+	"9oowhD3KCa157hOHgHoc/VK6po0ZQap9F708uL2J87F9LYhyhFa7fZzE4afPPi2MG7An5chkYG4Zcjcv",
+	"ZV2P0teNrmreA37EANGeZT5yi7cCxs4SKQELLh9pxrM1jX4e5dCRAPkkkW7rPwNeRNcigi5EMmdAm4nZ",
+	"jLGTqA1T4hqz5dD7cUDbHa3/wuxQzHZH+i8Csk00RMKxZm4f6wMzugqv8Qg7LcqhvplNQhtsXHC5+vfp",
+	"dExVPiEFn9z9jtfX6/8HAAD//6yEIeKuLQAA",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

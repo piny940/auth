@@ -19,7 +19,7 @@ export default async function Page(props: Props) {
       >
         ログイン
       </Typography>
-      <LoginForm next={query.next || '/'} />
+      <LoginForm next={query.next || '/member'} />
     </Container>
   )
 }

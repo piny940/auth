@@ -39,7 +39,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/account/clients:id/{id}': {
+  '/account/clients/{id}': {
     parameters: {
       query?: never
       header?: never
@@ -167,6 +167,12 @@ export interface components {
   schemas: {
     'AccountClients.CreateClientReq': {
       name: string
+      redirect_urls: string[]
+    }
+    'AccountClients.CreatedClient': {
+      id: string
+      name: string
+      secret: string
       redirect_urls: string[]
     }
     /** @enum {string} */
@@ -341,7 +347,7 @@ export interface operations {
         }
         content: {
           'application/json': {
-            client: components['schemas']['Client']
+            client: components['schemas']['AccountClients.CreatedClient']
           }
         }
       }
@@ -363,7 +369,7 @@ export interface operations {
       query?: never
       header?: never
       path: {
-        id: number
+        id: string
       }
       cookie?: never
     }

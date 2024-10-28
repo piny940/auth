@@ -20,7 +20,7 @@ export default async function Page(props: Props) {
       >
         ユーザー登録
       </Typography>
-      <SignupForm next={query.next || '/'} />
+      <SignupForm next={query.next || '/member'} />
     </Container>
   )
 }

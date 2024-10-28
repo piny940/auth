@@ -95,7 +95,7 @@ paths:
                 - client
       security:
         - ApiKeyAuth: []
-  /account/clients:id/{id}:
+  /account/clients/{id}:
     delete:
       operationId: AccountClients_deleteClient
       summary: Delete a client
