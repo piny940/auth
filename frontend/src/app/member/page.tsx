@@ -5,15 +5,16 @@ import { client } from '@/utils/client'
 import { Client } from '@/utils/types'
 import {
   Box,
+  Button,
   IconButton,
   List,
   ListItem,
-  ListItemAvatar,
   Typography,
 } from '@mui/material'
 import { blueGrey } from '@mui/material/colors'
 import { useCallback, useEffect, useState } from 'react'
 import Error from 'next/error'
+import Link from 'next/link'
 
 export default function Page() {
   const [clients, setClients] = useState<Client[]>([])
@@ -46,14 +47,26 @@ export default function Page() {
     return <Error statusCode={500} />
   }
   return (
-    <Box m={10} sx={{ '> *': { margin: 2 } }}>
+    <Box sx={{ '> *': { margin: 2 } }}>
       <Typography mb={4} variant="h4">
         ダッシュボード - {user.name}
       </Typography>
-      <Box p={4} maxWidth="800px" borderRadius={2} bgcolor={blueGrey[50]}>
-        <Typography mb={1} variant="h5">
-          Clients
-        </Typography>
+      <Box p={4} borderRadius={2} maxWidth={800} bgcolor={blueGrey[50]}>
+        <Box display="flex" alignItems="center" mb={1}>
+          <Typography mr={3} variant="h5">
+            Clients
+          </Typography>
+          <Link href="/member/clients/new">
+            <Box
+              p={1}
+              borderRadius={1}
+              fontWeight={500}
+              bgcolor={blueGrey[200]}
+            >
+              新規作成
+            </Box>
+          </Link>
+        </Box>
         <List>
           {clients.map((client) => (
             <ListItem
