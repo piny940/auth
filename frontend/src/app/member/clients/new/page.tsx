@@ -46,8 +46,9 @@ export default function Page() {
       <Typography variant="h4">New Client</Typography>
       {created ? (
         <Box m={2}>
-          <Typography variant="h5">
-            Client Created! Save the Client Secret
+          <Typography variant="h5">Clientを作成しました。</Typography>
+          <Typography component="p">
+            Secretは後で確認できません。必ず保存してください。
           </Typography>
           <Box m={2}>
             <Typography>Client ID: {created.id}</Typography>
