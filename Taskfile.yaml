@@ -38,6 +38,7 @@ tasks:
       - cd spec && pnpm compile
       - go generate ./...
       - cd frontend && pnpm codegen
+      - task lint
 
   migrate:create:
     cmds:
@@ -74,7 +75,7 @@ tasks:
     desc: "Run development server for frontend"
     cmds:
       - cd frontend && pnpm dev
-  
+
   dev:example:
     desc: "Run development server for example"
     cmds:
@@ -98,7 +99,31 @@ tasks:
     desc: "Run test"
     cmds:
       - task test:backend
-  test:
+  test:backend:
     desc: "Run test for backend"
     cmds:
       - go test ./...
+
+  lint:
+    desc: "Run lint"
+    cmds:
+      - task lint:backend
+      - task lint:frontend
+      - task lint:spec
+      - task lint:example
+  lint:backend:
+    desc: "Run lint for backend"
+    cmds:
+      - go fmt ./...
+  lint:frontend:
+    desc: "Run lint for frontend"
+    cmds:
+      - cd frontend && pnpm lint
+  lint:spec:
+    desc: "Run lint for spec"
+    cmds:
+      - cd spec && pnpm lint
+  lint:example:
+    desc: "Run lint for example"
+    cmds:
+      - cd example && pnpm lint
