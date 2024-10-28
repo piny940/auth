@@ -28,6 +28,9 @@ jobs:
             spec:
               - "spec/**"
               - ".github/workflows/ci.yaml"
+            example:
+              - "example/**"
+              - ".github/workflows/ci.yaml"
   go-test:
     services:
       postgres:
@@ -84,7 +87,7 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
       - name: Check format
         run: go fmt ./...
-  
+
   front-lint:
     runs-on: ubuntu-latest
     needs: filter
@@ -138,3 +141,22 @@ jobs:
       - run: cd spec && pnpm install
       - name: Prettier && ESLint
         run: cd spec && pnpm lint-check
+
+  example-lint:
+    runs-on: ubuntu-latest
+    needs: filter
+    if: ${{ needs.filter.outputs.example == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION}}
+          package_json_file: "example/package.json"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+          cache-dependency-path: "spec/package.json"
+      - run: cd example && pnpm install
+      - name: Prettier && ESLint
+        run: cd example && if pnpm lint-check |& grep -E "(error|warn)"; then exit 1; fi
