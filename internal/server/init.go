@@ -30,6 +30,7 @@ func Init() *echo.Echo {
 		panic(err)
 	}
 	e := echo.New()
+	e.Use(middleware.RequestID())
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.Secure())
@@ -40,7 +41,9 @@ func Init() *echo.Echo {
 	}))
 	e.Use(myMiddleware.Session())
 	e.Use(di.NewAuthMiddleware().Auth())
-	api.RegisterHandlers(e, api.NewStrictHandler(di.NewServer(), nil))
+	server := di.NewServer()
+	api.RegisterHandlers(e, api.NewStrictHandler(server, nil))
+	server.SetLogger(e.Logger)
 
 	return e
 }

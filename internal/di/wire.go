@@ -9,6 +9,7 @@ import (
 	"auth/internal/infrastructure"
 	"auth/internal/infrastructure/gateway"
 	"auth/internal/middleware"
+	"auth/internal/server"
 	"auth/internal/usecase"
 
 	"github.com/google/wire"
@@ -31,6 +32,7 @@ func NewServer() *api.Server {
 		gateway.NewAuthCodeRepo,
 		usecase.NewClientUsecase,
 		infrastructure.GetDB,
+		server.Logger,
 	)
 	return nil
 }
