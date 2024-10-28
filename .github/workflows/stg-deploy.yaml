@@ -17,6 +17,7 @@ jobs:
     outputs:
       frontend: ${{ steps.filter.outputs.frontend }}
       spec: ${{ steps.filter.outputs.spec }}
+      example: ${{ steps.filter.outputs.example }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3

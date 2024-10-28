@@ -20,6 +20,7 @@ jobs:
     outputs:
       frontend: ${{ steps.filter.outputs.frontend }}
       spec: ${{ steps.filter.outputs.spec }}
+      example: ${{ steps.filter.outputs.example }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -31,6 +32,9 @@ jobs:
               - ".github/workflows/prd-deploy.yaml"
             spec:
               - "spec/**"
+              - ".github/workflows/prd-deploy.yaml"
+            example:
+              - "example/**"
               - ".github/workflows/prd-deploy.yaml"
   prd-build-backend:
     runs-on: ubuntu-latest
