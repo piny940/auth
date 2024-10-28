@@ -11,10 +11,15 @@ import (
 func (s *Server) ClientsInterfaceGetClient(ctx context.Context, request ClientsInterfaceGetClientRequestObject) (ClientsInterfaceGetClientResponseObject, error) {
 	client, err := s.ClientUsecase.Find(oauth.ClientID(request.Id))
 	if errors.Is(err, domain.ErrRecordNotFound) {
+		s.logger.Infof("client not found: %v", err)
 		return ClientsInterfaceGetClient400JSONResponse{
 			Error:            ClientNotFound,
 			ErrorDescription: "client not found",
 		}, nil
+	}
+	if err != nil {
+		s.logger.Errorf("failed to get client: %v", err)
+		return nil, err
 	}
 	return ClientsInterfaceGetClient200JSONResponse{
 		Client: PublicClient{

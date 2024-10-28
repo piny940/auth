@@ -15,6 +15,7 @@ import (
 	"github.com/kelseyhightower/envconfig"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/gommon/log"
 )
 
 var config = &Config{}
@@ -30,7 +31,11 @@ func Init() *echo.Echo {
 		panic(err)
 	}
 	e := echo.New()
+	e.Use(middleware.RequestID())
 	e.Use(middleware.Logger())
+	if l, ok := e.Logger.(*log.Logger); ok {
+		l.SetLevel(log.INFO)
+	}
 	e.Use(middleware.Recover())
 	e.Use(middleware.Secure())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
@@ -40,7 +45,9 @@ func Init() *echo.Echo {
 	}))
 	e.Use(myMiddleware.Session())
 	e.Use(di.NewAuthMiddleware().Auth())
-	api.RegisterHandlers(e, api.NewStrictHandler(di.NewServer(), nil))
+	server := di.NewServer()
+	api.RegisterHandlers(e, api.NewStrictHandler(server, nil))
+	server.SetLogger(e.Logger)
 
 	return e
 }

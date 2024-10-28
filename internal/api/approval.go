@@ -10,6 +10,7 @@ import (
 func (s *Server) ApprovalsInterfaceApprove(ctx context.Context, request ApprovalsInterfaceApproveRequestObject) (ApprovalsInterfaceApproveResponseObject, error) {
 	user, err := CurrentUser(ctx)
 	if err != nil {
+		s.logger.Errorf("failed to get current user: %v", err)
 		return nil, err
 	}
 	scopes := make([]oauth.TypeScope, 0)
@@ -18,18 +19,21 @@ func (s *Server) ApprovalsInterfaceApprove(ctx context.Context, request Approval
 	}
 	err = s.OAuthUsecase.Approve(user, oauth.ClientID(request.Body.ClientId), scopes)
 	if errors.Is(err, oauth.ErrInvalidClientID) {
+		s.logger.Infof("invalid client id: %v", err)
 		return ApprovalsInterfaceApprove400JSONResponse{
 			Error:            ApprovalsApproveErrInvalidClient,
 			ErrorDescription: err.Error(),
 		}, nil
 	}
 	if errors.Is(err, oauth.ErrInvalidScope) {
+		s.logger.Infof("invalid scope: %v", err)
 		return ApprovalsInterfaceApprove400JSONResponse{
 			Error:            ApprovalsApproveErrInvalidScope,
 			ErrorDescription: err.Error(),
 		}, nil
 	}
 	if err != nil {
+		s.logger.Errorf("failed to approve: %v", err)
 		return nil, err
 	}
 	return ApprovalsInterfaceApprove204Response{}, nil

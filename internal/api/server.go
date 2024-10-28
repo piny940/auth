@@ -5,6 +5,7 @@ import (
 	"context"
 
 	"github.com/kelseyhightower/envconfig"
+	"github.com/labstack/echo/v4"
 )
 
 type Server struct {
@@ -12,6 +13,7 @@ type Server struct {
 	OAuthUsecase  *usecase.OAuthUsecase
 	ClientUsecase usecase.IClientUsecase
 	Conf          *Config
+	logger        echo.Logger
 }
 
 type Config struct {
@@ -34,6 +36,10 @@ func NewServer(userUsecase *usecase.UserUsecase, oauthUsecase *usecase.OAuthUsec
 		ClientUsecase: clientUC,
 		Conf:          conf,
 	}
+}
+
+func (s *Server) SetLogger(logger echo.Logger) {
+	s.logger = logger
 }
 
 func (s *Server) HealthzCheck(ctx context.Context, request HealthzCheckRequestObject) (HealthzCheckResponseObject, error) {
