@@ -90,3 +90,38 @@ func (s *Server) AccountClientsListClients(ctx context.Context, request AccountC
 		Clients: mClients,
 	}, nil
 }
+
+func (s *Server) AccountClientsGetClient(ctx context.Context, request AccountClientsGetClientRequestObject) (AccountClientsGetClientResponseObject, error) {
+	user, err := CurrentUser(ctx)
+	if err != nil {
+		s.logger.Errorf("failed to get current user: %v", err)
+		return nil, err
+	}
+	client, err := s.ClientUsecase.FindWithUserID(oauth.ClientID(request.Id), user.ID)
+	if err != nil {
+		s.logger.Errorf("failed to get client: %v", err)
+		return AccountClientsGetClient404JSONResponse{
+			Error: "client_not_found",
+		}, nil
+	}
+	return AccountClientsGetClient200JSONResponse{
+		Client: Client{
+			Id:           string(client.ID),
+			Name:         client.Name,
+			RedirectUrls: client.RedirectURIs,
+		},
+	}, nil
+}
+
+func (s *Server) AccountClientsUpdateClient(ctx context.Context, request AccountClientsUpdateClientRequestObject) (AccountClientsUpdateClientResponseObject, error) {
+	user, err := CurrentUser(ctx)
+	if err != nil {
+		s.logger.Errorf("failed to get current user: %v", err)
+		return nil, err
+	}
+	if err := s.ClientUsecase.Update(user.ID, request.Body.Client.Name, request.Body.Client.RedirectUrls); err != nil {
+		s.logger.Errorf("failed to update client: %v", err)
+		return nil, err
+	}
+	return AccountClientsUpdateClient204Response{}, nil
+}
