@@ -15,6 +15,8 @@ import { blueGrey } from '@mui/material/colors'
 import { useCallback, useEffect, useState } from 'react'
 import Error from 'next/error'
 import Link from 'next/link'
+import EditIcon from '@mui/icons-material/Edit'
+import { useRouter } from 'next/navigation'
 
 export default function Page() {
   const [clients, setClients] = useState<Client[]>([])
@@ -39,6 +41,8 @@ export default function Page() {
     },
     [fetchClients]
   )
+  const router = useRouter()
+
   useEffect(() => {
     fetchClients()
   }, [fetchClients])
@@ -71,13 +75,23 @@ export default function Page() {
           {clients.map((client) => (
             <ListItem
               secondaryAction={
-                <IconButton
-                  onClick={() => deleteClient(client.id)}
-                  edge="end"
-                  aria-label="delete"
-                >
-                  <DeleteIcon />
-                </IconButton>
+                <Box>
+                  <IconButton
+                    onClick={() =>
+                      router.push(`/member/clients/edit/${client.id}`)
+                    }
+                    edge="end"
+                  >
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton
+                    onClick={() => deleteClient(client.id)}
+                    edge="end"
+                    aria-label="delete"
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </Box>
               }
               key={client.id}
               sx={{
