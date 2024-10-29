@@ -8,6 +8,7 @@ import (
 	"auth/internal/infrastructure/query"
 	"errors"
 	"fmt"
+	"slices"
 
 	"gorm.io/gorm"
 )
@@ -33,11 +34,28 @@ func (c *ClientRepo) FindByID(id oauth.ClientID) (*oauth.Client, error) {
 	cq := c.query.Client
 	rq := c.query.RedirectURI
 	client, err := cq.Where(cq.ID.Eq(string(id))).First()
-	fmt.Println(id, client)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, domain.ErrRecordNotFound
 	}
 	uris, err := rq.Where(rq.ClientID.Eq(client.ID)).Find()
+	if err != nil {
+		return nil, err
+	}
+	return toDomainClient(client, uris), nil
+}
+
+func (c *ClientRepo) FindWithUserID(id oauth.ClientID, userID domain.UserID) (*oauth.Client, error) {
+	fmt.Println("clientId: ", id, "userid: ", userID)
+	client, err := c.query.Client.Where(
+		c.query.Client.ID.Eq(string(id)), c.query.Client.UserID.Eq(int64(userID)),
+	).First()
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, domain.ErrRecordNotFound
+	}
+	if err != nil {
+		return nil, err
+	}
+	uris, err := c.query.RedirectURI.Where(c.query.RedirectURI.ClientID.Eq(client.ID)).Find()
 	if err != nil {
 		return nil, err
 	}
@@ -66,6 +84,53 @@ func (c *ClientRepo) Create(client *oauth.ClientInput) error {
 	}
 	return nil
 }
+
+func (c *ClientRepo) Update(client *oauth.Client, userID domain.UserID) error {
+	_, err := c.query.Client.Where(
+		c.query.Client.ID.Eq(string(client.ID)), c.query.Client.UserID.Eq(int64(userID))).
+		UpdateColumns(&model.Client{
+			ID:              string(client.ID),
+			EncryptedSecret: client.EncryptedSecret,
+			UserID:          int64(client.UserID),
+			Name:            client.Name,
+		})
+	if err != nil {
+		return err
+	}
+	current, err := c.query.RedirectURI.Where(c.query.RedirectURI.ClientID.Eq(string(client.ID))).Find()
+	if err != nil {
+		return err
+	}
+	adds := make([]string, 0, len(client.RedirectURIs))
+	removeIds := make([]int64, 0, len(current))
+	for _, uri := range client.RedirectURIs {
+		if !slices.ContainsFunc(current, func(redirectUri *model.RedirectURI) bool {
+			return redirectUri.URI == uri
+		}) {
+			adds = append(adds, uri)
+		}
+	}
+	for _, uri := range current {
+		if !slices.Contains(client.RedirectURIs, uri.URI) {
+			removeIds = append(removeIds, uri.ID)
+		}
+	}
+	addRedirects := make([]*model.RedirectURI, 0, len(adds))
+	for _, uri := range adds {
+		addRedirects = append(addRedirects, &model.RedirectURI{
+			ClientID: string(client.ID),
+			URI:      uri,
+		})
+	}
+	if err := c.query.RedirectURI.CreateInBatches(addRedirects, redirectUriBatchSize); err != nil {
+		return err
+	}
+	if _, err := c.query.RedirectURI.Where(c.query.RedirectURI.ID.In(removeIds...)).Delete(); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (c *ClientRepo) Delete(id oauth.ClientID, userID domain.UserID) error {
 	_, err := c.query.Client.Where(
 		c.query.Client.ID.Eq(string(id)), c.query.Client.UserID.Eq(int64(userID)),

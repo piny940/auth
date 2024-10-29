@@ -101,6 +101,12 @@ type AccountClientsCreatedClient struct {
 	Secret       string   `json:"secret"`
 }
 
+// AccountClientsUpdateClientReq defines model for AccountClients.UpdateClientReq.
+type AccountClientsUpdateClientReq struct {
+	Name         string   `json:"name"`
+	RedirectUrls []string `json:"redirect_urls"`
+}
+
 // ApprovalsApproveErr defines model for Approvals.ApproveErr.
 type ApprovalsApproveErr string
 
@@ -209,6 +215,11 @@ type AccountClientsCreateClientJSONBody struct {
 	Client AccountClientsCreateClientReq `json:"client"`
 }
 
+// AccountClientsUpdateClientJSONBody defines parameters for AccountClientsUpdateClient.
+type AccountClientsUpdateClientJSONBody struct {
+	Client AccountClientsUpdateClientReq `json:"client"`
+}
+
 // OAuthInterfaceAuthorizeParams defines parameters for OAuthInterfaceAuthorize.
 type OAuthInterfaceAuthorizeParams struct {
 	ResponseType string  `form:"response_type" json:"response_type"`
@@ -228,6 +239,9 @@ type ApprovalsInterfaceApproveJSONRequestBody = ApprovalsApproveReq
 
 // AccountClientsCreateClientJSONRequestBody defines body for AccountClientsCreateClient for application/json ContentType.
 type AccountClientsCreateClientJSONRequestBody AccountClientsCreateClientJSONBody
+
+// AccountClientsUpdateClientJSONRequestBody defines body for AccountClientsUpdateClient for application/json ContentType.
+type AccountClientsUpdateClientJSONRequestBody AccountClientsUpdateClientJSONBody
 
 // OAuthInterfacePostAuthorizeMultipartRequestBody defines body for OAuthInterfacePostAuthorize for multipart/form-data ContentType.
 type OAuthInterfacePostAuthorizeMultipartRequestBody = OAuthAuthorizeReqMultiPart
@@ -255,6 +269,12 @@ type ServerInterface interface {
 	// Delete a client
 	// (DELETE /account/clients/{id})
 	AccountClientsDeleteClient(ctx echo.Context, id string) error
+	// Get a client
+	// (GET /account/clients/{id})
+	AccountClientsGetClient(ctx echo.Context, id string) error
+	// Update a client
+	// (POST /account/clients/{id})
+	AccountClientsUpdateClient(ctx echo.Context, id string) error
 	// Get a client
 	// (GET /clients/{id})
 	ClientsInterfaceGetClient(ctx echo.Context, id string) error
@@ -337,6 +357,42 @@ func (w *ServerInterfaceWrapper) AccountClientsDeleteClient(ctx echo.Context) er
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.AccountClientsDeleteClient(ctx, id)
+	return err
+}
+
+// AccountClientsGetClient converts echo context to params.
+func (w *ServerInterfaceWrapper) AccountClientsGetClient(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", ctx.Param("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	ctx.Set(ApiKeyAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AccountClientsGetClient(ctx, id)
+	return err
+}
+
+// AccountClientsUpdateClient converts echo context to params.
+func (w *ServerInterfaceWrapper) AccountClientsUpdateClient(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", ctx.Param("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	ctx.Set(ApiKeyAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AccountClientsUpdateClient(ctx, id)
 	return err
 }
 
@@ -525,6 +581,8 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/account/clients", wrapper.AccountClientsListClients)
 	router.POST(baseURL+"/account/clients", wrapper.AccountClientsCreateClient)
 	router.DELETE(baseURL+"/account/clients/:id", wrapper.AccountClientsDeleteClient)
+	router.GET(baseURL+"/account/clients/:id", wrapper.AccountClientsGetClient)
+	router.POST(baseURL+"/account/clients/:id", wrapper.AccountClientsUpdateClient)
 	router.GET(baseURL+"/clients/:id", wrapper.ClientsInterfaceGetClient)
 	router.GET(baseURL+"/healthz", wrapper.HealthzCheck)
 	router.GET(baseURL+"/oauth/authorize", wrapper.OAuthInterfaceAuthorize)
@@ -634,6 +692,64 @@ type AccountClientsDeleteClient400JSONResponse struct {
 }
 
 func (response AccountClientsDeleteClient400JSONResponse) VisitAccountClientsDeleteClientResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AccountClientsGetClientRequestObject struct {
+	Id string `json:"id"`
+}
+
+type AccountClientsGetClientResponseObject interface {
+	VisitAccountClientsGetClientResponse(w http.ResponseWriter) error
+}
+
+type AccountClientsGetClient200JSONResponse struct {
+	Client Client `json:"client"`
+}
+
+func (response AccountClientsGetClient200JSONResponse) VisitAccountClientsGetClientResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AccountClientsGetClient404JSONResponse struct {
+	Error string `json:"error"`
+}
+
+func (response AccountClientsGetClient404JSONResponse) VisitAccountClientsGetClientResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AccountClientsUpdateClientRequestObject struct {
+	Id   string `json:"id"`
+	Body *AccountClientsUpdateClientJSONRequestBody
+}
+
+type AccountClientsUpdateClientResponseObject interface {
+	VisitAccountClientsUpdateClientResponse(w http.ResponseWriter) error
+}
+
+type AccountClientsUpdateClient204Response struct {
+}
+
+func (response AccountClientsUpdateClient204Response) VisitAccountClientsUpdateClientResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type AccountClientsUpdateClient400JSONResponse struct {
+	Error string `json:"error"`
+}
+
+func (response AccountClientsUpdateClient400JSONResponse) VisitAccountClientsUpdateClientResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(400)
 
@@ -930,6 +1046,12 @@ type StrictServerInterface interface {
 	// (DELETE /account/clients/{id})
 	AccountClientsDeleteClient(ctx context.Context, request AccountClientsDeleteClientRequestObject) (AccountClientsDeleteClientResponseObject, error)
 	// Get a client
+	// (GET /account/clients/{id})
+	AccountClientsGetClient(ctx context.Context, request AccountClientsGetClientRequestObject) (AccountClientsGetClientResponseObject, error)
+	// Update a client
+	// (POST /account/clients/{id})
+	AccountClientsUpdateClient(ctx context.Context, request AccountClientsUpdateClientRequestObject) (AccountClientsUpdateClientResponseObject, error)
+	// Get a client
 	// (GET /clients/{id})
 	ClientsInterfaceGetClient(ctx context.Context, request ClientsInterfaceGetClientRequestObject) (ClientsInterfaceGetClientResponseObject, error)
 	// Check health
@@ -1070,6 +1192,62 @@ func (sh *strictHandler) AccountClientsDeleteClient(ctx echo.Context, id string)
 		return err
 	} else if validResponse, ok := response.(AccountClientsDeleteClientResponseObject); ok {
 		return validResponse.VisitAccountClientsDeleteClientResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// AccountClientsGetClient operation middleware
+func (sh *strictHandler) AccountClientsGetClient(ctx echo.Context, id string) error {
+	var request AccountClientsGetClientRequestObject
+
+	request.Id = id
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.AccountClientsGetClient(ctx.Request().Context(), request.(AccountClientsGetClientRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "AccountClientsGetClient")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(AccountClientsGetClientResponseObject); ok {
+		return validResponse.VisitAccountClientsGetClientResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// AccountClientsUpdateClient operation middleware
+func (sh *strictHandler) AccountClientsUpdateClient(ctx echo.Context, id string) error {
+	var request AccountClientsUpdateClientRequestObject
+
+	request.Id = id
+
+	var body AccountClientsUpdateClientJSONRequestBody
+	if err := ctx.Bind(&body); err != nil {
+		return err
+	}
+	request.Body = &body
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.AccountClientsUpdateClient(ctx.Request().Context(), request.(AccountClientsUpdateClientRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "AccountClientsUpdateClient")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(AccountClientsUpdateClientResponseObject); ok {
+		return validResponse.VisitAccountClientsUpdateClientResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
@@ -1320,37 +1498,38 @@ func (sh *strictHandler) UsersInterfaceSignup(ctx echo.Context) error {
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"dExVPiEFn9z9jtfX6/8HAAD//6yEIeKuLQAA",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

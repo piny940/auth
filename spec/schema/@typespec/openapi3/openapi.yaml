@@ -96,6 +96,76 @@ paths:
       security:
         - ApiKeyAuth: []
   /account/clients/{id}:
+    get:
+      operationId: AccountClients_getClient
+      summary: Get a client
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  client:
+                    $ref: '#/components/schemas/Client'
+                required:
+                  - client
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                required:
+                  - error
+      security:
+        - ApiKeyAuth: []
+    post:
+      operationId: AccountClients_updateClient
+      summary: Update a client
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        '400':
+          description: The server could not understand the request due to invalid syntax.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                required:
+                  - error
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                client:
+                  $ref: '#/components/schemas/AccountClients.UpdateClientReq'
+              required:
+                - client
+      security:
+        - ApiKeyAuth: []
     delete:
       operationId: AccountClients_deleteClient
       summary: Delete a client
@@ -425,6 +495,18 @@ components:
         name:
           type: string
         secret:
+          type: string
+        redirect_urls:
+          type: array
+          items:
+            type: string
+    AccountClients.UpdateClientReq:
+      type: object
+      required:
+        - name
+        - redirect_urls
+      properties:
+        name:
           type: string
         redirect_urls:
           type: array

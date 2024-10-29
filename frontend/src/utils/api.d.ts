@@ -46,9 +46,11 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    get?: never
+    /** Get a client */
+    get: operations['AccountClients_getClient']
     put?: never
-    post?: never
+    /** Update a client */
+    post: operations['AccountClients_updateClient']
     /** Delete a client */
     delete: operations['AccountClients_deleteClient']
     options?: never
@@ -173,6 +175,10 @@ export interface components {
       id: string
       name: string
       secret: string
+      redirect_urls: string[]
+    }
+    'AccountClients.UpdateClientReq': {
+      name: string
       redirect_urls: string[]
     }
     /** @enum {string} */
@@ -350,6 +356,78 @@ export interface operations {
             client: components['schemas']['AccountClients.CreatedClient']
           }
         }
+      }
+      /** @description The server could not understand the request due to invalid syntax. */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            error: string
+          }
+        }
+      }
+    }
+  }
+  AccountClients_getClient: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description The request has succeeded. */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            client: components['schemas']['Client']
+          }
+        }
+      }
+      /** @description The server cannot find the requested resource. */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            error: string
+          }
+        }
+      }
+    }
+  }
+  AccountClients_updateClient: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': {
+          client: components['schemas']['AccountClients.UpdateClientReq']
+        }
+      }
+    }
+    responses: {
+      /** @description There is no content to send for this request, but the headers may be useful.  */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
       }
       /** @description The server could not understand the request due to invalid syntax. */
       400: {

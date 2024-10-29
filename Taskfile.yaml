@@ -36,8 +36,8 @@ tasks:
     cmds:
       - task migrate:create
       - cd spec && pnpm compile
-      - go generate ./...
       - cd frontend && pnpm codegen
+      - go generate ./...
       - task lint
 
   migrate:create:

@@ -27,8 +27,10 @@ type ClientInput struct {
 }
 type IClientRepo interface {
 	FindByID(id ClientID) (*Client, error)
+	FindWithUserID(id ClientID, userID domain.UserID) (*Client, error)
 	List(userID domain.UserID) ([]*Client, error)
 	Create(client *ClientInput) error
+	Update(client *Client, userID domain.UserID) error
 	Delete(id ClientID, userID domain.UserID) error
 }
 

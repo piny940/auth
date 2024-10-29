@@ -17,6 +17,10 @@ model CreatedClient {
   secret: string;
   redirect_urls: string[];
 }
+model UpdateClientReq {
+  name: string;
+  redirect_urls: string[];
+}
 
 @route("/account/clients")
 @useAuth(ApiKeyAuth<ApiKeyLocation.cookie, "auth">)
@@ -27,6 +31,17 @@ interface AccountClients {
   listClients(): {
     @statusCode statusCode: 200;
     clients: Client[];
+  };
+
+  @route("/{id}")
+  @get
+  @summary("Get a client")
+  getClient(@path id: string): {
+    @statusCode statusCode: 200;
+    client: Client;
+  } | {
+    @statusCode statusCode: 404;
+    error: string;
   };
 
   @route("")
@@ -40,7 +55,17 @@ interface AccountClients {
     error: string;
   };
 
-  @route("")
+  @route("/{id}")
+  @post
+  @summary("Update a client")
+  updateClient(@path id: string, client: UpdateClientReq): {
+    @statusCode statusCode: 204;
+  } | {
+    @statusCode statusCode: 400;
+    error: string;
+  };
+
+  @route("/{id}")
   @delete
   @summary("Delete a client")
   deleteClient(@path id: string): {
