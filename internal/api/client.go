@@ -119,7 +119,7 @@ func (s *Server) AccountClientsUpdateClient(ctx context.Context, request Account
 		s.logger.Errorf("failed to get current user: %v", err)
 		return nil, err
 	}
-	if err := s.ClientUsecase.Update(user.ID, request.Body.Client.Name, request.Body.Client.RedirectUrls); err != nil {
+	if err := s.ClientUsecase.Update(oauth.ClientID(request.Id), user.ID, request.Body.Client.Name, request.Body.Client.RedirectUrls); err != nil {
 		s.logger.Errorf("failed to update client: %v", err)
 		return nil, err
 	}
