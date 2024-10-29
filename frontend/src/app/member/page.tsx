@@ -60,23 +60,15 @@ export default function Page() {
           <Typography mr={3} variant="h5">
             Clients
           </Typography>
-          <Link href="/member/clients/new">
-            <Box
-              p={1}
-              borderRadius={1}
-              fontWeight={500}
-              bgcolor={blueGrey[200]}
-            >
-              新規作成
-            </Box>
-          </Link>
+          <Button href="/member/clients/new">新規作成</Button>
         </Box>
         <List>
           {clients.map((client) => (
             <ListItem
               secondaryAction={
-                <Box sx={{ '> *': { marginX: 1 } }}>
+                <Box>
                   <IconButton
+                    sx={{ marginX: 1 }}
                     onClick={() =>
                       router.push(`/member/clients/edit/${client.id}`)
                     }
@@ -85,6 +77,7 @@ export default function Page() {
                     <EditIcon />
                   </IconButton>
                   <IconButton
+                    sx={{ marginX: 1 }}
                     onClick={() => deleteClient(client.id)}
                     edge="end"
                     aria-label="delete"
