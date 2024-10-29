@@ -75,7 +75,7 @@ export default function Page() {
           {clients.map((client) => (
             <ListItem
               secondaryAction={
-                <Box>
+                <Box sx={{ '> *': { marginX: 1 } }}>
                   <IconButton
                     onClick={() =>
                       router.push(`/member/clients/edit/${client.id}`)
@@ -97,6 +97,7 @@ export default function Page() {
               sx={{
                 bgcolor: 'white',
                 paddingX: 4,
+                paddingY: 2,
               }}
             >
               <Typography variant="h6">{client.name}</Typography>
