@@ -25,11 +25,11 @@ export const Header = (): JSX.Element => {
         </Link>
         <Box pr={4}>
           {user && (
-            <Box sx={{ '>*': { marginX: 2 } }}>
-              <Button color="inherit" href="/member">
+            <Box>
+              <Button sx={{ mx: 1 }} color="inherit" href="/member">
                 Dashboard
               </Button>
-              <Button color="inherit" onClick={logout}>
+              <Button sx={{ mx: 1 }} color="inherit" onClick={logout}>
                 Logout
               </Button>
             </Box>
