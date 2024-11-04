@@ -115,6 +115,6 @@ interface OAuthInterface {
   @summary("Get JSON Web Key Set")
   getJwks(): {
     @statusCode statusCode: 200;
-    @body body: string;
+    @body body: Record<unknown>;
   };
 }
