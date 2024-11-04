@@ -48,13 +48,3 @@ func (s *ApprovalService) Approved(clientID ClientID, byUserID domain.UserID, sc
 	}
 	return true, nil
 }
-
-func (s *ApprovalService) Approve(clientID ClientID, userID domain.UserID, scopes []TypeScope) error {
-	if err := ValidScopes(scopes); err != nil {
-		return err
-	}
-	if err := s.ApprovalRepo.Approve(clientID, userID, scopes); err != nil {
-		return err
-	}
-	return nil
-}
