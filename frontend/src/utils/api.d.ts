@@ -110,6 +110,23 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/oauth/jwks': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get JSON Web Key Set */
+    get: operations['OAuthInterface_getJwks']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/oauth/token': {
     parameters: {
       query?: never
@@ -608,6 +625,28 @@ export interface operations {
             error: components['schemas']['OAuth.AuthorizeErr']
             error_description: string
             state?: string
+          }
+        }
+      }
+    }
+  }
+  OAuthInterface_getJwks: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description The request has succeeded. */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            [key: string]: unknown
           }
         }
       }

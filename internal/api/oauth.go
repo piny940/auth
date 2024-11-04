@@ -5,6 +5,7 @@ import (
 	"auth/internal/domain/oauth"
 	"auth/internal/usecase"
 	"context"
+	"encoding/json"
 	"errors"
 	"net/url"
 	"strings"
@@ -171,4 +172,20 @@ func toDAuthParams(params OAuthInterfaceAuthorizeParams) *oauth.AuthRequest {
 		Scopes:       scopes,
 		State:        params.State,
 	}
+}
+
+func (s *Server) OAuthInterfaceGetJwks(ctx context.Context, request OAuthInterfaceGetJwksRequestObject) (OAuthInterfaceGetJwksResponseObject, error) {
+	set, err := s.OAuthUsecase.GetJWKs()
+	if err != nil {
+		return nil, err
+	}
+	data, err := json.Marshal(set)
+	if err != nil {
+		return nil, err
+	}
+	res := make(map[string]interface{})
+	if err := json.Unmarshal(data, &res); err != nil {
+		return nil, err
+	}
+	return OAuthInterfaceGetJwks200JSONResponse(res), nil
 }

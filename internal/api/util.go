@@ -6,6 +6,7 @@ import (
 	"errors"
 	"net/http"
 	"net/url"
+	"reflect"
 	"strings"
 
 	"github.com/gorilla/securecookie"
@@ -116,3 +117,23 @@ var (
 	ErrUnauthorized      = errors.New("unauthorized")
 	ErrNotFoundInSession = errors.New("not found in session")
 )
+
+func toMap(obj interface{}) map[string]interface{} {
+	result := make(map[string]interface{})
+	value := reflect.ValueOf(obj)
+
+	if value.Kind() == reflect.Ptr {
+		value = value.Elem()
+	}
+	if value.Kind() != reflect.Struct {
+		return result
+	}
+
+	typ := reflect.TypeOf(obj)
+	for i := 0; i < value.NumField(); i++ {
+		field := typ.Field(i)
+		fieldValue := value.Field(i)
+		result[field.Name] = fieldValue.Interface()
+	}
+	return result
+}

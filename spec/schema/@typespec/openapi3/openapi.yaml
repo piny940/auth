@@ -327,6 +327,19 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/OAuth.AuthorizeReqMultiPart'
+  /oauth/jwks:
+    get:
+      operationId: OAuthInterface_getJwks
+      summary: Get JSON Web Key Set
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
   /oauth/token:
     post:
       operationId: OAuthInterface_getToken

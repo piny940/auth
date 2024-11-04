@@ -109,4 +109,12 @@ interface OAuthInterface {
     error: TokenErr;
     error_description: string;
   };
+
+  @route("/jwks")
+  @get
+  @summary("Get JSON Web Key Set")
+  getJwks(): {
+    @statusCode statusCode: 200;
+    @body body: Record<unknown>;
+  };
 }

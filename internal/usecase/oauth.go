@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+
+	"github.com/lestrrat-go/jwx/jwk"
 )
 
 type OAuthUsecase struct {
@@ -13,18 +15,21 @@ type OAuthUsecase struct {
 	AuthCodeService *oauth.AuthCodeService
 	ApprovalService *oauth.ApprovalService
 	TokenService    *oauth.TokenService
+	JWKsService     *oauth.JWKsService
 	ClientRepo      oauth.IClientRepo
 }
 
 func NewOAuthUsecase(
 	reqSvc *oauth.RequestService,
 	authCodeSvc *oauth.AuthCodeService,
+	jwksService *oauth.JWKsService,
 	approvalSvc *oauth.ApprovalService,
 	tokenSvc *oauth.TokenService,
 	clientRepo oauth.IClientRepo,
 ) *OAuthUsecase {
 	return &OAuthUsecase{
 		RequestService:  reqSvc,
+		JWKsService:     jwksService,
 		AuthCodeService: authCodeSvc,
 		ApprovalService: approvalSvc,
 		TokenService:    tokenSvc,
@@ -84,6 +89,14 @@ func (u *OAuthUsecase) RequestToken(req *TokenRequest) (*oauth.AccessToken, *oau
 	} else {
 		return accessToken, nil, nil
 	}
+}
+
+func (u *OAuthUsecase) GetJWKs() (jwk.Set, error) {
+	set, err := u.JWKsService.IssueJwks()
+	if err != nil {
+		return nil, fmt.Errorf("failed to issue jwks: %w", err)
+	}
+	return set, nil
 }
 
 var (
