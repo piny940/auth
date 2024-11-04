@@ -1,6 +1,9 @@
 package oauth
 
-import "slices"
+import (
+	"errors"
+	"slices"
+)
 
 type TypeScope string
 
@@ -22,3 +25,5 @@ func ValidScopes(scopes []TypeScope) error {
 	}
 	return nil
 }
+
+var ErrInvalidScope = errors.New("invalid scope")

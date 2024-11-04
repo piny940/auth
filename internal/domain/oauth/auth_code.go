@@ -84,6 +84,8 @@ func (s *AuthCodeService) Verify(code string, clientID ClientID, redirectURI str
 }
 
 var (
-	ErrExpiredAuthCode = errors.New("expired auth code")
-	ErrUsedAuthCode    = errors.New("used auth code")
+	ErrExpiredAuthCode    = errors.New("expired auth code")
+	ErrUsedAuthCode       = errors.New("used auth code")
+	ErrInvalidClientID    = errors.New("invalid client id. client id is not the registered one")
+	ErrInvalidRedirectURI = errors.New("invalid redirect uri. redirect uri is not the registered one")
 )

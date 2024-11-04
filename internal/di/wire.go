@@ -24,7 +24,6 @@ func NewServer() *api.Server {
 		domain.NewUserService,
 		oauth.NewApprovalService,
 		oauth.NewAuthCodeService,
-		oauth.NewRequestService,
 		oauth.NewTokenService,
 		oauth.NewJWKsService,
 		oauth.NewConfig,

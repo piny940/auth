@@ -11,7 +11,6 @@ import (
 )
 
 type OAuthUsecase struct {
-	RequestService  *oauth.RequestService
 	AuthCodeService *oauth.AuthCodeService
 	ApprovalService *oauth.ApprovalService
 	TokenService    *oauth.TokenService
@@ -21,7 +20,6 @@ type OAuthUsecase struct {
 }
 
 func NewOAuthUsecase(
-	reqSvc *oauth.RequestService,
 	authCodeSvc *oauth.AuthCodeService,
 	jwksService *oauth.JWKsService,
 	approvalSvc *oauth.ApprovalService,
@@ -30,7 +28,6 @@ func NewOAuthUsecase(
 	clientRepo oauth.IClientRepo,
 ) *OAuthUsecase {
 	return &OAuthUsecase{
-		RequestService:  reqSvc,
 		JWKsService:     jwksService,
 		AuthCodeService: authCodeSvc,
 		ApprovalService: approvalSvc,
@@ -40,10 +37,37 @@ func NewOAuthUsecase(
 	}
 }
 
-func (u *OAuthUsecase) RequestAuthorization(user *domain.User, req *oauth.AuthRequest) (*oauth.AuthCode, error) {
-	err := u.RequestService.Validate(req)
-	if err != nil {
-		return nil, err
+type TypeResponseType string
+
+const (
+	ResponseTypeCode TypeResponseType = "code"
+)
+
+var AllResponseTypes = []TypeResponseType{
+	ResponseTypeCode,
+}
+
+type AuthRequest struct {
+	ResponseType TypeResponseType
+	ClientID     oauth.ClientID
+	RedirectURI  string
+	Scopes       []oauth.TypeScope
+	State        *string
+}
+
+func (u *OAuthUsecase) RequestCodeAuth(user *domain.User, req *AuthRequest) (*oauth.AuthCode, error) {
+	if req.ResponseType != ResponseTypeCode {
+		return nil, ErrInvalidRequestType
+	}
+	client, err := u.ClientRepo.FindByID(req.ClientID)
+	if errors.Is(err, domain.ErrRecordNotFound) {
+		return nil, ErrInvalidClientID
+	}
+	if !client.RedirectURIValid(req.RedirectURI) {
+		return nil, ErrInvalidRedirectURI
+	}
+	if err := oauth.ValidScopes(req.Scopes); err != nil {
+		return nil, fmt.Errorf("invalid scopes: %w", err)
 	}
 	ok, err := u.ApprovalService.Approved(req.ClientID, user.ID, req.Scopes)
 	if err != nil {
@@ -103,7 +127,10 @@ func (u *OAuthUsecase) GetJWKs() (jwk.Set, error) {
 }
 
 var (
-	ErrPasswordNotMatch = errors.New("invalid password")
-	ErrNotApproved      = errors.New("not approved")
-	ErrInvalidGrantType = errors.New("invalid grant type")
+	ErrInvalidRequestType = errors.New("invalid request type")
+	ErrInvalidClientID    = errors.New("invalid client id. client not found")
+	ErrInvalidRedirectURI = errors.New("invalid redirect uri")
+	ErrPasswordNotMatch   = errors.New("invalid password")
+	ErrNotApproved        = errors.New("not approved")
+	ErrInvalidGrantType   = errors.New("invalid grant type")
 )

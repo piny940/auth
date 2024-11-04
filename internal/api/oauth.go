@@ -43,14 +43,14 @@ func (s *Server) OAuthInterfaceAuthorize(ctx context.Context, request OAuthInter
 	if err != nil {
 		return nil, err
 	}
-	code, err := s.OAuthUsecase.RequestAuthorization(user, toDAuthParams(request.Params))
-	if errors.Is(err, oauth.ErrInvalidRequestType) {
+	if request.Params.ResponseType != string(usecase.ResponseTypeCode) {
 		s.logger.Infof("invalid request type: %v", err)
 		return OAuthInterfaceAuthorize400JSONResponse{
 			Error:            OAuthAuthorizeErrUnsupportedResponseType,
 			ErrorDescription: "unsupported_response_type",
 		}, nil
 	}
+	code, err := s.OAuthUsecase.RequestCodeAuth(user, toUAuthParams(request.Params))
 	if errors.Is(err, oauth.ErrInvalidClientID) {
 		s.logger.Infof("invalid client id: %v", err)
 		return OAuthInterfaceAuthorize400JSONResponse{
@@ -159,16 +159,16 @@ func (s *Server) OAuthInterfacePostAuthorize(ctx context.Context, request OAuthI
 	panic("unimplemented")
 }
 
-func toDAuthParams(params OAuthInterfaceAuthorizeParams) *oauth.AuthRequest {
+func toUAuthParams(params OAuthInterfaceAuthorizeParams) *usecase.AuthRequest {
 	strScopes := strings.Split(params.Scope, " ")
 	scopes := make([]oauth.TypeScope, 0, len(strScopes))
 	for _, s := range strScopes {
 		scopes = append(scopes, oauth.TypeScope(s))
 	}
-	return &oauth.AuthRequest{
+	return &usecase.AuthRequest{
 		ClientID:     oauth.ClientID(params.ClientId),
 		RedirectURI:  params.RedirectUri,
-		ResponseType: oauth.TypeResponseType(params.ResponseType),
+		ResponseType: usecase.TypeResponseType(params.ResponseType),
 		Scopes:       scopes,
 		State:        params.State,
 	}
