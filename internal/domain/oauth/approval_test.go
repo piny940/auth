@@ -2,6 +2,7 @@ package oauth
 
 import (
 	"auth/internal/domain"
+	"errors"
 	"testing"
 )
 
@@ -32,13 +33,35 @@ func TestApproved(t *testing.T) {
 	}
 	for _, s := range suites {
 		t.Run(s.name, func(t *testing.T) {
-			service := NewApprovalService(approvalRepo, nil)
+			service := NewApprovalService(approvalRepo)
 			result, err := service.Approved(s.clientID, s.userID, s.scopes)
 			if err != nil {
 				t.Fatal(err)
 			}
 			if result != s.expected {
 				t.Errorf("expected: %t, got: %t", s.expected, result)
+			}
+		})
+	}
+}
+
+func TestApprove(t *testing.T) {
+	approvalRepo := &approvalRepo{Approvals: []*Approval{}}
+	suites := []struct {
+		name     string
+		clientID ClientID
+		userID   domain.UserID
+		scopes   []TypeScope
+		expected error
+	}{
+		{"approve", "client1", 1, []TypeScope{ScopeOpenID}, nil},
+	}
+	for _, suit := range suites {
+		t.Run(suit.name, func(t *testing.T) {
+			svc := NewApprovalService(approvalRepo)
+			err := svc.Approve(suit.clientID, suit.userID, suit.scopes)
+			if !errors.Is(err, suit.expected) {
+				t.Errorf("expected: %v, got: %v", suit.expected, err)
 			}
 		})
 	}

@@ -23,13 +23,11 @@ type IApprovalRepo interface {
 
 type ApprovalService struct {
 	ApprovalRepo IApprovalRepo
-	ClientRepo   IClientRepo
 }
 
-func NewApprovalService(approvalRepo IApprovalRepo, clientRepo IClientRepo) *ApprovalService {
+func NewApprovalService(approvalRepo IApprovalRepo) *ApprovalService {
 	return &ApprovalService{
 		ApprovalRepo: approvalRepo,
-		ClientRepo:   clientRepo,
 	}
 }
 func (s *ApprovalService) Approved(clientID ClientID, byUserID domain.UserID, scopes []TypeScope) (bool, error) {
@@ -52,10 +50,6 @@ func (s *ApprovalService) Approved(clientID ClientID, byUserID domain.UserID, sc
 }
 
 func (s *ApprovalService) Approve(clientID ClientID, userID domain.UserID, scopes []TypeScope) error {
-	_, err := s.ClientRepo.FindByID(clientID)
-	if err != nil {
-		return err
-	}
 	if err := ValidScopes(scopes); err != nil {
 		return err
 	}
