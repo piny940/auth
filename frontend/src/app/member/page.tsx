@@ -1,4 +1,5 @@
 'use client'
+import CopyIcon from '@mui/icons-material/ContentCopy'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { useUser } from '@/context/user'
 import { client } from '@/utils/client'
@@ -14,7 +15,6 @@ import {
 import { blueGrey } from '@mui/material/colors'
 import { useCallback, useEffect, useState } from 'react'
 import Error from 'next/error'
-import Link from 'next/link'
 import EditIcon from '@mui/icons-material/Edit'
 import { useRouter } from 'next/navigation'
 
@@ -42,6 +42,23 @@ export default function Page() {
     [fetchClients]
   )
   const router = useRouter()
+  const [copiedClient, setCopiedClient] = useState<string | null>(null)
+  const [copiedTimer, setCopiedTimer] = useState<NodeJS.Timeout | null>(null)
+
+  const copyClientId = useCallback(
+    (clientId: string) => {
+      navigator.clipboard.writeText(clientId)
+      setCopiedClient(clientId)
+      if (copiedTimer) {
+        clearTimeout(copiedTimer)
+      }
+      const timer = setTimeout(() => {
+        setCopiedClient(null)
+      }, 3000)
+      setCopiedTimer(timer)
+    },
+    [copiedTimer, setCopiedClient, setCopiedTimer]
+  )
 
   useEffect(() => {
     fetchClients()
@@ -94,6 +111,19 @@ export default function Page() {
               }}
             >
               <Typography variant="h6">{client.name}</Typography>
+              <Typography component="span" ml={2} variant="body1">
+                ID:
+                <Typography component="span">
+                  <IconButton
+                    onClick={() => copyClientId(client.id)}
+                    size="small"
+                    color={copiedClient === client.id ? 'success' : 'default'}
+                  >
+                    <CopyIcon />
+                  </IconButton>
+                </Typography>
+                {client.id}
+              </Typography>
             </ListItem>
           ))}
         </List>
