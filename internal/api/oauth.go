@@ -172,3 +172,7 @@ func toDAuthParams(params OAuthInterfaceAuthorizeParams) *oauth.AuthRequest {
 		State:        params.State,
 	}
 }
+
+func (s *Server) OAuthInterfaceGetJwks(ctx context.Context, request OAuthInterfaceGetJwksRequestObject) (OAuthInterfaceGetJwksResponseObject, error) {
+	panic("unimplemented")
+}

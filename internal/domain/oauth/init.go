@@ -5,6 +5,8 @@ import "github.com/kelseyhightower/envconfig"
 type Config struct {
 	RsaPrivateKey           string `required:"true" split_words:"true"`
 	RsaPrivateKeyPassphrase string `required:"true" split_words:"true"`
+	RsaPublicKey            string `required:"true" split_words:"true"`
+	RsaKeyId                string `required:"true" split_words:"true"`
 	Issuer                  string `required:"true"`
 }
 
