@@ -18,7 +18,7 @@ type Approval struct {
 }
 type IApprovalRepo interface {
 	Find(clientID ClientID, userID domain.UserID) (*Approval, error)
-	Create(clientID ClientID, userID domain.UserID, scopes []TypeScope) error
+	Approve(clientID ClientID, userID domain.UserID, scopes []TypeScope) error
 }
 
 type ApprovalService struct {
@@ -53,7 +53,7 @@ func (s *ApprovalService) Approve(clientID ClientID, userID domain.UserID, scope
 	if err := ValidScopes(scopes); err != nil {
 		return err
 	}
-	if err := s.ApprovalRepo.Create(clientID, userID, scopes); err != nil {
+	if err := s.ApprovalRepo.Approve(clientID, userID, scopes); err != nil {
 		return err
 	}
 	return nil

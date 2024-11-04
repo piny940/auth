@@ -47,7 +47,7 @@ func (a *ApprovalRepo) Find(clientID oauth.ClientID, userID domain.UserID) (*oau
 	return toDomainApproval(approval, scopes), nil
 }
 
-func (a *ApprovalRepo) Create(clientID oauth.ClientID, userID domain.UserID, scopes []oauth.TypeScope) error {
+func (a *ApprovalRepo) Approve(clientID oauth.ClientID, userID domain.UserID, scopes []oauth.TypeScope) error {
 	var approval *model.Approval
 	var err error
 	{ // create approval if not exists
@@ -92,8 +92,12 @@ func (a *ApprovalRepo) Create(clientID oauth.ClientID, userID domain.UserID, sco
 	}
 	mAdds := make([]*model.ApprovalScope, 0, len(adds))
 	for _, s := range adds {
+		scopeID, ok := scopeMapReverse[s]
+		if !ok {
+			return oauth.ErrInvalidScope
+		}
 		mAdds = append(mAdds, &model.ApprovalScope{
-			ScopeID:    scopeMapReverse[s],
+			ScopeID:    scopeID,
 			ApprovalID: approval.ID,
 		})
 	}

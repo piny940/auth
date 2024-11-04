@@ -15,6 +15,7 @@ type OAuthUsecase struct {
 	AuthCodeService *oauth.AuthCodeService
 	ApprovalService *oauth.ApprovalService
 	TokenService    *oauth.TokenService
+	ApprovalRepo    oauth.IApprovalRepo
 	JWKsService     *oauth.JWKsService
 	ClientRepo      oauth.IClientRepo
 }
@@ -24,6 +25,7 @@ func NewOAuthUsecase(
 	authCodeSvc *oauth.AuthCodeService,
 	jwksService *oauth.JWKsService,
 	approvalSvc *oauth.ApprovalService,
+	approvalRepo oauth.IApprovalRepo,
 	tokenSvc *oauth.TokenService,
 	clientRepo oauth.IClientRepo,
 ) *OAuthUsecase {
@@ -32,6 +34,7 @@ func NewOAuthUsecase(
 		JWKsService:     jwksService,
 		AuthCodeService: authCodeSvc,
 		ApprovalService: approvalSvc,
+		ApprovalRepo:    approvalRepo,
 		TokenService:    tokenSvc,
 		ClientRepo:      clientRepo,
 	}
@@ -53,7 +56,7 @@ func (u *OAuthUsecase) RequestAuthorization(user *domain.User, req *oauth.AuthRe
 }
 
 func (u *OAuthUsecase) Approve(user *domain.User, clientID oauth.ClientID, scopes []oauth.TypeScope) error {
-	return u.ApprovalService.Approve(clientID, user.ID, scopes)
+	return u.ApprovalRepo.Approve(clientID, user.ID, scopes)
 }
 
 type TokenRequest struct {

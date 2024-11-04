@@ -40,7 +40,7 @@ type approvalRepo struct {
 
 var _ IApprovalRepo = &approvalRepo{}
 
-func (a *approvalRepo) Create(clientID ClientID, userID domain.UserID, scopes []TypeScope) error {
+func (a *approvalRepo) Approve(clientID ClientID, userID domain.UserID, scopes []TypeScope) error {
 	a.Approvals = append(a.Approvals, &Approval{
 		ID:        a.lastId,
 		ClientID:  clientID,

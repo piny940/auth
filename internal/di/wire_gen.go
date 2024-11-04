@@ -30,9 +30,9 @@ func NewServer() *api.Server {
 	authCodeService := oauth.NewAuthCodeService(iAuthCodeRepo)
 	config := oauth.NewConfig()
 	jwKsService := oauth.NewJWKsService(config)
-	approvalService := oauth.NewApprovalService(iApprovalRepo, iClientRepo)
+	approvalService := oauth.NewApprovalService(iApprovalRepo)
 	tokenService := oauth.NewTokenService(config, iUserRepo)
-	oAuthUsecase := usecase.NewOAuthUsecase(requestService, authCodeService, jwKsService, approvalService, tokenService, iClientRepo)
+	oAuthUsecase := usecase.NewOAuthUsecase(requestService, authCodeService, jwKsService, approvalService, iApprovalRepo, tokenService, iClientRepo)
 	iClientUsecase := usecase.NewClientUsecase(iClientRepo)
 	server := api.NewServer(userUsecase, oAuthUsecase, iClientUsecase)
 	return server
