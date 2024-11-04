@@ -24,8 +24,8 @@ export default async function Page({
   if (!process.env.CLIENT_SECRET) {
     throw new Error("CLIENT_SECRET is not set")
   }
-  if (!process.env.SERVER_PUBLIC_KEY) {
-    throw new Error("SERVER_PUBLIC_KEY is not set")
+  if (!process.env.OAUTH_RSA_PUBLIC_KEY) {
+    throw new Error("OAUTH_RSA_PUBLIC_KEY is not set")
   }
   const secret = Buffer.from(
     `${process.env.NEXT_PUBLIC_CLIENT_ID}:${process.env.CLIENT_SECRET}`
@@ -52,7 +52,7 @@ export default async function Page({
   const json = await res.json()
   const idToken = jwt.verify(
     json.id_token,
-    process.env.SERVER_PUBLIC_KEY
+    process.env.OAUTH_RSA_PUBLIC_KEY
   ) as IDToken
   console.log(idToken)
   try {
