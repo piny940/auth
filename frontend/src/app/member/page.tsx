@@ -31,6 +31,10 @@ export default function Page() {
   }, [])
   const deleteClient = useCallback(
     async (clientId: string) => {
+      const ok = confirm('Are you sure you want to delete this client?')
+      if (!ok) {
+        return
+      }
       const { error } = await client.DELETE('/account/clients/{id}', {
         params: { path: { id: clientId } },
       })
