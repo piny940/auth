@@ -28,32 +28,57 @@ func fromJSONBody(t *testing.T, body io.Reader, v interface{}) {
 		t.Fatalf("failed to decode json: %v", err)
 	}
 }
-func login(t *testing.T, s *httptest.Server) *api.User {
+func login(t *testing.T, s *httptest.Server) (*api.User, string) {
 	t.Helper()
 
 	name := randomString(t, 10)
 	password := randomString(t, 16)
 
-	input := api.SessionLoginReq{
-		Name:     name,
-		Password: password,
+	signupInput := &api.UsersReqSignup{
+		Name:                 name,
+		Password:             password,
+		PasswordConfirmation: password,
 	}
-	body := toJSON(t, input)
-	resp, err := http.Post(s.URL+"/session", "application/json", bytes.NewBuffer(body))
+	body := toJSON(t, signupInput)
+	resp, err := http.Post(s.URL+"/users/signup", "application/json", bytes.NewBuffer(body))
 	if err != nil {
 		t.Fatalf("failed to post: %v", err)
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusNoContent {
+		t.Fatalf("failed to create user: %v", resp.StatusCode)
+	}
+	input := &api.SessionLoginReq{
+		Name:     name,
+		Password: password,
+	}
+	body = toJSON(t, input)
+	resp, err = http.Post(s.URL+"/session", "application/json", bytes.NewBuffer(body))
+	if err != nil {
+		t.Fatalf("failed to post: %v", err)
+	}
+	defer resp.Body.Close()
+	cookie := resp.Header.Get("set-cookie")
+	if cookie == "" {
+		t.Fatalf("failed to set cookie")
+	}
 
-	resp, err = http.Get(s.URL + "/session")
+	req, err := http.NewRequest(http.MethodGet, s.URL+"/session", nil)
+	if err != nil {
+		t.Fatalf("failed to create request: %v", err)
+	}
+	req.Header.Set("Cookie", cookie)
+	resp, err = (&http.Client{}).Do(req)
 	if err != nil {
 		t.Fatalf("failed to get: %v", err)
 	}
 	defer resp.Body.Close()
-
-	user := &api.User{}
-	fromJSONBody(t, resp.Body, user)
-	return user
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("failed to get: %v", resp.StatusCode)
+	}
+	resBody := &struct{ User *api.User }{}
+	fromJSONBody(t, resp.Body, resBody)
+	return resBody.User, cookie
 }
 
 func randomString(t *testing.T, l int) string {
