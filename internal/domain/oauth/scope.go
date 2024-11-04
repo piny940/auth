@@ -6,10 +6,12 @@ type TypeScope string
 
 const (
 	ScopeOpenID TypeScope = "openid"
+	ScopeEmail  TypeScope = "email"
 )
 
 var AllScopes = []TypeScope{
 	ScopeOpenID,
+	ScopeEmail,
 }
 
 func ValidScopes(scopes []TypeScope) error {

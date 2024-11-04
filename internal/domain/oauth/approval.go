@@ -32,8 +32,8 @@ func NewApprovalService(approvalRepo IApprovalRepo, clientRepo IClientRepo) *App
 		ClientRepo:   clientRepo,
 	}
 }
-func (s *ApprovalService) Approved(r *AuthRequest, user *domain.User) (bool, error) {
-	approval, err := s.ApprovalRepo.Find(r.ClientID, user.ID)
+func (s *ApprovalService) Approved(clientID ClientID, byUserID domain.UserID, scopes []TypeScope) (bool, error) {
+	approval, err := s.ApprovalRepo.Find(clientID, byUserID)
 	if errors.Is(err, domain.ErrRecordNotFound) {
 		return false, nil
 	}
@@ -43,7 +43,7 @@ func (s *ApprovalService) Approved(r *AuthRequest, user *domain.User) (bool, err
 	if approval == nil {
 		return false, nil
 	}
-	for _, scope := range r.Scopes {
+	for _, scope := range scopes {
 		if !slices.Contains(approval.Scopes, scope) {
 			return false, nil
 		}

@@ -42,7 +42,7 @@ func (u *OAuthUsecase) RequestAuthorization(user *domain.User, req *oauth.AuthRe
 	if err != nil {
 		return nil, err
 	}
-	ok, err := u.ApprovalService.Approved(req, user)
+	ok, err := u.ApprovalService.Approved(req.ClientID, user.ID, req.Scopes)
 	if err != nil {
 		return nil, err
 	}

@@ -33,16 +33,33 @@ func (a *authCodeRepo) Create(value string, clientID ClientID, userID domain.Use
 	return nil
 }
 
-type approvalRepo struct{}
+type approvalRepo struct {
+	lastId    ApprovalID
+	Approvals []*Approval
+}
 
 var _ IApprovalRepo = &approvalRepo{}
 
 func (a *approvalRepo) Create(clientID ClientID, userID domain.UserID, scopes []TypeScope) error {
-	panic("unimplemented")
+	a.Approvals = append(a.Approvals, &Approval{
+		ID:        a.lastId,
+		ClientID:  clientID,
+		UserID:    userID,
+		Scopes:    scopes,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	})
+	a.lastId++
+	return nil
 }
 
 func (a *approvalRepo) Find(clientID ClientID, userID domain.UserID) (*Approval, error) {
-	panic("unimplemented")
+	for _, approval := range a.Approvals {
+		if approval.ClientID == clientID && approval.UserID == userID {
+			return approval, nil
+		}
+	}
+	return nil, domain.ErrRecordNotFound
 }
 
 type clientRepo struct{}
