@@ -25,9 +25,14 @@ export const Header = (): JSX.Element => {
         </Link>
         <Box pr={4}>
           {user && (
-            <Button color="inherit" onClick={logout}>
-              Logout
-            </Button>
+            <Box>
+              <Button sx={{ mx: 1 }} color="inherit" href="/member">
+                Dashboard
+              </Button>
+              <Button sx={{ mx: 1 }} color="inherit" onClick={logout}>
+                Logout
+              </Button>
+            </Box>
           )}
         </Box>
       </Toolbar>
