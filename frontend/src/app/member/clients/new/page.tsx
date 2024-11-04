@@ -1,8 +1,9 @@
 'use client'
+import CopyIcon from '@mui/icons-material/ContentCopy'
 import { ClientForm, ClientInput } from '@/components/ClientForm'
 import { RedirectURIsFields } from '@/components/RedirectURIsEdit'
 import { client } from '@/utils/client'
-import { Box, Typography } from '@mui/material'
+import { Box, IconButton, Typography } from '@mui/material'
 import { blue } from '@mui/material/colors'
 import Link from 'next/link'
 import { useCallback, useState } from 'react'
@@ -51,8 +52,28 @@ export default function Page() {
             Secretは後で確認できません。必ず保存してください。
           </Typography>
           <Box m={2}>
-            <Typography>Client ID: {created.id}</Typography>
-            <Typography>Client Secret: {created.secret}</Typography>
+            <Typography>
+              Client ID:
+              <Typography component="span">
+                <IconButton
+                  onClick={() => navigator.clipboard.writeText(created.id)}
+                >
+                  <CopyIcon />
+                </IconButton>
+                {created.id}
+              </Typography>
+            </Typography>
+            <Typography>
+              Client Secret:
+              <Typography component="span">
+                <IconButton
+                  onClick={() => navigator.clipboard.writeText(created.secret)}
+                >
+                  <CopyIcon />
+                </IconButton>
+                {created.secret}
+              </Typography>
+            </Typography>
           </Box>
           <Link href="/member">
             <Typography sx={{ color: blue[700] }}>
