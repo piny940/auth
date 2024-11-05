@@ -18,22 +18,20 @@ type Approval struct {
 }
 type IApprovalRepo interface {
 	Find(clientID ClientID, userID domain.UserID) (*Approval, error)
-	Create(clientID ClientID, userID domain.UserID, scopes []TypeScope) error
+	Approve(clientID ClientID, userID domain.UserID, scopes []TypeScope) error
 }
 
 type ApprovalService struct {
 	ApprovalRepo IApprovalRepo
-	ClientRepo   IClientRepo
 }
 
-func NewApprovalService(approvalRepo IApprovalRepo, clientRepo IClientRepo) *ApprovalService {
+func NewApprovalService(approvalRepo IApprovalRepo) *ApprovalService {
 	return &ApprovalService{
 		ApprovalRepo: approvalRepo,
-		ClientRepo:   clientRepo,
 	}
 }
-func (s *ApprovalService) Approved(r *AuthRequest, user *domain.User) (bool, error) {
-	approval, err := s.ApprovalRepo.Find(r.ClientID, user.ID)
+func (s *ApprovalService) Approved(clientID ClientID, byUserID domain.UserID, scopes []TypeScope) (bool, error) {
+	approval, err := s.ApprovalRepo.Find(clientID, byUserID)
 	if errors.Is(err, domain.ErrRecordNotFound) {
 		return false, nil
 	}
@@ -43,24 +41,10 @@ func (s *ApprovalService) Approved(r *AuthRequest, user *domain.User) (bool, err
 	if approval == nil {
 		return false, nil
 	}
-	for _, scope := range r.Scopes {
+	for _, scope := range scopes {
 		if !slices.Contains(approval.Scopes, scope) {
 			return false, nil
 		}
 	}
 	return true, nil
-}
-
-func (s *ApprovalService) Approve(clientID ClientID, userID domain.UserID, scopes []TypeScope) error {
-	_, err := s.ClientRepo.FindByID(clientID)
-	if err != nil {
-		return err
-	}
-	if err := ValidScopes(scopes); err != nil {
-		return err
-	}
-	if err := s.ApprovalRepo.Create(clientID, userID, scopes); err != nil {
-		return err
-	}
-	return nil
 }

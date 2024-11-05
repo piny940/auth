@@ -8,9 +8,7 @@ import (
 )
 
 func TestAuthCodeServiceIssueAuthCode(t *testing.T) {
-	s := &AuthCodeService{
-		AuthCodeRepo: &authCodeRepo{authCodes: []*AuthCode{}},
-	}
+	s := NewAuthCodeService(&authCodeRepo{authCodes: []*AuthCode{}})
 	client := &Client{ID: "client_id"}
 	user := &domain.User{ID: 1}
 	scopes := []TypeScope{"scope1", "scope2"}

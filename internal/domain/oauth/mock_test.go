@@ -33,16 +33,33 @@ func (a *authCodeRepo) Create(value string, clientID ClientID, userID domain.Use
 	return nil
 }
 
-type approvalRepo struct{}
+type approvalRepo struct {
+	lastId    ApprovalID
+	Approvals []*Approval
+}
 
 var _ IApprovalRepo = &approvalRepo{}
 
-func (a *approvalRepo) Create(clientID ClientID, userID domain.UserID, scopes []TypeScope) error {
-	panic("unimplemented")
+func (a *approvalRepo) Approve(clientID ClientID, userID domain.UserID, scopes []TypeScope) error {
+	a.Approvals = append(a.Approvals, &Approval{
+		ID:        a.lastId,
+		ClientID:  clientID,
+		UserID:    userID,
+		Scopes:    scopes,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	})
+	a.lastId++
+	return nil
 }
 
 func (a *approvalRepo) Find(clientID ClientID, userID domain.UserID) (*Approval, error) {
-	panic("unimplemented")
+	for _, approval := range a.Approvals {
+		if approval.ClientID == clientID && approval.UserID == userID {
+			return approval, nil
+		}
+	}
+	return nil, domain.ErrRecordNotFound
 }
 
 type clientRepo struct{}
@@ -55,7 +72,7 @@ func (c *clientRepo) Create(client *ClientInput) error {
 func (c *clientRepo) FindWithUserID(id ClientID, userID domain.UserID) (*Client, error) {
 	panic("unimplemented")
 }
-func (c *clientRepo) Update(client *Client, userID domain.UserID) error {
+func (c *clientRepo) Update(client *ClientInput, userID domain.UserID) error {
 	panic("unimplemented")
 }
 func (c *clientRepo) FindByID(id ClientID) (*Client, error) {
