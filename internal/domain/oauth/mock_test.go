@@ -72,7 +72,7 @@ func (c *clientRepo) Create(client *ClientInput) error {
 func (c *clientRepo) FindWithUserID(id ClientID, userID domain.UserID) (*Client, error) {
 	panic("unimplemented")
 }
-func (c *clientRepo) Update(client *Client, userID domain.UserID) error {
+func (c *clientRepo) Update(client *ClientInput, userID domain.UserID) error {
 	panic("unimplemented")
 }
 func (c *clientRepo) FindByID(id ClientID) (*Client, error) {

@@ -85,7 +85,7 @@ func (c *ClientRepo) Create(client *oauth.ClientInput) error {
 	return nil
 }
 
-func (c *ClientRepo) Update(client *oauth.Client, userID domain.UserID) error {
+func (c *ClientRepo) Update(client *oauth.ClientInput, userID domain.UserID) error {
 	_, err := c.query.Client.Where(
 		c.query.Client.ID.Eq(string(client.ID)), c.query.Client.UserID.Eq(int64(userID))).
 		UpdateColumns(&model.Client{

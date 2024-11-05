@@ -71,7 +71,7 @@ func (c *ClientUsecase) Update(clientID oauth.ClientID, userID domain.UserID, na
 	if err != nil {
 		return fmt.Errorf("failed to find client: %w", err)
 	}
-	if err := c.ClientRepo.Update(&oauth.Client{
+	if err := c.ClientRepo.Update(&oauth.ClientInput{
 		ID:              current.ID,
 		EncryptedSecret: current.EncryptedSecret,
 		UserID:          current.UserID,

@@ -33,7 +33,7 @@ type IClientRepo interface {
 	FindWithUserID(id ClientID, userID domain.UserID) (*Client, error)
 	List(userID domain.UserID) ([]*Client, error)
 	Create(client *ClientInput) error
-	Update(client *Client, userID domain.UserID) error
+	Update(client *ClientInput, userID domain.UserID) error
 	Delete(id ClientID, userID domain.UserID) error
 }
 
