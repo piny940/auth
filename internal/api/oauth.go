@@ -51,7 +51,7 @@ func (s *Server) OAuthInterfaceAuthorize(ctx context.Context, request OAuthInter
 		}, nil
 	}
 	code, err := s.OAuthUsecase.RequestCodeAuth(user, toUAuthParams(request.Params))
-	if errors.Is(err, oauth.ErrInvalidClientID) {
+	if errors.Is(err, usecase.ErrClientNotFound) {
 		s.logger.Infof("invalid client id: %v", err)
 		return OAuthInterfaceAuthorize400JSONResponse{
 			Error:            OAuthAuthorizeErrInvalidRequest,
@@ -79,7 +79,7 @@ func (s *Server) OAuthInterfaceAuthorize(ctx context.Context, request OAuthInter
 			ErrorDescription: "invalid_scope",
 		}, nil
 	}
-	if errors.Is(err, oauth.ErrInvalidRedirectURI) {
+	if errors.Is(err, usecase.ErrRedirectURINotRegistered) {
 		s.logger.Infof("invalid redirect uri: %v", err)
 		return OAuthInterfaceAuthorize400JSONResponse{
 			Error:            OAuthAuthorizeErrInvalidRequest,

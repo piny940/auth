@@ -61,10 +61,10 @@ func (u *OAuthUsecase) RequestCodeAuth(user *domain.User, req *AuthRequest) (*oa
 	}
 	client, err := u.ClientRepo.FindByID(req.ClientID)
 	if errors.Is(err, domain.ErrRecordNotFound) {
-		return nil, ErrInvalidClientID
+		return nil, ErrClientNotFound
 	}
 	if !client.RedirectURIValid(req.RedirectURI) {
-		return nil, ErrInvalidRedirectURI
+		return nil, ErrRedirectURINotRegistered
 	}
 	if err := oauth.ValidScopes(req.Scopes); err != nil {
 		return nil, fmt.Errorf("invalid scopes: %w", err)
@@ -127,10 +127,10 @@ func (u *OAuthUsecase) GetJWKs() (jwk.Set, error) {
 }
 
 var (
-	ErrInvalidRequestType = errors.New("invalid request type")
-	ErrInvalidClientID    = errors.New("invalid client id. client not found")
-	ErrInvalidRedirectURI = errors.New("invalid redirect uri")
-	ErrPasswordNotMatch   = errors.New("invalid password")
-	ErrNotApproved        = errors.New("not approved")
-	ErrInvalidGrantType   = errors.New("invalid grant type")
+	ErrInvalidRequestType       = errors.New("invalid request type")
+	ErrClientNotFound           = errors.New("invalid client id. client not found")
+	ErrRedirectURINotRegistered = errors.New("invalid redirect uri. this redirect uri is not registered")
+	ErrPasswordNotMatch         = errors.New("invalid password")
+	ErrNotApproved              = errors.New("not approved")
+	ErrInvalidGrantType         = errors.New("invalid grant type")
 )
