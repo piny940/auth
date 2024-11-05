@@ -1,6 +1,3 @@
-//go:build !wireinject
-// +build !wireinject
-
 package e2e
 
 import (
