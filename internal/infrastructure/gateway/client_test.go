@@ -241,3 +241,55 @@ func TestClientUpdate(t *testing.T) {
 		})
 	}
 }
+
+func TestClientDelete(t *testing.T) {
+	const userID = 45328
+	const clientID = "client1"
+	initialUsers := []*model.User{
+		{Name: "test1", ID: userID, EncryptedPassword: "password"},
+	}
+	initialClients := []*oauth.ClientInput{
+		{ID: clientID, UserID: userID, RedirectURIs: []string{"http://example.com", "http://example1.com"}},
+	}
+	suites := []struct {
+		name     string
+		clientID oauth.ClientID
+		expected error
+	}{
+		{"existing client", clientID, nil},
+	}
+	for _, s := range suites {
+		t.Run(s.name, func(t *testing.T) {
+			setup(t)
+			db := infrastructure.GetDB()
+			query := query.Use(db.Client)
+			if err := query.User.CreateInBatches(initialUsers, len(initialUsers)); err != nil {
+				t.Fatal(err)
+			}
+			svc := NewClientRepo(db)
+			for _, c := range initialClients {
+				if err := svc.Create(c); err != nil {
+					t.Fatal(err)
+				}
+			}
+			err := svc.Delete(s.clientID, userID)
+			if err != s.expected {
+				t.Fatalf("expected %v, got %v", s.expected, err)
+			}
+			if err != nil {
+				return
+			}
+			_, err = svc.FindByID(s.clientID)
+			if err != domain.ErrRecordNotFound {
+				t.Fatalf("expected %v, got %v", domain.ErrRecordNotFound, err)
+			}
+			uris, err := query.RedirectURI.Where(query.RedirectURI.ClientID.Eq(string(s.clientID))).Find()
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(uris) != 0 {
+				t.Fatalf("expected 0 redirect URIs, got %d", len(uris))
+			}
+		})
+	}
+}
