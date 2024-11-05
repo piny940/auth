@@ -1,6 +1,7 @@
 package gateway
 
 import (
+	"auth/internal/domain"
 	"auth/internal/domain/oauth"
 	"auth/internal/infrastructure"
 	"auth/internal/infrastructure/model"
@@ -69,6 +70,56 @@ func TestClientCreate(t *testing.T) {
 			for _, uri := range uris {
 				if !slices.Contains(s.redirectURIs, uri.URI) {
 					t.Fatalf("expected %s to be in the redirect URIs", uri.URI)
+				}
+			}
+		})
+	}
+}
+
+func TestClientFindByID(t *testing.T) {
+	const userID = 45328
+	const clientID = "client1"
+	initialUsers := []*model.User{
+		{Name: "test1", ID: userID, EncryptedPassword: "password"},
+	}
+	suites := []struct {
+		name     string
+		clients  []*oauth.ClientInput
+		expected error
+	}{
+		{"with a URI", []*oauth.ClientInput{{RedirectURIs: []string{"http://example.com"}, ID: clientID, UserID: userID}}, nil},
+		{"with two URIs", []*oauth.ClientInput{{RedirectURIs: []string{"http://example.com", "http://example1.com"}, ID: clientID, UserID: userID}}, nil},
+		{"with no URI", []*oauth.ClientInput{{RedirectURIs: []string{}, ID: clientID, UserID: userID}}, nil},
+		{"not found", []*oauth.ClientInput{}, domain.ErrRecordNotFound},
+	}
+	for _, s := range suites {
+		t.Run(s.name, func(t *testing.T) {
+			setup(t)
+			db := infrastructure.GetDB()
+			query := query.Use(db.Client)
+			if err := query.User.CreateInBatches(initialUsers, len(initialUsers)); err != nil {
+				t.Fatal(err)
+			}
+			svc := NewClientRepo(db)
+			for _, client := range s.clients {
+				err := svc.Create(client)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+			actual, err := svc.FindByID(clientID)
+			if err != s.expected {
+				t.Fatalf("expected %v, got %v", s.expected, err)
+			}
+			if err != nil {
+				return
+			}
+			if len(actual.RedirectURIs) != len(s.clients[0].RedirectURIs) {
+				t.Fatalf("expected %d redirect URIs, got %d", len(s.clients[0].RedirectURIs), len(actual.RedirectURIs))
+			}
+			for _, uri := range actual.RedirectURIs {
+				if !slices.Contains(s.clients[0].RedirectURIs, uri) {
+					t.Fatalf("expected %s to be in the redirect URIs", uri)
 				}
 			}
 		})
