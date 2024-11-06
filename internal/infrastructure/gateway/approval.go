@@ -81,7 +81,7 @@ func (a *ApprovalRepo) Approve(clientID oauth.ClientID, userID domain.UserID, sc
 	}
 	existScopes := make([]oauth.TypeScope, 0, len(existMScopes))
 	for _, s := range existMScopes {
-		existScopes = append(existScopes, scopeMap[s.ScopeID])
+		existScopes = append(existScopes, ScopeMap[s.ScopeID])
 	}
 	compactScopes := slices.Compact(scopes)
 	adds := make([]oauth.TypeScope, 0)
@@ -92,7 +92,7 @@ func (a *ApprovalRepo) Approve(clientID oauth.ClientID, userID domain.UserID, sc
 	}
 	mAdds := make([]*model.ApprovalScope, 0, len(adds))
 	for _, s := range adds {
-		scopeID, ok := scopeMapReverse[s]
+		scopeID, ok := ScopeMapReverse[s]
 		if !ok {
 			return oauth.ErrInvalidScope
 		}
@@ -110,7 +110,7 @@ func (a *ApprovalRepo) Approve(clientID oauth.ClientID, userID domain.UserID, sc
 func toDomainApproval(approval *model.Approval, approvalScopes []*model.ApprovalScope) *oauth.Approval {
 	scopes := make([]oauth.TypeScope, 0, len(approvalScopes))
 	for _, s := range approvalScopes {
-		scopes = append(scopes, scopeMap[s.ScopeID])
+		scopes = append(scopes, ScopeMap[s.ScopeID])
 	}
 	return &oauth.Approval{
 		ID:        oauth.ApprovalID(approval.ID),

@@ -67,7 +67,7 @@ func TestAuthCodeCreate(t *testing.T) {
 	if len(actualScopes) != 1 { // 重複は排除される
 		t.Fatalf("unexpected len(actualScopes): %d", len(actualScopes))
 	}
-	if actualScopes[0].ScopeID != scopeMapReverse[oauth.ScopeOpenID] {
+	if actualScopes[0].ScopeID != ScopeMapReverse[oauth.ScopeOpenID] {
 		t.Errorf("unexpected actualScopes[0].ScopeID: %d", actualScopes[0].ScopeID)
 	}
 }

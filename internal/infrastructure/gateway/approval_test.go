@@ -25,7 +25,7 @@ func TestApprovalApprove(t *testing.T) {
 		{ID: approvalID, ClientID: "client2", UserID: userID},
 	}
 	initialApprovalScopes := []*model.ApprovalScope{
-		{ApprovalID: approvalID, ScopeID: scopeMapReverse[oauth.ScopeOpenID]},
+		{ApprovalID: approvalID, ScopeID: ScopeMapReverse[oauth.ScopeOpenID]},
 	}
 	suites := []struct {
 		name           string
@@ -76,7 +76,7 @@ func TestApprovalApprove(t *testing.T) {
 				t.Errorf("expected: %v, got: %v", s.expectedScopes, scopes)
 			}
 			for _, scope := range scopes {
-				if !slices.Contains(s.expectedScopes, scopeMap[scope.ScopeID]) {
+				if !slices.Contains(s.expectedScopes, ScopeMap[scope.ScopeID]) {
 					t.Errorf("expected: %v, got: %v", s.expectedScopes, scopes)
 				}
 			}
