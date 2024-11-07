@@ -26,9 +26,9 @@ type TokenService struct {
 }
 
 const (
-	ACCESS_TOKEN_TTL     = 24 * 30 * time.Hour
+	ACCESS_TOKEN_TTL     = 24 * 30 * time.Hour // 30 days
 	ACCESS_TOKEN_JTI_LEN = 32
-	ID_TOKEN_TTL         = 5 * time.Minute
+	ID_TOKEN_TTL         = 24 * 3 * time.Hour // 3 days
 	ID_TOKEN_JTI_LEN     = 32
 )
 
