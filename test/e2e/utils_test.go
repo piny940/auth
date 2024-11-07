@@ -12,6 +12,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 )
@@ -162,7 +163,7 @@ func mapToQuery(t *testing.T, m map[string]string) string {
 
 	kvs := make([]string, 0, len(m))
 	for k, v := range m {
-		kvs = append(kvs, k+"="+v)
+		kvs = append(kvs, k+"="+url.QueryEscape(v))
 	}
 	return strings.Join(kvs, "&")
 }

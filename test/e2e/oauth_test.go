@@ -31,8 +31,8 @@ func TestAuthorizeCodeNotAuthenticated(t *testing.T) {
 	}
 	initialClients := []*model.Client{
 		{ID: client1ID, Name: "approved", EncryptedSecret: "secret", UserID: clientOwnerID},
-		{ID: client2ID, Name: "approved", EncryptedSecret: "secret", UserID: clientOwnerID},
-		{ID: client3ID, Name: "approved", EncryptedSecret: "secret", UserID: clientOwnerID},
+		{ID: client2ID, Name: "partially approved", EncryptedSecret: "secret", UserID: clientOwnerID},
+		{ID: client3ID, Name: "not approved", EncryptedSecret: "secret", UserID: clientOwnerID},
 	}
 	const validRedirectURI = "https://example.com/callback"
 	initialRedirectURIs := []*model.RedirectURI{
@@ -40,7 +40,7 @@ func TestAuthorizeCodeNotAuthenticated(t *testing.T) {
 		{ClientID: client2ID, URI: validRedirectURI},
 		{ClientID: client3ID, URI: validRedirectURI},
 	}
-	validScope := url.QueryEscape(fmt.Sprintf("%s %s", oauth.ScopeOpenID, oauth.ScopeEmail))
+	validScope := "openid email"
 
 	const approval1ID = 32284
 	const approval2ID = 32285
@@ -55,7 +55,7 @@ func TestAuthorizeCodeNotAuthenticated(t *testing.T) {
 	}
 	const state = "rfejafewiofjwefiojwoefwjofprwjfrawo"
 
-	// serverUrl := os.Getenv("SERVER_URL")
+	serverUrl := os.Getenv("SERVER_URL")
 	apiLoginUrl := os.Getenv("API_LOGIN_URL")
 	apiApproveUrl := os.Getenv("API_APPROVE_URL")
 
@@ -63,22 +63,23 @@ func TestAuthorizeCodeNotAuthenticated(t *testing.T) {
 		name           string
 		authenticated  bool
 		clientID       string
-		RedirectURI    string
-		Scope          string
-		State          string
-		ExpectedStatus int
-		Location       *string
+		redirectURI    string
+		scope          string
+		state          string
+		expectedStatus int
+		authCodeIssued bool
+		redirectedTo   *string
 	}{
-		{"not authenticated", false, client1ID, validRedirectURI, validScope, state, 302, ptr(apiLoginUrl)},
-		{"client not found", true, "invalid", validRedirectURI, validScope, state, 400, nil},
-		{"invalid redirect uri", true, client1ID, "https://example.com/invalid", validScope, state, 400, nil},
-		{"invalid scope", true, client1ID, validRedirectURI, "invalid", state, 400, nil},
-		{"partially invalid scope", true, client1ID, validRedirectURI, "openid invalid", state, 400, nil},
-		{"empty state", true, client1ID, validRedirectURI, validScope, "", 200, nil},
-		{"client not approved", true, client3ID, validRedirectURI, validScope, state, 302, ptr(apiApproveUrl)},
-		{"a scope not approved", true, client2ID, validRedirectURI, validScope, state, 302, ptr(apiApproveUrl)},
-		{"client approved", true, client1ID, validRedirectURI, validScope, state, 200, nil},
-		{"more approved", true, client1ID, validRedirectURI, string(oauth.ScopeOpenID), state, 200, nil},
+		{"not authenticated", false, client1ID, validRedirectURI, validScope, state, 302, false, ptr(apiLoginUrl)},
+		{"client not found", true, "invalid", validRedirectURI, validScope, state, 400, false, nil},
+		{"invalid redirect uri", true, client1ID, "https://example.com/invalid", validScope, state, 400, false, nil},
+		{"invalid scope", true, client1ID, validRedirectURI, "invalid", state, 400, false, nil},
+		{"partially invalid scope", true, client1ID, validRedirectURI, "openid invalid", state, 400, false, nil},
+		{"empty state", true, client1ID, validRedirectURI, validScope, "", 302, true, ptr(validRedirectURI)},
+		{"client not approved", true, client3ID, validRedirectURI, validScope, state, 302, false, ptr(apiApproveUrl)},
+		{"a scope not approved", true, client2ID, validRedirectURI, validScope, state, 302, false, ptr(apiApproveUrl)},
+		{"client approved", true, client1ID, validRedirectURI, validScope, state, 302, true, ptr(validRedirectURI)},
+		{"more approved", true, client1ID, validRedirectURI, string(oauth.ScopeOpenID), state, 302, true, ptr(validRedirectURI)},
 	}
 
 	for _, suit := range suites {
@@ -95,23 +96,73 @@ func TestAuthorizeCodeNotAuthenticated(t *testing.T) {
 			query := map[string]string{
 				"response_type": "code",
 				"client_id":     suit.clientID,
-				"redirect_uri":  suit.RedirectURI,
-				"scope":         suit.Scope,
+				"redirect_uri":  suit.redirectURI,
+				"scope":         suit.scope,
 			}
-			if suit.State != "" {
-				query["state"] = suit.State
+			if suit.state != "" {
+				query["state"] = suit.state
 			}
 			res := authedGet(t, s.URL+"/oauth/authorize?"+mapToQuery(t, query), cookie)
 			defer res.Body.Close()
 
-			if res.StatusCode != suit.ExpectedStatus {
+			if res.StatusCode != suit.expectedStatus {
 				body, err := io.ReadAll(res.Body)
 				if err != nil {
 					t.Fatalf("failed to read response body: %v", err)
 				}
-				t.Fatalf("expected status code: %d, but got %d. response body: %v", suit.ExpectedStatus, res.StatusCode, string(body))
+				t.Fatalf("expected status code: %d, but got %d. response body: %v", suit.expectedStatus, res.StatusCode, string(body))
+			}
+			if suit.expectedStatus == 302 {
+				actual, err := url.Parse(res.Header.Get("Location"))
+				if err != nil {
+					t.Fatalf("failed to parse url: %v", err)
+				}
+				{ // test the redirect target is correct
+					actualUrl := fmt.Sprintf("%s://%s%s", actual.Scheme, actual.Host, actual.Path)
+					if actualUrl != *suit.redirectedTo {
+						t.Errorf("unexpected url: %v, expect %v", actualUrl, *suit.redirectedTo)
+					}
+				}
+				actualQuery := actual.Query()
+				if suit.state != "" {
+					if actualQuery.Get("state") != suit.state {
+						t.Errorf("unexpected state: %v", actualQuery.Get("state"))
+					}
+				}
+				if suit.authCodeIssued {
+					if actualQuery.Get("code") == "" {
+						t.Errorf("code is not issued")
+					}
+				} else {
+					next, err := url.Parse(actualQuery.Get("next"))
+					if err != nil {
+						t.Fatalf("failed to parse next url: %v", err)
+					}
+					actualUrl := fmt.Sprintf("%s://%s%s", next.Scheme, next.Host, next.Path)
+					expectedUrl := fmt.Sprintf("%s%s", serverUrl, "/oauth/authorize")
+					if actualUrl != expectedUrl {
+						t.Errorf("unexpected url: %v, expect %v", actualUrl, expectedUrl)
+					}
+					nextQuery := next.Query()
+					if nextQuery.Get("response_type") != "code" {
+						t.Errorf("unexpected response_type: %v, expect code", nextQuery.Get("response_type"))
+					}
+					if nextQuery.Get("client_id") != suit.clientID {
+						t.Errorf("unexpected client_id: %v, expect %v", nextQuery.Get("client_id"), suit.clientID)
+					}
+					if nextQuery.Get("redirect_uri") != suit.redirectURI {
+						t.Errorf("unexpected redirect_uri: %v, expect %v", nextQuery.Get("redirect_uri"), suit.redirectURI)
+					}
+					if nextQuery.Get("scope") != suit.scope {
+						t.Errorf("unexpected scope: %v, expect %v", nextQuery.Get("scope"), suit.scope)
+					}
+					if suit.state != "" {
+						if nextQuery.Get("state") != suit.state {
+							t.Errorf("unexpected state: %v, expect %v", nextQuery.Get("state"), suit.state)
+						}
+					}
+				}
 			}
 		})
 	}
-
 }
