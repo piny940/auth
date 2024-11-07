@@ -2,12 +2,18 @@ package e2e
 
 import (
 	"auth/internal/api"
+	"auth/internal/infrastructure"
+	"auth/internal/infrastructure/model"
+	"auth/internal/infrastructure/query"
 	"bytes"
 	"crypto/rand"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
+	"strings"
 	"testing"
 )
 
@@ -28,32 +34,15 @@ func fromJSONBody(t *testing.T, body io.Reader, v interface{}) {
 		t.Fatalf("failed to decode json: %v", err)
 	}
 }
-func login(t *testing.T, s *httptest.Server) (*api.User, string) {
+func login(t *testing.T, s *httptest.Server, name, password string) (*api.User, string) {
 	t.Helper()
 
-	name := randomString(t, 10)
-	password := randomString(t, 16)
-
-	signupInput := &api.UsersReqSignup{
-		Name:                 name,
-		Password:             password,
-		PasswordConfirmation: password,
-	}
-	body := toJSON(t, signupInput)
-	resp, err := http.Post(s.URL+"/users/signup", "application/json", bytes.NewBuffer(body))
-	if err != nil {
-		t.Fatalf("failed to post: %v", err)
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusNoContent {
-		t.Fatalf("failed to create user: %v", resp.StatusCode)
-	}
 	input := &api.SessionLoginReq{
 		Name:     name,
 		Password: password,
 	}
-	body = toJSON(t, input)
-	resp, err = http.Post(s.URL+"/session", "application/json", bytes.NewBuffer(body))
+	body := toJSON(t, input)
+	resp, err := http.Post(s.URL+"/session", "application/json", bytes.NewBuffer(body))
 	if err != nil {
 		t.Fatalf("failed to post: %v", err)
 	}
@@ -92,4 +81,93 @@ func randomString(t *testing.T, l int) string {
 		result += string(letters[int(v)%len(letters)])
 	}
 	return result
+}
+
+func seed(
+	t *testing.T,
+	users []*model.User,
+	clients []*model.Client,
+	redirectURIs []*model.RedirectURI,
+	approvals []*model.Approval,
+	approvalScopes []*model.ApprovalScope,
+) {
+	t.Helper()
+
+	db := infrastructure.GetDB()
+	query := query.Use(db.Client)
+
+	if err := query.User.CreateInBatches(users, len(users)); err != nil {
+		t.Fatalf("failed to create users: %v", err)
+	}
+	if err := query.Client.CreateInBatches(clients, len(clients)); err != nil {
+		t.Fatalf("failed to create clients: %v", err)
+	}
+	if err := query.RedirectURI.CreateInBatches(redirectURIs, len(redirectURIs)); err != nil {
+		t.Fatalf("failed to create redirectURIs: %v", err)
+	}
+	if err := query.Approval.CreateInBatches(approvals, len(approvals)); err != nil {
+		t.Fatalf("failed to create approvals: %v", err)
+	}
+	if err := query.ApprovalScope.CreateInBatches(approvalScopes, len(approvalScopes)); err != nil {
+		t.Fatalf("failed to create approvalScopes: %v", err)
+	}
+}
+
+func authedGet(t *testing.T, url string, cookie *string) *http.Response {
+	t.Helper()
+
+	fmt.Println(url)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		t.Fatalf("failed to create request: %v", err)
+	}
+	if cookie != nil {
+		req.Header.Set("Cookie", *cookie)
+	}
+	resp, err := (&http.Client{
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			fmt.Println("check redirect: ", req.URL, "via: ", via[0].URL)
+			return http.ErrUseLastResponse
+		},
+	}).Do(req)
+	if err != nil {
+		t.Fatalf("failed to get: %v", err)
+	}
+	return resp
+}
+func authedPost(t *testing.T, url string, cookie *string, body interface{}) *http.Response {
+	t.Helper()
+
+	b := toJSON(t, body)
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(b))
+	if err != nil {
+		t.Fatalf("failed to create request: %v", err)
+	}
+	if cookie != nil {
+		req.Header.Set("Cookie", *cookie)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := (&http.Client{
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}).Do(req)
+	if err != nil {
+		t.Fatalf("failed to post: %v", err)
+	}
+	return resp
+}
+
+func mapToQuery(t *testing.T, m map[string]string) string {
+	t.Helper()
+
+	kvs := make([]string, 0, len(m))
+	for k, v := range m {
+		kvs = append(kvs, k+"="+url.QueryEscape(v))
+	}
+	return strings.Join(kvs, "&")
+}
+
+func ptr[T any](v T) *T {
+	return &v
 }

@@ -70,7 +70,7 @@ func (a *AuthCodeRepo) Create(value string, clientID oauth.ClientID, userID doma
 	adds := make([]*model.AuthCodeScope, 0, len(compactScopes))
 	for _, s := range compactScopes {
 		adds = append(adds, &model.AuthCodeScope{
-			ScopeID:    scopeMapReverse[s],
+			ScopeID:    ScopeMapReverse[s],
 			AuthCodeID: code.ID,
 		})
 	}
@@ -83,7 +83,7 @@ func (a *AuthCodeRepo) Create(value string, clientID oauth.ClientID, userID doma
 func toDomainAuthCode(m *model.AuthCode, mScopes []*model.AuthCodeScope) *oauth.AuthCode {
 	scopes := make([]oauth.TypeScope, 0, len(mScopes))
 	for _, s := range mScopes {
-		scopes = append(scopes, scopeMap[s.ScopeID])
+		scopes = append(scopes, ScopeMap[s.ScopeID])
 	}
 	return &oauth.AuthCode{
 		Value:       m.Value,
