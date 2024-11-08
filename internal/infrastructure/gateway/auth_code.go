@@ -80,6 +80,13 @@ func (a *AuthCodeRepo) Create(value string, clientID oauth.ClientID, userID doma
 	return nil
 }
 
+func (a *AuthCodeRepo) Use(value string) error {
+	_, err := a.query.AuthCode.Where(a.query.AuthCode.Value.Eq(value)).Update(
+		a.query.AuthCode.Used, true,
+	)
+	return err
+}
+
 func toDomainAuthCode(m *model.AuthCode, mScopes []*model.AuthCodeScope) *oauth.AuthCode {
 	scopes := make([]oauth.TypeScope, 0, len(mScopes))
 	for _, s := range mScopes {

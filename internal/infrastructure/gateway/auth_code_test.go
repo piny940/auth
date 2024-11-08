@@ -126,3 +126,40 @@ func TestAuthCodeRepoFindEmpty(t *testing.T) {
 		t.Errorf("unexpected error: %v", err)
 	}
 }
+
+func TestAuthCodeUse(t *testing.T) {
+	setup(t)
+
+	db := infrastructure.GetDB()
+	query := query.Use(db.Client)
+	authCodeRepo := NewAuthCodeRepo(db)
+	scopes := []oauth.TypeScope{oauth.ScopeOpenID, oauth.ScopeOpenID}
+	expiresAt := time.Now()
+	clientID := "test_client_id"
+	userID := int64(1)
+	value := "test_value"
+	query.User.Create(&model.User{ID: userID, Name: "test", EncryptedPassword: "test"})
+	query.Client.Create(&model.Client{ID: clientID, EncryptedSecret: "", UserID: 1})
+	err := authCodeRepo.Create(value, oauth.ClientID(clientID), domain.UserID(userID), scopes, expiresAt, "test_redirect_uri")
+	if err != nil {
+		t.Fatal(err)
+	}
+	before, err := authCodeRepo.Find(value)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if before.Used {
+		t.Errorf("unexpected before.Used: %t", before.Used)
+	}
+	err = authCodeRepo.Use(value)
+	if err != nil {
+		t.Fatal(err)
+	}
+	authCode, err := authCodeRepo.Find(value)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !authCode.Used {
+		t.Errorf("unexpected authCode.Used: %t", authCode.Used)
+	}
+}

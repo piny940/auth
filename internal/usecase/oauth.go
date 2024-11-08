@@ -103,6 +103,10 @@ func (u *OAuthUsecase) RequestToken(req *TokenRequest) (*oauth.AccessToken, *oau
 	if err != nil {
 		return nil, nil, fmt.Errorf("invalid auth code: %w", err)
 	}
+	if err := u.AuthCodeService.AuthCodeRepo.Use(authCode.Value); err != nil {
+		return nil, nil, fmt.Errorf("failed to use auth code: %w", err)
+	}
+
 	accessToken, err := u.TokenService.IssueAccessToken(authCode)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to issue access token: %w", err)
