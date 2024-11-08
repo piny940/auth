@@ -1,6 +1,6 @@
 import { ApproveButton } from '@/components/ApproveButton'
 import { client } from '@/utils/client'
-import { Box, Button, Container, Typography } from '@mui/material'
+import { Box, Container, Typography } from '@mui/material'
 
 type Props = {
   searchParams: Promise<{
