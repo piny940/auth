@@ -21,6 +21,7 @@ type IDToken struct {
 
 type TokenService struct {
 	rsaPrivateKey *rsa.PrivateKey
+	rsaKeyId      string
 	issuer        string
 	userRepo      domain.IUserRepo
 }
@@ -42,6 +43,7 @@ func NewTokenService(config *Config, userRepo domain.IUserRepo) *TokenService {
 	}
 	return &TokenService{
 		rsaPrivateKey: rsaPrivateKey,
+		rsaKeyId:      config.RsaKeyId,
 		issuer:        config.Issuer,
 		userRepo:      userRepo,
 	}
@@ -67,6 +69,7 @@ func (s *TokenService) IssueAccessToken(authCode *AuthCode) (*AccessToken, error
 		"iat":   time.Now().Unix(),
 		"sub":   fmt.Sprintf("id:%d;name:%s", user.ID, user.Name),
 		"jti":   jti,
+		"kid":   s.rsaKeyId,
 		"scope": strings.Join(strScopes, " "),
 	})
 	token, err := raw.SignedString(s.rsaPrivateKey)
@@ -96,6 +99,7 @@ func (s *TokenService) IssueIDToken(authCode *AuthCode) (*IDToken, error) {
 		"aud": authCode.ClientID,
 		"exp": expiresAt.Unix(),
 		"iat": time.Now().Unix(),
+		"kid": s.rsaKeyId,
 		"jti": jti,
 	})
 	token, err := raw.SignedString(s.rsaPrivateKey)
