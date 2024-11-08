@@ -25,6 +25,7 @@ const (
 type IAuthCodeRepo interface {
 	Find(value string) (*AuthCode, error)
 	Create(value string, clientID ClientID, userID domain.UserID, scopes []TypeScope, expiresAt time.Time, redirectURI string) error
+	Use(value string) error
 }
 
 type AuthCodeService struct {

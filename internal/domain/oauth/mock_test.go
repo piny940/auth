@@ -11,6 +11,10 @@ type authCodeRepo struct {
 
 var _ IAuthCodeRepo = &authCodeRepo{}
 
+func (a *authCodeRepo) Use(value string) error {
+	panic("unimplemented")
+}
+
 func (a *authCodeRepo) Find(value string) (*AuthCode, error) {
 	for _, code := range a.authCodes {
 		if code.Value == value {
