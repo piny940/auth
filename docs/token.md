@@ -13,6 +13,7 @@
   "sub": "id:{userID};name:{username}",
   "iat": 0000000000,
   "jti": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", // 32字のランダム文字列
+  "kid": "xxxxxx",
   "scope": "openid profile email", // スペース区切り
 }
 ```
@@ -30,6 +31,7 @@
   "aud": "{client_id}",
   "exp": 0000000000,
   "iat": 0000000000, // トークン発行日時
+  "kid": "xxxxxx",
   "jti": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", // 32字のランダム文字列
 }
 ```
