@@ -74,7 +74,7 @@ func TestTokenServiceIssueAccessToken(t *testing.T) {
 	if claims["scope"] != fmt.Sprintf("%s %s", ScopeOpenID, ScopeOpenID) {
 		t.Errorf("scope is invalid")
 	}
-	if claims["kid"] != RSA_KEY_ID {
+	if tok.Header["kid"] != RSA_KEY_ID {
 		t.Errorf("kid is invalid")
 	}
 }
@@ -134,7 +134,7 @@ func TestTokenServiceIssueIDToken(t *testing.T) {
 	if len(claims["jti"].(string)) != ACCESS_TOKEN_JTI_LEN {
 		t.Errorf("jti is invalid")
 	}
-	if claims["kid"] != RSA_KEY_ID {
+	if tok.Header["kid"] != RSA_KEY_ID {
 		t.Errorf("kid is invalid")
 	}
 }

@@ -99,7 +99,6 @@ func (s *TokenService) IssueIDToken(authCode *AuthCode) (*IDToken, error) {
 		"aud": authCode.ClientID,
 		"exp": expiresAt.Unix(),
 		"iat": time.Now().Unix(),
-		"kid": s.rsaKeyId,
 		"jti": jti,
 	})
 	token.Header["kid"] = s.rsaKeyId
