@@ -337,6 +337,15 @@ func TestOAuthToken(t *testing.T) {
 					t.Errorf("jti is empty")
 				}
 			}
+
+			// test auth code can be used only once
+			res, err = http.DefaultClient.Do(req)
+			if err != nil {
+				t.Fatalf("failed to send request: %v", err)
+			}
+			if res.StatusCode != 400 {
+				t.Fatalf("expected status code: 400, but got %d", res.StatusCode)
+			}
 		})
 	}
 }
