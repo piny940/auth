@@ -6,14 +6,16 @@ import (
 	"auth/internal/infrastructure/model"
 	"fmt"
 	"io"
+	"net/http"
 	"net/url"
 	"os"
 	"testing"
 
+	"github.com/lestrrat-go/jwx/jwk"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func TestAuthorizeCodeNotAuthenticated(t *testing.T) {
+func TestAuthorizeCode(t *testing.T) {
 	const userID = 43234
 	const username = "user1"
 	const password = "password"
@@ -164,5 +166,29 @@ func TestAuthorizeCodeNotAuthenticated(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestJwks(t *testing.T) {
+	s := newServer(t)
+	defer s.Close()
+
+	res, err := http.Get(s.URL + "/oauth/jwks")
+	if err != nil {
+		t.Fatalf("failed to send request: %v", err)
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != 200 {
+		t.Fatalf("expected status code: 200, but got %d", res.StatusCode)
+	}
+
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		t.Fatalf("failed to read response body: %v", err)
+	}
+	_, err = jwk.Parse(body)
+	if err != nil {
+		t.Fatalf("failed to parse jwks: %v", err)
 	}
 }
