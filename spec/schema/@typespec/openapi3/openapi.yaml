@@ -239,7 +239,7 @@ paths:
           in: query
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/OAuth.AuthorizeResponseType'
           explode: false
         - name: client_id
           in: query
@@ -585,7 +585,7 @@ components:
         - scope
       properties:
         response_type:
-          type: string
+          $ref: '#/components/schemas/OAuth.AuthorizeResponseType'
         client_id:
           type: string
         redirect_uri:
@@ -594,6 +594,10 @@ components:
           type: string
         state:
           type: string
+    OAuth.AuthorizeResponseType:
+      type: string
+      enum:
+        - code
     OAuth.TokenCacheControlHeader:
       type: string
       enum:
@@ -602,6 +606,10 @@ components:
       type: string
       enum:
         - invalid_request
+    OAuth.TokenGrantType:
+      type: string
+      enum:
+        - authorization_code
     OAuth.TokenPragmaHeader:
       type: string
       enum:
@@ -615,7 +623,7 @@ components:
         - client_id
       properties:
         grant_type:
-          type: string
+          $ref: '#/components/schemas/OAuth.TokenGrantType'
         code:
           type: string
         redirect_uri:
