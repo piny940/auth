@@ -224,20 +224,24 @@ export interface components {
       | 'server_error'
       | 'temporarily_unavailable'
     'OAuth.AuthorizeReqMultiPart': {
-      response_type: string
+      response_type: components['schemas']['OAuth.AuthorizeResponseType']
       client_id: string
       redirect_uri: string
       scope: string
       state?: string
     }
     /** @enum {string} */
+    'OAuth.AuthorizeResponseType': 'code'
+    /** @enum {string} */
     'OAuth.TokenCacheControlHeader': 'no-store'
     /** @enum {string} */
     'OAuth.TokenErr': 'invalid_request'
     /** @enum {string} */
+    'OAuth.TokenGrantType': 'authorization_code'
+    /** @enum {string} */
     'OAuth.TokenPragmaHeader': 'no-store'
     'OAuth.TokenReq': {
-      grant_type: string
+      grant_type: components['schemas']['OAuth.TokenGrantType']
       code: string
       redirect_uri: string
       client_id: string
@@ -545,7 +549,7 @@ export interface operations {
   OAuthInterface_authorize: {
     parameters: {
       query: {
-        response_type: string
+        response_type: components['schemas']['OAuth.AuthorizeResponseType']
         client_id: string
         redirect_uri: string
         scope: string

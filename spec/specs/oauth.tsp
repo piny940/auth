@@ -7,8 +7,11 @@ using TypeSpec.Rest;
 
 namespace Auth.OAuth;
 
+enum AuthorizeResponseType {
+  code,
+}
 model AuthorizeReq {
-  response_type: string;
+  response_type: AuthorizeResponseType;
   client_id: string;
   redirect_uri: string;
   scope: string;
@@ -23,8 +26,11 @@ enum AuthorizeErr {
   server_error,
   temporarily_unavailable,
 }
+enum TokenGrantType {
+  authorization_code,
+}
 model TokenReq {
-  grant_type: string;
+  grant_type: TokenGrantType;
   code: string;
   redirect_uri: string;
   client_id: string;
@@ -56,7 +62,7 @@ interface OAuthInterface {
   @get
   @summary("Authorization Request")
   authorize(
-    @query response_type: string,
+    @query response_type: AuthorizeResponseType,
     @query client_id: string,
     @query redirect_uri: string,
     @query scope: string,

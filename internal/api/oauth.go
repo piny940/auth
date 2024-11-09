@@ -18,7 +18,7 @@ func (s *Server) OAuthInterfaceAuthorize(ctx context.Context, request OAuthInter
 		query := map[string]string{
 			"error":         "unauthorized_client",
 			"redirect_uri":  request.Params.RedirectUri,
-			"response_type": request.Params.ResponseType,
+			"response_type": string(request.Params.ResponseType),
 			"client_id":     request.Params.ClientId,
 			"scope":         request.Params.Scope,
 		}
@@ -37,7 +37,7 @@ func (s *Server) OAuthInterfaceAuthorize(ctx context.Context, request OAuthInter
 			"next":              this,
 			"client_id":         request.Params.ClientId,
 			"scope":             request.Params.Scope,
-			"response_type":     request.Params.ResponseType,
+			"response_type":     string(request.Params.ResponseType),
 			"error":             string(OAuthAuthorizeErrUnauthorizedClient),
 			"error_description": "unauthorized_client",
 		}
@@ -54,7 +54,7 @@ func (s *Server) OAuthInterfaceAuthorize(ctx context.Context, request OAuthInter
 	if err != nil {
 		return nil, err
 	}
-	if request.Params.ResponseType != string(usecase.ResponseTypeCode) {
+	if request.Params.ResponseType != Code {
 		s.logger.Infof("invalid request type: %v", err)
 		return OAuthInterfaceAuthorize400JSONResponse{
 			Error:            OAuthAuthorizeErrUnsupportedResponseType,
@@ -122,7 +122,7 @@ func (s *Server) OAuthInterfaceAuthorize(ctx context.Context, request OAuthInter
 // OAuthInterfaceGetToken implements StrictServerInterface.
 func (s *Server) OAuthInterfaceGetToken(ctx context.Context, request OAuthInterfaceGetTokenRequestObject) (OAuthInterfaceGetTokenResponseObject, error) {
 	accessToken, idToken, err := s.OAuthUsecase.RequestToken(&usecase.TokenRequest{
-		GrantType:   request.Body.GrantType,
+		GrantType:   string(request.Body.GrantType),
 		AuthCode:    request.Body.Code,
 		RedirectURI: request.Body.RedirectUri,
 		ClientID:    oauth.ClientID(request.Body.ClientId),

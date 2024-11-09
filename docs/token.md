@@ -5,7 +5,8 @@
 ```json
 {
   "typ": "JWT",
-  "alg": "RS256"
+  "alg": "RS256",
+  "kid": "xxxxxx",
 }
 {
   "iss": "https://auth.piny940.com", // staging環境はhttps://stg-auth.piny940.com
@@ -13,8 +14,7 @@
   "sub": "id:{userID};name:{username}",
   "iat": 0000000000,
   "jti": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", // 32字のランダム文字列
-  "kid": "xxxxxx",
-  "scope": "openid profile email", // スペース区切り
+  "scope": "openid profile email" // スペース区切り
 }
 ```
 
@@ -23,7 +23,8 @@
 ```json
 {
   "typ": "JWT",
-  "alg": "RS256"
+  "alg": "RS256",
+  "kid": "xxxxxx",
 }
 {
   "iss": "https://auth.piny940.com", // staging環境はhttps://stg-auth.piny940.com
@@ -31,7 +32,6 @@
   "aud": "{client_id}",
   "exp": 0000000000,
   "iat": 0000000000, // トークン発行日時
-  "kid": "xxxxxx",
   "jti": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", // 32字のランダム文字列
 }
 ```

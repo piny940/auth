@@ -90,26 +90,48 @@ func seed(
 	redirectURIs []*model.RedirectURI,
 	approvals []*model.Approval,
 	approvalScopes []*model.ApprovalScope,
+	authCodes []*model.AuthCode,
+	authCodeScopes []*model.AuthCodeScope,
 ) {
 	t.Helper()
 
 	db := infrastructure.GetDB()
 	query := query.Use(db.Client)
 
-	if err := query.User.CreateInBatches(users, len(users)); err != nil {
-		t.Fatalf("failed to create users: %v", err)
+	if users != nil {
+		if err := query.User.CreateInBatches(users, len(users)); err != nil {
+			t.Fatalf("failed to create users: %v", err)
+		}
 	}
-	if err := query.Client.CreateInBatches(clients, len(clients)); err != nil {
-		t.Fatalf("failed to create clients: %v", err)
+	if clients != nil {
+		if err := query.Client.CreateInBatches(clients, len(clients)); err != nil {
+			t.Fatalf("failed to create clients: %v", err)
+		}
 	}
-	if err := query.RedirectURI.CreateInBatches(redirectURIs, len(redirectURIs)); err != nil {
-		t.Fatalf("failed to create redirectURIs: %v", err)
+	if redirectURIs != nil {
+		if err := query.RedirectURI.CreateInBatches(redirectURIs, len(redirectURIs)); err != nil {
+			t.Fatalf("failed to create redirectURIs: %v", err)
+		}
 	}
-	if err := query.Approval.CreateInBatches(approvals, len(approvals)); err != nil {
-		t.Fatalf("failed to create approvals: %v", err)
+	if approvals != nil {
+		if err := query.Approval.CreateInBatches(approvals, len(approvals)); err != nil {
+			t.Fatalf("failed to create approvals: %v", err)
+		}
 	}
-	if err := query.ApprovalScope.CreateInBatches(approvalScopes, len(approvalScopes)); err != nil {
-		t.Fatalf("failed to create approvalScopes: %v", err)
+	if approvalScopes != nil {
+		if err := query.ApprovalScope.CreateInBatches(approvalScopes, len(approvalScopes)); err != nil {
+			t.Fatalf("failed to create approvalScopes: %v", err)
+		}
+	}
+	if authCodes != nil {
+		if err := query.AuthCode.CreateInBatches(authCodes, len(authCodes)); err != nil {
+			t.Fatalf("failed to create authCodes: %v", err)
+		}
+	}
+	if authCodeScopes != nil {
+		if err := query.AuthCodeScope.CreateInBatches(authCodeScopes, len(authCodeScopes)); err != nil {
+			t.Fatalf("failed to create authCodeScopes: %v", err)
+		}
 	}
 }
 
