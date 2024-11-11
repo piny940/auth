@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"time"
 
 	"github.com/lestrrat-go/jwx/jwk"
 )
@@ -17,6 +18,10 @@ type OAuthUsecase struct {
 	ApprovalRepo    oauth.IApprovalRepo
 	JWKsService     *oauth.JWKsService
 	ClientRepo      oauth.IClientRepo
+}
+type Session struct {
+	User     *domain.User
+	AuthTime time.Time
 }
 
 func NewOAuthUsecase(
@@ -55,7 +60,7 @@ type AuthRequest struct {
 	State        *string
 }
 
-func (u *OAuthUsecase) RequestCodeAuth(user *domain.User, req *AuthRequest) (*oauth.AuthCode, error) {
+func (u *OAuthUsecase) RequestCodeAuth(session *Session, req *AuthRequest) (*oauth.AuthCode, error) {
 	if req.ResponseType != ResponseTypeCode {
 		return nil, ErrInvalidRequestType
 	}
@@ -69,14 +74,14 @@ func (u *OAuthUsecase) RequestCodeAuth(user *domain.User, req *AuthRequest) (*oa
 	if err := oauth.ValidScopes(req.Scopes); err != nil {
 		return nil, fmt.Errorf("invalid scopes: %w", err)
 	}
-	ok, err := u.ApprovalService.Approved(req.ClientID, user.ID, req.Scopes)
+	ok, err := u.ApprovalService.Approved(req.ClientID, session.User.ID, req.Scopes)
 	if err != nil {
 		return nil, err
 	}
 	if !ok {
 		return nil, ErrNotApproved
 	}
-	return u.AuthCodeService.IssueAuthCode(req.ClientID, user.ID, req.Scopes, req.RedirectURI)
+	return u.AuthCodeService.IssueAuthCode(req.ClientID, session.User.ID, session.AuthTime, req.Scopes, req.RedirectURI)
 }
 
 func (u *OAuthUsecase) Approve(user *domain.User, clientID oauth.ClientID, scopes []oauth.TypeScope) error {

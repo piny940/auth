@@ -38,7 +38,13 @@ func NewAuthCodeService(authCodeRepo IAuthCodeRepo) *AuthCodeService {
 	}
 }
 
-func (s *AuthCodeService) IssueAuthCode(clientID ClientID, userID domain.UserID, scopes []TypeScope, redirectURI string) (*AuthCode, error) {
+func (s *AuthCodeService) IssueAuthCode(
+	clientID ClientID,
+	userID domain.UserID,
+	authTime time.Time,
+	scopes []TypeScope,
+	redirectURI string,
+) (*AuthCode, error) {
 	const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	b := make([]byte, AUTH_CODE_LEN)
 	if _, err := rand.Read(b); err != nil {
