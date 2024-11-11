@@ -96,6 +96,9 @@ table "approvals" {
   column "user_id" {
     type = bigint
   }
+  column "auth_time" {
+    type = timestamptz
+  }
   column "created_at" {
     type = timestamptz
   }

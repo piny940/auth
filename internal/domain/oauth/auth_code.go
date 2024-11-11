@@ -13,6 +13,7 @@ type AuthCode struct {
 	UserID      domain.UserID
 	ExpiresAt   time.Time
 	Used        bool
+	AuthTime    time.Time
 	RedirectURI string
 	Scopes      []TypeScope
 }
@@ -63,6 +64,7 @@ func (s *AuthCodeService) IssueAuthCode(
 		ClientID:  clientID,
 		UserID:    userID,
 		ExpiresAt: expiresAt,
+		AuthTime:  authTime,
 		Scopes:    scopes,
 	}, nil
 }

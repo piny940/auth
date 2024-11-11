@@ -1,3 +1,5 @@
+-- Modify "approvals" table
+ALTER TABLE "public"."approvals" ADD COLUMN "auth_time" timestamptz NOT NULL;
 -- Create "auth_codes" table
 CREATE TABLE "public"."auth_codes" ("id" bigserial NOT NULL, "value" character varying(32) NOT NULL, "client_id" character varying(16) NOT NULL, "user_id" bigint NOT NULL, "redirect_uri" character varying(255) NOT NULL, "used" boolean NOT NULL, "expires_at" timestamptz NOT NULL, "created_at" timestamptz NOT NULL, "updated_at" timestamptz NOT NULL, PRIMARY KEY ("id"), CONSTRAINT "client_id" FOREIGN KEY ("client_id") REFERENCES "public"."clients" ("id") ON UPDATE NO ACTION ON DELETE CASCADE, CONSTRAINT "user_id" FOREIGN KEY ("user_id") REFERENCES "public"."users" ("id") ON UPDATE NO ACTION ON DELETE CASCADE);
 -- Create "auth_code_scopes" table

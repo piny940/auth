@@ -31,7 +31,7 @@ func (s *Server) OAuthInterfaceAuthorize(ctx context.Context, request OAuthInter
 		}
 		this = authorizeUrl + "?" + toQueryString(query)
 	}
-	user, err := CurrentUser(ctx)
+	session, err := CurrentUser(ctx)
 	if errors.Is(err, ErrUnauthorized) {
 		query := map[string]string{
 			"next":              this,
@@ -61,7 +61,7 @@ func (s *Server) OAuthInterfaceAuthorize(ctx context.Context, request OAuthInter
 			ErrorDescription: "unsupported_response_type",
 		}, nil
 	}
-	code, err := s.OAuthUsecase.RequestCodeAuth(user, toUAuthParams(request.Params))
+	code, err := s.OAuthUsecase.RequestCodeAuth(session, toUAuthParams(request.Params))
 	if errors.Is(err, usecase.ErrClientNotFound) {
 		s.logger.Infof("invalid client id: %v", err)
 		return OAuthInterfaceAuthorize400JSONResponse{

@@ -224,24 +224,20 @@ export interface components {
       | 'server_error'
       | 'temporarily_unavailable'
     'OAuth.AuthorizeReqMultiPart': {
-      response_type: components['schemas']['OAuth.AuthorizeResponseType']
+      response_type: string
       client_id: string
       redirect_uri: string
       scope: string
       state?: string
     }
     /** @enum {string} */
-    'OAuth.AuthorizeResponseType': 'code'
-    /** @enum {string} */
     'OAuth.TokenCacheControlHeader': 'no-store'
     /** @enum {string} */
     'OAuth.TokenErr': 'invalid_request'
     /** @enum {string} */
-    'OAuth.TokenGrantType': 'authorization_code'
-    /** @enum {string} */
     'OAuth.TokenPragmaHeader': 'no-store'
     'OAuth.TokenReq': {
-      grant_type: components['schemas']['OAuth.TokenGrantType']
+      grant_type: string
       code: string
       redirect_uri: string
       client_id: string
@@ -549,7 +545,7 @@ export interface operations {
   OAuthInterface_authorize: {
     parameters: {
       query: {
-        response_type: components['schemas']['OAuth.AuthorizeResponseType']
+        response_type: string
         client_id: string
         redirect_uri: string
         scope: string
@@ -629,28 +625,6 @@ export interface operations {
             error: components['schemas']['OAuth.AuthorizeErr']
             error_description: string
             state?: string
-          }
-        }
-      }
-    }
-  }
-  OAuthInterface_getJwks: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description The request has succeeded. */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': {
-            [key: string]: unknown
           }
         }
       }

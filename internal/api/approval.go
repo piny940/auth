@@ -8,7 +8,7 @@ import (
 )
 
 func (s *Server) ApprovalsInterfaceApprove(ctx context.Context, request ApprovalsInterfaceApproveRequestObject) (ApprovalsInterfaceApproveResponseObject, error) {
-	user, err := CurrentUser(ctx)
+	session, err := CurrentUser(ctx)
 	if err != nil {
 		s.logger.Errorf("failed to get current user: %v", err)
 		return nil, err
@@ -17,7 +17,7 @@ func (s *Server) ApprovalsInterfaceApprove(ctx context.Context, request Approval
 	for _, s := range strings.Split(request.Body.Scope, " ") {
 		scopes = append(scopes, oauth.TypeScope(s))
 	}
-	err = s.OAuthUsecase.Approve(user, oauth.ClientID(request.Body.ClientId), scopes)
+	err = s.OAuthUsecase.Approve(session.User, oauth.ClientID(request.Body.ClientId), scopes)
 	if errors.Is(err, oauth.ErrInvalidClientID) {
 		s.logger.Infof("invalid client id: %v", err)
 		return ApprovalsInterfaceApprove400JSONResponse{

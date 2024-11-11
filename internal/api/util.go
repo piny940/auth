@@ -2,11 +2,14 @@ package api
 
 import (
 	"auth/internal/domain"
+	"auth/internal/usecase"
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
@@ -30,6 +33,7 @@ const (
 )
 
 const SESSION_USER_KEY = "user"
+const SESSION_AUTH_TIME_KEY = "auth_time"
 
 func SetSessionRegistry(r *http.Request) error {
 	reg := sessions.GetRegistry(r)
@@ -73,7 +77,7 @@ func Save(c context.Context) (*http.Cookie, error) {
 	return sessions.NewCookie(session.Name(), encoded, sessionsOptions), nil
 }
 
-func CurrentUser(c context.Context) (*domain.User, error) {
+func CurrentUser(c context.Context) (*usecase.Session, error) {
 	userObj, err := GetFromSession(c, SESSION_USER_KEY)
 	if errors.Is(err, ErrNotFoundInSession) {
 		return nil, ErrUnauthorized
@@ -85,21 +89,36 @@ func CurrentUser(c context.Context) (*domain.User, error) {
 	if !ok {
 		return nil, ErrUnauthorized
 	}
-	return user, nil
+	authTime, err := GetFromSession(c, SESSION_AUTH_TIME_KEY)
+	if err != nil {
+		return nil, err
+	}
+	if authTime == nil {
+		return nil, ErrUnauthorized
+	}
+	t, ok := authTime.(time.Time)
+	if !ok {
+		return nil, ErrUnauthorized
+	}
+	return &usecase.Session{User: user, AuthTime: t}, nil
 }
 
 func Login(c context.Context, user *domain.User) (*http.Cookie, error) {
-	err := SetToSession(c, SESSION_USER_KEY, user)
-	if err != nil {
-		return nil, err
+	if err := SetToSession(c, SESSION_USER_KEY, user); err != nil {
+		return nil, fmt.Errorf("failed to set user session: %w", err)
+	}
+	if err := SetToSession(c, SESSION_AUTH_TIME_KEY, time.Now()); err != nil {
+		return nil, fmt.Errorf("failed to set auth time session: %w", err)
 	}
 	return Save(c)
 }
 
 func Logout(c context.Context) (*http.Cookie, error) {
-	err := SetToSession(c, SESSION_USER_KEY, nil)
-	if err != nil {
-		return nil, err
+	if err := SetToSession(c, SESSION_USER_KEY, nil); err != nil {
+		return nil, fmt.Errorf("failed to set user session: %w", err)
+	}
+	if err := SetToSession(c, SESSION_AUTH_TIME_KEY, nil); err != nil {
+		return nil, fmt.Errorf("failed to set auth time session: %w", err)
 	}
 	return Save(c)
 }

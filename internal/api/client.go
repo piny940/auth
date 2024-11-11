@@ -32,13 +32,13 @@ func (s *Server) ClientsInterfaceGetClient(ctx context.Context, request ClientsI
 // ----------------------------------- private api -------------------------------
 
 func (s *Server) AccountClientsCreateClient(ctx context.Context, request AccountClientsCreateClientRequestObject) (AccountClientsCreateClientResponseObject, error) {
-	user, err := CurrentUser(ctx)
+	session, err := CurrentUser(ctx)
 	if err != nil {
 		s.logger.Errorf("failed to get current user: %v", err)
 		return nil, err
 	}
 	client, err := s.ClientUsecase.Create(
-		domain.UserID(user.ID), request.Body.Client.Name, request.Body.Client.RedirectUrls,
+		domain.UserID(session.User.ID), request.Body.Client.Name, request.Body.Client.RedirectUrls,
 	)
 	if err != nil {
 		s.logger.Errorf("failed to create client: %v", err)
@@ -55,12 +55,12 @@ func (s *Server) AccountClientsCreateClient(ctx context.Context, request Account
 }
 
 func (s *Server) AccountClientsDeleteClient(ctx context.Context, request AccountClientsDeleteClientRequestObject) (AccountClientsDeleteClientResponseObject, error) {
-	user, err := CurrentUser(ctx)
+	session, err := CurrentUser(ctx)
 	if err != nil {
 		s.logger.Errorf("failed to get current user: %v", err)
 		return nil, err
 	}
-	if err := s.ClientUsecase.Delete(oauth.ClientID(request.Id), domain.UserID(user.ID)); err != nil {
+	if err := s.ClientUsecase.Delete(oauth.ClientID(request.Id), domain.UserID(session.User.ID)); err != nil {
 		s.logger.Errorf("failed to delete client: %v", err)
 		return nil, err
 	}
@@ -68,12 +68,12 @@ func (s *Server) AccountClientsDeleteClient(ctx context.Context, request Account
 }
 
 func (s *Server) AccountClientsListClients(ctx context.Context, request AccountClientsListClientsRequestObject) (AccountClientsListClientsResponseObject, error) {
-	user, err := CurrentUser(ctx)
+	session, err := CurrentUser(ctx)
 	if err != nil {
 		s.logger.Errorf("failed to get current user: %v", err)
 		return nil, err
 	}
-	clients, err := s.ClientUsecase.List(domain.UserID(user.ID))
+	clients, err := s.ClientUsecase.List(domain.UserID(session.User.ID))
 	if err != nil {
 		s.logger.Errorf("failed to list clients: %v", err)
 		return nil, err
@@ -92,12 +92,12 @@ func (s *Server) AccountClientsListClients(ctx context.Context, request AccountC
 }
 
 func (s *Server) AccountClientsGetClient(ctx context.Context, request AccountClientsGetClientRequestObject) (AccountClientsGetClientResponseObject, error) {
-	user, err := CurrentUser(ctx)
+	session, err := CurrentUser(ctx)
 	if err != nil {
 		s.logger.Errorf("failed to get current user: %v", err)
 		return nil, err
 	}
-	client, err := s.ClientUsecase.FindWithUserID(oauth.ClientID(request.Id), user.ID)
+	client, err := s.ClientUsecase.FindWithUserID(oauth.ClientID(request.Id), session.User.ID)
 	if err != nil {
 		s.logger.Errorf("failed to get client: %v", err)
 		return AccountClientsGetClient404JSONResponse{
@@ -114,12 +114,17 @@ func (s *Server) AccountClientsGetClient(ctx context.Context, request AccountCli
 }
 
 func (s *Server) AccountClientsUpdateClient(ctx context.Context, request AccountClientsUpdateClientRequestObject) (AccountClientsUpdateClientResponseObject, error) {
-	user, err := CurrentUser(ctx)
+	session, err := CurrentUser(ctx)
 	if err != nil {
 		s.logger.Errorf("failed to get current user: %v", err)
 		return nil, err
 	}
-	if err := s.ClientUsecase.Update(oauth.ClientID(request.Id), user.ID, request.Body.Client.Name, request.Body.Client.RedirectUrls); err != nil {
+	if err := s.ClientUsecase.Update(
+		oauth.ClientID(request.Id),
+		session.User.ID,
+		request.Body.Client.Name,
+		request.Body.Client.RedirectUrls,
+	); err != nil {
 		s.logger.Errorf("failed to update client: %v", err)
 		return nil, err
 	}
