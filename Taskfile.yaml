@@ -40,16 +40,10 @@ tasks:
       - go generate ./...
       - task lint
 
-  migrate:create:
-    cmds:
-      - cd atlas && atlas migrate diff {{.CLI_ARGS}} --env local
-  migrate:remove:
-    cmds:
-      - cd atlas && atlas migrate rm --env local
-
-  migrate:
+  migrate:up:
     desc: "Migrate database"
     cmds:
+      - cd atlas && atlas migrate diff {{.CLI_ARGS}} --env local
       - cd atlas && atlas migrate apply --env local
       - cd atlas && atlas migrate apply --env test
   migrate:down:
@@ -57,6 +51,7 @@ tasks:
     cmds:
       - cd atlas && atlas migrate down --env local
       - cd atlas && atlas migrate down --env test
+      - cd atlas && atlas migrate rm --env local
 
   dev:
     desc: "Run development server"
