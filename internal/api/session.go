@@ -31,12 +31,12 @@ func (s *Server) SessionInterfaceLogin(ctx context.Context, request SessionInter
 
 // SessionInterfaceLogout implements StrictServerInterface.
 func (s *Server) SessionInterfaceLogout(ctx context.Context, request SessionInterfaceLogoutRequestObject) (SessionInterfaceLogoutResponseObject, error) {
-	user, err := CurrentUser(ctx)
+	session, err := CurrentUser(ctx)
 	if err != nil {
 		s.logger.Errorf("failed to get current user: %v", err)
 		return nil, err
 	}
-	if user == nil {
+	if session == nil {
 		return nil, echo.ErrUnauthorized
 	}
 	cookie, err := Logout(ctx)
@@ -53,15 +53,15 @@ func (s *Server) SessionInterfaceLogout(ctx context.Context, request SessionInte
 
 // SessionInterfaceMe implements StrictServerInterface.
 func (s *Server) SessionInterfaceMe(ctx context.Context, request SessionInterfaceMeRequestObject) (SessionInterfaceMeResponseObject, error) {
-	user, err := CurrentUser(ctx)
+	session, err := CurrentUser(ctx)
 	if err != nil {
 		s.logger.Errorf("failed to get current user: %v", err)
 		return nil, err
 	}
 	return &SessionInterfaceMe200JSONResponse{
 		User: &User{
-			Id:   int64(user.ID),
-			Name: user.Name,
+			Id:   int64(session.User.ID),
+			Name: session.User.Name,
 		},
 	}, nil
 }

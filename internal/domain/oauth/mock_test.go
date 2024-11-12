@@ -24,12 +24,13 @@ func (a *authCodeRepo) Find(value string) (*AuthCode, error) {
 	return nil, domain.ErrRecordNotFound
 }
 
-func (a *authCodeRepo) Create(value string, clientID ClientID, userID domain.UserID, scopes []TypeScope, expiresAt time.Time, redirectURI string) error {
+func (a *authCodeRepo) Create(value string, clientID ClientID, userID domain.UserID, scopes []TypeScope, expiresAt, authTime time.Time, redirectURI string) error {
 	a.authCodes = append(a.authCodes, &AuthCode{
 		Value:       value,
 		ClientID:    clientID,
 		UserID:      userID,
 		ExpiresAt:   expiresAt,
+		AuthTime:    authTime,
 		Used:        false,
 		RedirectURI: redirectURI,
 		Scopes:      scopes,

@@ -169,6 +169,9 @@ table "auth_codes" {
   column "expires_at" {
     type = timestamptz
   }
+  column "auth_time" {
+    type = timestamptz
+  }
   column "created_at" {
     type = timestamptz
   }

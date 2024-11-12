@@ -64,12 +64,13 @@ func (s *TokenService) IssueAccessToken(authCode *AuthCode) (*AccessToken, error
 	}
 	expiresAt := time.Now().Add(ACCESS_TOKEN_TTL)
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{
-		"iss":   s.issuer,
-		"exp":   expiresAt.Unix(),
-		"iat":   time.Now().Unix(),
-		"sub":   fmt.Sprintf("id:%d;name:%s", user.ID, user.Name),
-		"jti":   jti,
-		"scope": strings.Join(strScopes, " "),
+		"iss":       s.issuer,
+		"exp":       expiresAt.Unix(),
+		"iat":       time.Now().Unix(),
+		"sub":       fmt.Sprintf("id:%d;name:%s", user.ID, user.Name),
+		"jti":       jti,
+		"scope":     strings.Join(strScopes, " "),
+		"auth_time": authCode.AuthTime.Unix(),
 	})
 	token.Header["kid"] = s.rsaKeyId
 	raw, err := token.SignedString(s.rsaPrivateKey)
@@ -94,12 +95,13 @@ func (s *TokenService) IssueIDToken(authCode *AuthCode) (*IDToken, error) {
 	}
 	expiresAt := time.Now().Add(ID_TOKEN_TTL)
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{
-		"iss": s.issuer,
-		"sub": fmt.Sprintf("id:%d;name:%s", user.ID, user.Name),
-		"aud": authCode.ClientID,
-		"exp": expiresAt.Unix(),
-		"iat": time.Now().Unix(),
-		"jti": jti,
+		"iss":       s.issuer,
+		"sub":       fmt.Sprintf("id:%d;name:%s", user.ID, user.Name),
+		"aud":       authCode.ClientID,
+		"exp":       expiresAt.Unix(),
+		"iat":       time.Now().Unix(),
+		"jti":       jti,
+		"auth_time": authCode.AuthTime.Unix(),
 	})
 	token.Header["kid"] = s.rsaKeyId
 	raw, err := token.SignedString(s.rsaPrivateKey)

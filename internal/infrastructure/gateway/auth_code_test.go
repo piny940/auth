@@ -19,6 +19,7 @@ func TestAuthCodeCreate(t *testing.T) {
 	authCodeRepo := NewAuthCodeRepo(db)
 	scopes := []oauth.TypeScope{oauth.ScopeOpenID, oauth.ScopeOpenID}
 	expiresAt := time.Now()
+	authTime := time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)
 	clientID := "test_client_id"
 	userID := int64(1)
 	query.User.Create(&model.User{ID: userID, Name: "test", EncryptedPassword: "test"})
@@ -34,6 +35,7 @@ func TestAuthCodeCreate(t *testing.T) {
 		domain.UserID(userID),
 		scopes,
 		expiresAt,
+		authTime,
 		"test_redirect_uri",
 	)
 	if err != nil {
@@ -51,6 +53,9 @@ func TestAuthCodeCreate(t *testing.T) {
 	}
 	if actual.ExpiresAt.Unix() != expiresAt.Unix() { // DBはnano秒精度を持たないため秒単位で比較する
 		t.Errorf("expected ExpiresAt: %s, but got %s", expiresAt, actual.ExpiresAt)
+	}
+	if actual.AuthTime.Unix() != authTime.Unix() {
+		t.Errorf("unexpected actual.AuthTime: %s", actual.AuthTime)
 	}
 	if actual.RedirectURI != "test_redirect_uri" {
 		t.Errorf("unexpected actual.RedirectURI: %s", actual.RedirectURI)
@@ -80,12 +85,13 @@ func TestAuthCodeFind(t *testing.T) {
 	authCodeRepo := NewAuthCodeRepo(db)
 	scopes := []oauth.TypeScope{oauth.ScopeOpenID, oauth.ScopeOpenID}
 	expiresAt := time.Now()
+	authTime := time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)
 	clientID := "test_client_id"
 	userID := int64(1)
 	value := "test_value"
 	query.User.Create(&model.User{ID: userID, Name: "test", EncryptedPassword: "test"})
 	query.Client.Create(&model.Client{ID: clientID, EncryptedSecret: "", UserID: 1})
-	err := authCodeRepo.Create(value, oauth.ClientID(clientID), domain.UserID(userID), scopes, expiresAt, "test_redirect_uri")
+	err := authCodeRepo.Create(value, oauth.ClientID(clientID), domain.UserID(userID), scopes, expiresAt, authTime, "test_redirect_uri")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -102,6 +108,10 @@ func TestAuthCodeFind(t *testing.T) {
 	if authCode.ExpiresAt.Unix() != expiresAt.Unix() { // DBはnano秒精度を持たないため秒単位で比較する
 		t.Errorf("expected ExpiresAt: %s, but got %s", expiresAt, authCode.ExpiresAt)
 	}
+	if authCode.AuthTime.Unix() != authTime.Unix() {
+		t.Errorf("unexpected authCode.AuthTime: %s", authCode.AuthTime)
+	}
+
 	if authCode.RedirectURI != "test_redirect_uri" {
 		t.Errorf("unexpected authCode.RedirectURI: %s", authCode.RedirectURI)
 	}
@@ -135,12 +145,13 @@ func TestAuthCodeUse(t *testing.T) {
 	authCodeRepo := NewAuthCodeRepo(db)
 	scopes := []oauth.TypeScope{oauth.ScopeOpenID, oauth.ScopeOpenID}
 	expiresAt := time.Now()
+	authTime := time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)
 	clientID := "test_client_id"
 	userID := int64(1)
 	value := "test_value"
 	query.User.Create(&model.User{ID: userID, Name: "test", EncryptedPassword: "test"})
 	query.Client.Create(&model.Client{ID: clientID, EncryptedSecret: "", UserID: 1})
-	err := authCodeRepo.Create(value, oauth.ClientID(clientID), domain.UserID(userID), scopes, expiresAt, "test_redirect_uri")
+	err := authCodeRepo.Create(value, oauth.ClientID(clientID), domain.UserID(userID), scopes, expiresAt, authTime, "test_redirect_uri")
 	if err != nil {
 		t.Fatal(err)
 	}

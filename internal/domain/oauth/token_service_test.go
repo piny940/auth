@@ -26,6 +26,7 @@ func TestTokenServiceIssueAccessToken(t *testing.T) {
 	const issuer = "auth.example.com"
 	const userID = 1
 	const userName = "test"
+	authTime := time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)
 	users := []*domain.User{
 		{ID: userID, Name: userName, EncryptedPassword: "test"},
 	}
@@ -36,8 +37,9 @@ func TestTokenServiceIssueAccessToken(t *testing.T) {
 		Issuer:                  issuer,
 	}, &userRepo{Users: users})
 	authCode := &AuthCode{
-		UserID: 1,
-		Scopes: []TypeScope{ScopeOpenID, ScopeOpenID},
+		UserID:   1,
+		Scopes:   []TypeScope{ScopeOpenID, ScopeOpenID},
+		AuthTime: authTime,
 	}
 	token, err := tokenSvc.IssueAccessToken(authCode)
 	if err != nil {
@@ -74,6 +76,9 @@ func TestTokenServiceIssueAccessToken(t *testing.T) {
 	if claims["scope"] != fmt.Sprintf("%s %s", ScopeOpenID, ScopeOpenID) {
 		t.Errorf("scope is invalid")
 	}
+	if int64(claims["auth_time"].(float64)) != authTime.Unix() {
+		t.Errorf("auth_time is invalid. expected: %d, got: %v", authTime.Unix(), claims["auth_time"])
+	}
 	if tok.Header["kid"] != RSA_KEY_ID {
 		t.Errorf("kid is invalid")
 	}
@@ -85,6 +90,7 @@ func TestTokenServiceIssueIDToken(t *testing.T) {
 	const userID = 1
 	const userName = "test"
 	const clientID = "test_client"
+	authTime := time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)
 	users := []*domain.User{
 		{ID: userID, Name: userName, EncryptedPassword: "test"},
 	}
@@ -98,6 +104,7 @@ func TestTokenServiceIssueIDToken(t *testing.T) {
 		UserID:   userID,
 		ClientID: clientID,
 		Scopes:   []TypeScope{ScopeOpenID, ScopeOpenID},
+		AuthTime: authTime,
 	}
 	token, err := tokenSvc.IssueIDToken(authCode)
 	if err != nil {
@@ -133,6 +140,9 @@ func TestTokenServiceIssueIDToken(t *testing.T) {
 	}
 	if len(claims["jti"].(string)) != ACCESS_TOKEN_JTI_LEN {
 		t.Errorf("jti is invalid")
+	}
+	if int64(claims["auth_time"].(float64)) != authTime.Unix() {
+		t.Errorf("auth_time is invalid. expected: %d, got: %v", authTime.Unix(), claims["auth_time"])
 	}
 	if tok.Header["kid"] != RSA_KEY_ID {
 		t.Errorf("kid is invalid")

@@ -38,7 +38,6 @@ func (c *ClientUsecase) Find(id oauth.ClientID) (*oauth.Client, error) {
 	return c.ClientRepo.FindByID(id)
 }
 func (c *ClientUsecase) FindWithUserID(id oauth.ClientID, userID domain.UserID) (*oauth.Client, error) {
-	fmt.Println("api: clientid: ", id)
 	client, err := c.ClientRepo.FindWithUserID(id, userID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to find client: %w", err)

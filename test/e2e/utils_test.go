@@ -49,7 +49,8 @@ func login(t *testing.T, s *httptest.Server, name, password string) (*api.User, 
 	defer resp.Body.Close()
 	cookie := resp.Header.Get("set-cookie")
 	if cookie == "" {
-		t.Fatalf("failed to set cookie")
+		body, _ := io.ReadAll(resp.Body)
+		t.Fatalf("failed to set cookie: %v", string(body))
 	}
 
 	req, err := http.NewRequest(http.MethodGet, s.URL+"/session", nil)

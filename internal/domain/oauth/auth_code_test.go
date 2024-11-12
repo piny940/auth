@@ -12,7 +12,8 @@ func TestAuthCodeServiceIssueAuthCode(t *testing.T) {
 	client := &Client{ID: "client_id"}
 	user := &domain.User{ID: 1}
 	scopes := []TypeScope{"scope1", "scope2"}
-	code1, err := s.IssueAuthCode(client.ID, user.ID, scopes, "redirect_uri")
+	authTime := time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)
+	code1, err := s.IssueAuthCode(client.ID, user.ID, authTime, scopes, "redirect_uri")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -31,7 +32,10 @@ func TestAuthCodeServiceIssueAuthCode(t *testing.T) {
 	if code1.Used {
 		t.Error("want false, got true")
 	}
-	code2, err := s.IssueAuthCode(client.ID, user.ID, scopes, "redirect_uri")
+	if code1.AuthTime != authTime {
+		t.Errorf("want %v, got %v", authTime, code1.AuthTime)
+	}
+	code2, err := s.IssueAuthCode(client.ID, user.ID, authTime, scopes, "redirect_uri")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -42,10 +46,11 @@ func TestAuthCodeServiceIssueAuthCode(t *testing.T) {
 
 func TestAuthCodeVerify(t *testing.T) {
 	now := time.Now()
+	authTime := time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)
 	oauthCodes := []*AuthCode{
-		{"active", "client_id", 1, now.Add(time.Minute), false, "redirect_uri", []TypeScope{"scope1", "scope2"}},
-		{"used", "client_id", 1, now.Add(time.Minute), true, "redirect_uri", []TypeScope{"scope1", "scope2"}},
-		{"expired", "client_id", 1, now.Add(-time.Minute), false, "redirect_uri", []TypeScope{"scope1", "scope2"}},
+		{"active", "client_id", 1, now.Add(time.Minute), false, authTime, "redirect_uri", []TypeScope{"scope1", "scope2"}},
+		{"used", "client_id", 1, now.Add(time.Minute), true, authTime, "redirect_uri", []TypeScope{"scope1", "scope2"}},
+		{"expired", "client_id", 1, now.Add(-time.Minute), false, authTime, "redirect_uri", []TypeScope{"scope1", "scope2"}},
 	}
 	suites := []struct {
 		Name        string

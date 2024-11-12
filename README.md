@@ -16,7 +16,5 @@ OAuth2.0・OpenID Connect プロバイダを作ってみた
 
 ### DB
 
-- マイグレーションファイル作成：`task migrate:create -- {name}`
-  - 作成取り消し：`task migrate:remove`
-- マイグレーション実行：`task migrate`
-  - マイグレーション取り消し：`task migrate:down`
+- マイグレーション実行：`task migrate:up`
+- マイグレーション取り消し：`task migrate:down`

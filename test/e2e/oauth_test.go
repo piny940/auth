@@ -350,6 +350,134 @@ func TestOAuthToken(t *testing.T) {
 	}
 }
 
+func TestAuthTime(t *testing.T) {
+	const userID = 43234
+	const username = "user1"
+	const password = "password"
+	hashed, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		t.Fatalf("failed to hash password: %v", err)
+	}
+	const clientOwnerID = 32478
+	initialUsers := []*model.User{
+		{ID: clientOwnerID, Name: "client owner", EncryptedPassword: "password"},
+		{ID: userID, Name: username, EncryptedPassword: string(hashed)},
+	}
+	const clientID = "client1"
+	const clientSecret = "secret"
+	hashed, err = bcrypt.GenerateFromPassword([]byte(clientSecret), bcrypt.DefaultCost)
+	if err != nil {
+		t.Fatalf("failed to hash password: %v", err)
+	}
+	initialClients := []*model.Client{
+		{ID: clientID, Name: "client1", EncryptedSecret: string(hashed), UserID: clientOwnerID},
+	}
+	const redirectURI = "https://example.com/callback"
+	initialRedirectURIs := []*model.RedirectURI{
+		{ClientID: "client1", URI: redirectURI},
+	}
+
+	suites := []struct {
+		name string
+	}{
+		{"auth time"},
+	}
+	for _, suit := range suites {
+		t.Run(suit.name, func(t *testing.T) {
+			s := newServer(t)
+			defer s.Close()
+			seed(t, initialUsers, initialClients, initialRedirectURIs, nil, nil, nil, nil)
+
+			authTime := time.Now()
+			_, c := login(t, s, username, password)
+
+			time.Sleep(1 * time.Second)
+
+			approveReq := &api.ApprovalsApproveReq{
+				ClientId: clientID,
+				Scope:    string(oauth.ScopeOpenID),
+			}
+			approveRes := authedPost(t, s.URL+"/account/approvals", &c, approveReq)
+			defer approveRes.Body.Close()
+			if approveRes.StatusCode != 204 {
+				t.Fatalf("expected status code: 204, but got %d", approveRes.StatusCode)
+			}
+
+			query := map[string]string{
+				"response_type": "code",
+				"client_id":     clientID,
+				"redirect_uri":  redirectURI,
+				"scope":         string(oauth.ScopeOpenID),
+			}
+			authRes := authedGet(t, s.URL+"/oauth/authorize?"+mapToQuery(t, query), &c)
+			defer authRes.Body.Close()
+			if authRes.StatusCode != 302 {
+				t.Fatalf("expected status code: 302, but got %d", authRes.StatusCode)
+			}
+			redirected, err := url.Parse(authRes.Header.Get("Location"))
+			if err != nil {
+				t.Fatalf("failed to parse url: %v", err)
+			}
+			code := redirected.Query().Get("code")
+			if code == "" {
+				t.Fatalf("code is empty")
+			}
+
+			form := url.Values{}
+			form.Add("grant_type", string(api.AuthorizationCode))
+			form.Add("code", code)
+			form.Add("redirect_uri", redirectURI)
+			form.Add("client_id", clientID)
+			reqBody := strings.NewReader(form.Encode())
+			req, err := http.NewRequest(http.MethodPost, s.URL+"/oauth/token", reqBody)
+			if err != nil {
+				t.Fatalf("failed to create request: %v", err)
+			}
+			req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+			req.SetBasicAuth(clientID, clientSecret)
+
+			tokenRes, err := http.DefaultClient.Do(req)
+			if err != nil {
+				t.Fatalf("failed to send request: %v", err)
+			}
+			defer tokenRes.Body.Close()
+			if tokenRes.StatusCode != 200 {
+				t.Fatalf("expected status code: 200, but got %d", tokenRes.StatusCode)
+			}
+			data := &api.OAuthTokenRes{}
+			fromJSONBody(t, tokenRes.Body, data)
+			{ // test id token's auth_time
+				if data.IdToken == nil {
+					t.Fatalf("id token is empty")
+				}
+				claims := parseToken(t, s, *data.IdToken).(jwt.MapClaims)
+				if claims["auth_time"] == nil {
+					t.Fatalf("auth_time is empty")
+				}
+				actual := time.Unix(int64(claims["auth_time"].(float64)), 0)
+				gap := 1 * time.Second
+				if actual.Before(authTime.Add(-gap)) || actual.After(authTime.Add(gap)) {
+					t.Errorf("unexpected auth_time: %v, expect %v", actual, authTime)
+				}
+			}
+			{ // test access token's auth_time
+				if data.AccessToken == "" {
+					t.Fatalf("access token is empty")
+				}
+				claims := parseToken(t, s, data.AccessToken).(jwt.MapClaims)
+				if claims["auth_time"] == nil {
+					t.Fatalf("auth_time is empty")
+				}
+				actual := time.Unix(int64(claims["auth_time"].(float64)), 0)
+				gap := 1 * time.Second
+				if actual.Before(authTime.Add(-gap)) || actual.After(authTime.Add(gap)) {
+					t.Errorf("unexpected auth_time: %v, expect %v", actual, authTime)
+				}
+			}
+		})
+	}
+}
+
 func TestOAuthJwks(t *testing.T) {
 	s := newServer(t)
 	defer s.Close()
