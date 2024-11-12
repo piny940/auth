@@ -391,7 +391,7 @@ func TestAuthTime(t *testing.T) {
 			authTime := time.Now()
 			_, c := login(t, s, username, password)
 
-			time.Sleep(3 * time.Second)
+			time.Sleep(1 * time.Second)
 
 			approveReq := &api.ApprovalsApproveReq{
 				ClientId: clientID,
