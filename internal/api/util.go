@@ -90,6 +90,9 @@ func CurrentUser(c context.Context) (*usecase.Session, error) {
 		return nil, ErrUnauthorized
 	}
 	authTime, err := GetFromSession(c, SESSION_AUTH_TIME_KEY)
+	if errors.Is(err, ErrNotFoundInSession) {
+		return nil, ErrUnauthorized
+	}
 	if err != nil {
 		return nil, err
 	}
