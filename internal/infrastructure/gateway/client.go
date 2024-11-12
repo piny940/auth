@@ -7,7 +7,6 @@ import (
 	"auth/internal/infrastructure/model"
 	"auth/internal/infrastructure/query"
 	"errors"
-	"fmt"
 	"slices"
 
 	"gorm.io/gorm"
@@ -45,7 +44,6 @@ func (c *ClientRepo) FindByID(id oauth.ClientID) (*oauth.Client, error) {
 }
 
 func (c *ClientRepo) FindWithUserID(id oauth.ClientID, userID domain.UserID) (*oauth.Client, error) {
-	fmt.Println("clientId: ", id, "userid: ", userID)
 	client, err := c.query.Client.Where(
 		c.query.Client.ID.Eq(string(id)), c.query.Client.UserID.Eq(int64(userID)),
 	).First()

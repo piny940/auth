@@ -103,7 +103,6 @@ func CurrentUser(c context.Context) (*usecase.Session, error) {
 	if !ok {
 		return nil, ErrUnauthorized
 	}
-	fmt.Println("authTime", time.Unix(t, 0))
 	return &usecase.Session{User: user, AuthTime: time.Unix(t, 0)}, nil
 }
 
