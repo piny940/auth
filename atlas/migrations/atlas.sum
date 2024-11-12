@@ -1,6 +1,6 @@
-h1:yWTOE+HEQvMxLj0/bWKvlRNwFJOmtzpi3zARGlRPo4Q=
+h1:s+t89fCNZgQD3useTmjjiSGjww31uNB5WczlWunSCY8=
 20241021163015_create_user.sql h1:gCgeqsR5gC7HN2P2UeGrpMNAW5b9zJNSwPtURtwws1A=
 20241021163211_create_client.sql h1:Zk3Nd8qUAnS7v7eIvNaADHK8D0RqIcpkCjUT/Guxt1o=
 20241021163446_create_redirect_uri.sql h1:K1C6Q4XOQKbChyejJ/M7F3JHVOgu6DTweXnnX/fOjJ0=
 20241024084524_create_approvals.sql h1:7ar7WTyOGflX99Dpm5JiiCInKNrvPk+3UM6yHC+o4Sw=
-20241111143106_create_auth_codes.sql h1:3sGLkfQ8AzLI5rtBNqTabvNsas3HInv/ctljNbTFjeY=
+20241112151331_create_auth_codes.sql h1:vyO6e7e3dRnZICvOuhVZgR+VxOP55Q1/b79v0jAsan0=
