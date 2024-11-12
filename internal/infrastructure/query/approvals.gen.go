@@ -32,6 +32,7 @@ func newApproval(db *gorm.DB, opts ...gen.DOOption) approval {
 	_approval.UserID = field.NewInt64(tableName, "user_id")
 	_approval.CreatedAt = field.NewTime(tableName, "created_at")
 	_approval.UpdatedAt = field.NewTime(tableName, "updated_at")
+	_approval.AuthTime = field.NewTime(tableName, "auth_time")
 
 	_approval.fillFieldMap()
 
@@ -47,6 +48,7 @@ type approval struct {
 	UserID    field.Int64
 	CreatedAt field.Time
 	UpdatedAt field.Time
+	AuthTime  field.Time
 
 	fieldMap map[string]field.Expr
 }
@@ -68,6 +70,7 @@ func (a *approval) updateTableName(table string) *approval {
 	a.UserID = field.NewInt64(table, "user_id")
 	a.CreatedAt = field.NewTime(table, "created_at")
 	a.UpdatedAt = field.NewTime(table, "updated_at")
+	a.AuthTime = field.NewTime(table, "auth_time")
 
 	a.fillFieldMap()
 
@@ -84,12 +87,13 @@ func (a *approval) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (a *approval) fillFieldMap() {
-	a.fieldMap = make(map[string]field.Expr, 5)
+	a.fieldMap = make(map[string]field.Expr, 6)
 	a.fieldMap["id"] = a.ID
 	a.fieldMap["client_id"] = a.ClientID
 	a.fieldMap["user_id"] = a.UserID
 	a.fieldMap["created_at"] = a.CreatedAt
 	a.fieldMap["updated_at"] = a.UpdatedAt
+	a.fieldMap["auth_time"] = a.AuthTime
 }
 
 func (a approval) clone(db *gorm.DB) approval {

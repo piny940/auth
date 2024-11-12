@@ -17,6 +17,7 @@ type Approval struct {
 	UserID    int64     `gorm:"column:user_id;not null" json:"user_id"`
 	CreatedAt time.Time `gorm:"column:created_at;not null" json:"created_at"`
 	UpdatedAt time.Time `gorm:"column:updated_at;not null" json:"updated_at"`
+	AuthTime  time.Time `gorm:"column:auth_time;not null" json:"auth_time"`
 }
 
 // TableName Approval's table name

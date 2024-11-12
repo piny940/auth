@@ -96,18 +96,19 @@ func CurrentUser(c context.Context) (*usecase.Session, error) {
 	if authTime == nil {
 		return nil, ErrUnauthorized
 	}
-	t, ok := authTime.(time.Time)
+	t, ok := authTime.(int64)
 	if !ok {
 		return nil, ErrUnauthorized
 	}
-	return &usecase.Session{User: user, AuthTime: t}, nil
+	fmt.Println("authTime", time.Unix(t, 0))
+	return &usecase.Session{User: user, AuthTime: time.Unix(t, 0)}, nil
 }
 
 func Login(c context.Context, user *domain.User) (*http.Cookie, error) {
 	if err := SetToSession(c, SESSION_USER_KEY, user); err != nil {
 		return nil, fmt.Errorf("failed to set user session: %w", err)
 	}
-	if err := SetToSession(c, SESSION_AUTH_TIME_KEY, time.Now()); err != nil {
+	if err := SetToSession(c, SESSION_AUTH_TIME_KEY, time.Now().Unix()); err != nil {
 		return nil, fmt.Errorf("failed to set auth time session: %w", err)
 	}
 	return Save(c)

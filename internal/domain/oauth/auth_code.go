@@ -25,7 +25,7 @@ const (
 
 type IAuthCodeRepo interface {
 	Find(value string) (*AuthCode, error)
-	Create(value string, clientID ClientID, userID domain.UserID, scopes []TypeScope, expiresAt time.Time, redirectURI string) error
+	Create(value string, clientID ClientID, userID domain.UserID, scopes []TypeScope, expiresAt, authTime time.Time, redirectURI string) error
 	Use(value string) error
 }
 
@@ -56,7 +56,7 @@ func (s *AuthCodeService) IssueAuthCode(
 		code += string(letters[int(v)%len(letters)])
 	}
 	expiresAt := time.Now().Add(AUTH_CODE_TTL)
-	if err := s.AuthCodeRepo.Create(code, clientID, userID, scopes, expiresAt, redirectURI); err != nil {
+	if err := s.AuthCodeRepo.Create(code, clientID, userID, scopes, expiresAt, authTime, redirectURI); err != nil {
 		return nil, err
 	}
 	return &AuthCode{

@@ -19,6 +19,7 @@ type AuthCode struct {
 	RedirectURI string    `gorm:"column:redirect_uri;not null" json:"redirect_uri"`
 	Used        bool      `gorm:"column:used;not null" json:"used"`
 	ExpiresAt   time.Time `gorm:"column:expires_at;not null" json:"expires_at"`
+	AuthTime    time.Time `gorm:"column:auth_time;not null" json:"auth_time"`
 	CreatedAt   time.Time `gorm:"column:created_at;not null" json:"created_at"`
 	UpdatedAt   time.Time `gorm:"column:updated_at;not null" json:"updated_at"`
 }

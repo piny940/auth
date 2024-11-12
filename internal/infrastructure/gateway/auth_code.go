@@ -45,12 +45,13 @@ func (a *AuthCodeRepo) Find(value string) (*oauth.AuthCode, error) {
 	return toDomainAuthCode(authCode, mScopes), nil
 }
 
-func (a *AuthCodeRepo) Create(value string, clientID oauth.ClientID, userID domain.UserID, scopes []oauth.TypeScope, expiresAt time.Time, redirectURI string) error {
+func (a *AuthCodeRepo) Create(value string, clientID oauth.ClientID, userID domain.UserID, scopes []oauth.TypeScope, expiresAt, authTime time.Time, redirectURI string) error {
 	err := a.query.AuthCode.Create(&model.AuthCode{
 		Value:       value,
 		ClientID:    string(clientID),
 		UserID:      int64(userID),
 		ExpiresAt:   expiresAt,
+		AuthTime:    authTime,
 		Used:        false,
 		RedirectURI: redirectURI,
 	})
@@ -99,6 +100,7 @@ func toDomainAuthCode(m *model.AuthCode, mScopes []*model.AuthCodeScope) *oauth.
 		ExpiresAt:   m.ExpiresAt,
 		Used:        m.Used,
 		RedirectURI: m.RedirectURI,
+		AuthTime:    m.AuthTime,
 		Scopes:      scopes,
 	}
 }
