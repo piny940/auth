@@ -11,6 +11,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -378,9 +379,12 @@ func TestAuthTime(t *testing.T) {
 	}
 
 	suites := []struct {
-		name string
+		name         string
+		maxAge       int
+		expectAuthOk bool
 	}{
-		{"auth time"},
+		{"auth too old", 1, false},
+		{"auth ok", 2, true},
 	}
 	for _, suit := range suites {
 		t.Run(suit.name, func(t *testing.T) {
@@ -408,6 +412,7 @@ func TestAuthTime(t *testing.T) {
 				"client_id":     clientID,
 				"redirect_uri":  redirectURI,
 				"scope":         string(oauth.ScopeOpenID),
+				"max_age":       strconv.Itoa(suit.maxAge),
 			}
 			authRes := authedGet(t, s.URL+"/oauth/authorize?"+mapToQuery(t, query), &c)
 			defer authRes.Body.Close()
@@ -417,6 +422,15 @@ func TestAuthTime(t *testing.T) {
 			redirected, err := url.Parse(authRes.Header.Get("Location"))
 			if err != nil {
 				t.Fatalf("failed to parse url: %v", err)
+			}
+			if !suit.expectAuthOk {
+				if redirected.Query().Get("code") != "" {
+					t.Errorf("code is not expected to be issued")
+				}
+				if redirected.Query().Get("error") != string(api.OAuthAuthorizeErrUnauthorizedClient) {
+					t.Errorf("unexpected error: %v", redirected.Query().Get("error"))
+				}
+				return
 			}
 			code := redirected.Query().Get("code")
 			if code == "" {

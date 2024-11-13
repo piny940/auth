@@ -7,14 +7,14 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/url"
 	"strings"
 	"time"
 )
 
 func (s *Server) OAuthInterfaceAuthorize(ctx context.Context, request OAuthInterfaceAuthorizeRequestObject) (OAuthInterfaceAuthorizeResponseObject, error) {
-	var this string
-	{
+	thisUrl := func() (string, error) {
 		query := map[string]string{
 			"error":         "unauthorized_client",
 			"redirect_uri":  request.Params.RedirectUri,
@@ -27,12 +27,15 @@ func (s *Server) OAuthInterfaceAuthorize(ctx context.Context, request OAuthInter
 		}
 		authorizeUrl, err := url.JoinPath(s.Conf.ServerUrl, "oauth", "authorize")
 		if err != nil {
-			return nil, err
+			return "", fmt.Errorf("failed to join path: %w", err)
 		}
-		this = authorizeUrl + "?" + toQueryString(query)
+		return authorizeUrl + "?" + toQueryString(query), nil
 	}
-	session, err := CurrentUser(ctx)
-	if errors.Is(err, ErrUnauthorized) {
+	loginUrl := func() (string, error) {
+		this, err := thisUrl()
+		if err != nil {
+			return "", fmt.Errorf("failed to get this url: %w", err)
+		}
 		query := map[string]string{
 			"next":              this,
 			"client_id":         request.Params.ClientId,
@@ -44,15 +47,27 @@ func (s *Server) OAuthInterfaceAuthorize(ctx context.Context, request OAuthInter
 		if request.Params.State != nil {
 			query["state"] = *request.Params.State
 		}
-		url := s.Conf.LoginUrl + "?" + toQueryString(query)
+		return s.Conf.LoginUrl + "?" + toQueryString(query), nil
+	}
+
+	authSession, err := CurrentUser(ctx)
+	if errors.Is(err, ErrUnauthorized) {
+		loginUrl, err := loginUrl()
+		if err != nil {
+			return nil, err
+		}
 		return OAuthInterfaceAuthorize302Response{
 			Headers: OAuthInterfaceAuthorize302ResponseHeaders{
-				Location: url,
+				Location: loginUrl,
 			},
 		}, nil
 	}
 	if err != nil {
 		return nil, err
+	}
+	session := &oauth.Session{
+		User:     authSession.User,
+		AuthTime: authSession.AuthTime,
 	}
 	if request.Params.ResponseType != Code {
 		s.logger.Infof("invalid request type: %v", err)
@@ -62,6 +77,18 @@ func (s *Server) OAuthInterfaceAuthorize(ctx context.Context, request OAuthInter
 		}, nil
 	}
 	code, err := s.OAuthUsecase.RequestCodeAuth(session, toUAuthParams(request.Params))
+	if errors.Is(err, oauth.ErrSessionExpired) {
+		s.logger.Infof("session expired: %v", err)
+		loginUrl, err := loginUrl()
+		if err != nil {
+			return nil, err
+		}
+		return OAuthInterfaceAuthorize302Response{
+			Headers: OAuthInterfaceAuthorize302ResponseHeaders{
+				Location: loginUrl,
+			},
+		}, nil
+	}
 	if errors.Is(err, usecase.ErrClientNotFound) {
 		s.logger.Infof("invalid client id: %v", err)
 		return OAuthInterfaceAuthorize400JSONResponse{
@@ -70,6 +97,10 @@ func (s *Server) OAuthInterfaceAuthorize(ctx context.Context, request OAuthInter
 		}, nil
 	}
 	if errors.Is(err, usecase.ErrNotApproved) {
+		this, err := thisUrl()
+		if err != nil {
+			return nil, err
+		}
 		query := map[string]string{
 			"next":              this,
 			"client_id":         request.Params.ClientId,
@@ -180,12 +211,18 @@ func toUAuthParams(params OAuthInterfaceAuthorizeParams) *usecase.AuthRequest {
 	for _, s := range strScopes {
 		scopes = append(scopes, oauth.TypeScope(s))
 	}
+	var maxAge *time.Duration
+	if params.MaxAge != nil {
+		d := time.Duration(*params.MaxAge) * time.Second
+		maxAge = &d
+	}
 	return &usecase.AuthRequest{
 		ClientID:     oauth.ClientID(params.ClientId),
 		RedirectURI:  params.RedirectUri,
 		ResponseType: usecase.TypeResponseType(params.ResponseType),
 		Scopes:       scopes,
 		State:        params.State,
+		MaxAge:       maxAge,
 	}
 }
 
