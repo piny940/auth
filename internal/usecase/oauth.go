@@ -19,10 +19,6 @@ type OAuthUsecase struct {
 	JWKsService     *oauth.JWKsService
 	ClientRepo      oauth.IClientRepo
 }
-type Session struct {
-	User     *domain.User
-	AuthTime time.Time
-}
 
 func NewOAuthUsecase(
 	authCodeSvc *oauth.AuthCodeService,
@@ -58,9 +54,10 @@ type AuthRequest struct {
 	RedirectURI  string
 	Scopes       []oauth.TypeScope
 	State        *string
+	MaxAge       *time.Duration
 }
 
-func (u *OAuthUsecase) RequestCodeAuth(session *Session, req *AuthRequest) (*oauth.AuthCode, error) {
+func (u *OAuthUsecase) RequestCodeAuth(session *oauth.Session, req *AuthRequest) (*oauth.AuthCode, error) {
 	if req.ResponseType != ResponseTypeCode {
 		return nil, ErrInvalidRequestType
 	}
@@ -73,6 +70,11 @@ func (u *OAuthUsecase) RequestCodeAuth(session *Session, req *AuthRequest) (*oau
 	}
 	if err := oauth.ValidScopes(req.Scopes); err != nil {
 		return nil, fmt.Errorf("invalid scopes: %w", err)
+	}
+	if req.MaxAge != nil {
+		if err := session.Valid(*req.MaxAge); err != nil {
+			return nil, fmt.Errorf("auth session expired: %w", err)
+		}
 	}
 	ok, err := u.ApprovalService.Approved(req.ClientID, session.User.ID, req.Scopes)
 	if err != nil {

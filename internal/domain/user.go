@@ -79,6 +79,6 @@ func passwordStrong(password string) bool {
 var (
 	ErrPasswordConfirmation    = errors.New("password and password confirmation do not match")
 	ErrNameAlreadyUsed         = errors.New("this name is already used")
-	ErrNameLengthNotEnough     = errors.New(fmt.Sprintf("name length must be at least %d", MIN_NAME_LENGTH))
-	ErrPasswordLengthNotEnough = errors.New(fmt.Sprintf("password length must be at least %d", MIN_PASSWORD_LENGTH))
+	ErrNameLengthNotEnough     = fmt.Errorf("name length must be at least %d", MIN_NAME_LENGTH)
+	ErrPasswordLengthNotEnough = fmt.Errorf("password length must be at least %d", MIN_PASSWORD_LENGTH)
 )

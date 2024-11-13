@@ -2,7 +2,6 @@ package api
 
 import (
 	"auth/internal/domain"
-	"auth/internal/usecase"
 	"context"
 	"errors"
 	"fmt"
@@ -31,6 +30,11 @@ type CtxKey string
 const (
 	CtxKeySessionRegistry CtxKey = "sessionRegistry"
 )
+
+type AuthSession struct {
+	User     *domain.User
+	AuthTime time.Time
+}
 
 const SESSION_USER_KEY = "user"
 const SESSION_AUTH_TIME_KEY = "auth_time"
@@ -77,7 +81,7 @@ func Save(c context.Context) (*http.Cookie, error) {
 	return sessions.NewCookie(session.Name(), encoded, sessionsOptions), nil
 }
 
-func CurrentUser(c context.Context) (*usecase.Session, error) {
+func CurrentUser(c context.Context) (*AuthSession, error) {
 	userObj, err := GetFromSession(c, SESSION_USER_KEY)
 	if errors.Is(err, ErrNotFoundInSession) {
 		return nil, ErrUnauthorized
@@ -103,7 +107,7 @@ func CurrentUser(c context.Context) (*usecase.Session, error) {
 	if !ok {
 		return nil, ErrUnauthorized
 	}
-	return &usecase.Session{User: user, AuthTime: time.Unix(t, 0)}, nil
+	return &AuthSession{User: user, AuthTime: time.Unix(t, 0)}, nil
 }
 
 func Login(c context.Context, user *domain.User) (*http.Cookie, error) {
