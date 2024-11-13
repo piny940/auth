@@ -20,7 +20,7 @@ var sessionsOptions = &sessions.Options{
 	HttpOnly: true,
 	SameSite: http.SameSiteLaxMode,
 	// Secure:   true,
-	MaxAge: 60 * 60 * 24 * 7,
+	MaxAge: 60 * 60 * 24 * 3,
 }
 
 var store *sessions.CookieStore
