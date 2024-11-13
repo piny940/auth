@@ -10,7 +10,7 @@ export default function Home() {
     throw new Error("NEXT_PUBLIC_API_URL is not set")
   }
   const redirectUri = process.env.NEXT_PUBLIC_APP_URL + "/callback"
-  const link = `${process.env.NEXT_PUBLIC_API_URL}/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_CLIENT_ID}&response_type=code&redirect_uri=${redirectUri}&scope=openid`
+  const link = `${process.env.NEXT_PUBLIC_API_URL}/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_CLIENT_ID}&response_type=code&redirect_uri=${redirectUri}&scope=openid&max_age=300`
   return (
     <main className="m-20">
       <h1 className="text-4xl font-bold">Example Client</h1>
