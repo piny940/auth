@@ -16,6 +16,7 @@ model AuthorizeReq {
   redirect_uri: string;
   scope: string;
   state?: string;
+  max_age?: int32;
 }
 enum AuthorizeErr {
   invalid_request,
@@ -67,6 +68,7 @@ interface OAuthInterface {
     @query redirect_uri: string,
     @query scope: string,
     @query state?: string,
+    @query max_age?: int32,
   ): {
     @statusCode statusCode: 204;
   } | {

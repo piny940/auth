@@ -229,6 +229,8 @@ export interface components {
       redirect_uri: string
       scope: string
       state?: string
+      /** Format: int32 */
+      max_age?: number
     }
     /** @enum {string} */
     'OAuth.AuthorizeResponseType': 'code'
@@ -554,6 +556,7 @@ export interface operations {
         redirect_uri: string
         scope: string
         state?: string
+        max_age?: number
       }
       header?: never
       path?: never

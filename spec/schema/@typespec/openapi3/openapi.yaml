@@ -265,6 +265,13 @@ paths:
           schema:
             type: string
           explode: false
+        - name: max_age
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+          explode: false
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
@@ -594,6 +601,9 @@ components:
           type: string
         state:
           type: string
+        max_age:
+          type: integer
+          format: int32
     OAuth.AuthorizeResponseType:
       type: string
       enum:
