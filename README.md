@@ -3,7 +3,7 @@
 OAuth2.0・OpenID Connect プロバイダを作ってみた
 
 - ER 図: [docs/er.md](docs/er.md)
-- API スキーマ：<http://piny940.github.io/auth/>
+- API スキーマ：<https://auth-doc.piny940.com/>
 
 ## 開発
 
