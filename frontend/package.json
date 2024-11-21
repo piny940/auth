@@ -12,7 +12,7 @@
     "lint-check": "npx prettier -c . & npx eslint ."
   },
   "dependencies": {
-    "@emotion/react": "^11.13.3",
+    "@emotion/react": "^11.13.5",
     "@emotion/styled": "^11.13.0",
     "@mui/icons-material": "^6.1.7",
     "@mui/material": "^6.1.7",
