@@ -27,6 +27,10 @@ table "users" {
     columns = [column.name]
     unique = true
   }
+  index "email" {
+    columns = [column.email]
+    unique = true
+  }
 }
 table "clients" {
   schema = schema.public
