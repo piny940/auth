@@ -1,8 +1,8 @@
-h1:SBITIO3AI7kVB1NJQRg9VuUaIhUegH2f1g6Ds+UuB3c=
+h1:5aYCq2wr+qJ4ckP53Fj+f/l0JFFOQG7C9ictTx6NvPo=
 20241021163015_create_user.sql h1:gCgeqsR5gC7HN2P2UeGrpMNAW5b9zJNSwPtURtwws1A=
 20241021163211_create_client.sql h1:Zk3Nd8qUAnS7v7eIvNaADHK8D0RqIcpkCjUT/Guxt1o=
 20241021163446_create_redirect_uri.sql h1:K1C6Q4XOQKbChyejJ/M7F3JHVOgu6DTweXnnX/fOjJ0=
 20241024084524_create_approvals.sql h1:7ar7WTyOGflX99Dpm5JiiCInKNrvPk+3UM6yHC+o4Sw=
 20241112154715_create_auth_codes.sql h1:GV/eitiRSfHDM1t1YDxKNKsNsrv35QPNSXDZPPKA+Ns=
-20241126070859_add_users_email_column.sql h1:GYcZ1691ITh4mAs6cCdT1j+s/k9BhzWepZm9J4nUvAw=
-20241126071402_change_user_email_not_null.sql h1:fWsI6cpE4mFmkX8UqsVNmosEwHJ77rk6dOv0pnQdvdg=
+20241126073229_add_column_users_email.sql h1:st3u0Yl/fpXgr3JHyeT2/PHo5gywJY7lxm5l12Wd7u8=
+20241126073311_change_user_email_not_null.sql h1:crChtzneQLh7UXWKfEezju1d8/mAK+JzzfFgOHkq6MM=

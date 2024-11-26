@@ -8,6 +8,10 @@ table "users" {
   column "email" {
     type = varchar(255)
   }
+  column "email_verified" {
+    type = boolean
+    default = false
+  }
   column "name" {
     type = varchar(255)
   }
