@@ -792,7 +792,6 @@ export interface operations {
       /** @description There is no content to send for this request, but the headers may be useful.  */
       204: {
         headers: {
-          'set-cookie': string
           [name: string]: unknown
         }
         content?: never

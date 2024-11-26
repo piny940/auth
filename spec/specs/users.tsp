@@ -30,7 +30,6 @@ interface UsersInterface {
   @summary("Signup")
   signup(@body body: ReqSignup): {
     @statusCode statusCode: 204;
-    @header setCookie: string;
   } | {
     @statusCode statusCode: 400;
     error: SignupErr;
