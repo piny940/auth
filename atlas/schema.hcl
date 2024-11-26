@@ -5,6 +5,9 @@ table "users" {
   column "id" {
     type = bigserial
   }
+  column "email" {
+    type = varchar(255)
+  }
   column "name" {
     type = varchar(255)
   }
