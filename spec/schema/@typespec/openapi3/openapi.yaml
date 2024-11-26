@@ -713,10 +713,13 @@ components:
     Users.ReqSignup:
       type: object
       required:
+        - email
         - name
         - password
         - password_confirmation
       properties:
+        email:
+          type: string
         name:
           type: string
         password:
@@ -728,6 +731,8 @@ components:
       enum:
         - name_length_not_enough
         - name_already_used
+        - email_already_used
+        - email_format_invalid
         - password_length_not_enough
         - password_confirmation_not_match
   securitySchemes:
