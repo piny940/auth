@@ -12,11 +12,13 @@ func TestSignupLogin(t *testing.T) {
 	defer s.Close()
 
 	name := randomString(t, 10)
+	email := randomString(t, 10) + "@example.com"
 	password := randomString(t, 16)
 
 	{ // signup
 		signupInput := &api.UsersReqSignup{
 			Name:                 name,
+			Email:                email,
 			Password:             password,
 			PasswordConfirmation: password,
 		}

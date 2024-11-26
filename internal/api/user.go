@@ -8,7 +8,7 @@ import (
 
 func (s *Server) UsersInterfaceSignup(ctx context.Context, request UsersInterfaceSignupRequestObject) (UsersInterfaceSignupResponseObject, error) {
 	user, err := s.UserUsecase.SignUp(
-		request.Body.Name, request.Body.Password, request.Body.PasswordConfirmation,
+		request.Body.Email, request.Body.Name, request.Body.Password, request.Body.PasswordConfirmation,
 	)
 	if errors.Is(err, domain.ErrNameLengthNotEnough) {
 		s.logger.Infof("name length not enough: %v", err)

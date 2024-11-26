@@ -22,8 +22,8 @@ func TestAuthCodeCreate(t *testing.T) {
 	authTime := time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)
 	clientID := "test_client_id"
 	userID := int64(1)
-	query.User.Create(&model.User{ID: userID, Name: "test", EncryptedPassword: "test"})
-	query.User.Create(&model.User{ID: 2, Name: "test2", EncryptedPassword: "test2"})
+	query.User.Create(&model.User{ID: userID, Email: "test1@example.com", Name: "test", EncryptedPassword: "test"})
+	query.User.Create(&model.User{ID: 2, Email: "test2@example.com", Name: "test2", EncryptedPassword: "test2"})
 	query.Client.Create(&model.Client{
 		ID:              clientID,
 		EncryptedSecret: "",
@@ -89,7 +89,7 @@ func TestAuthCodeFind(t *testing.T) {
 	clientID := "test_client_id"
 	userID := int64(1)
 	value := "test_value"
-	query.User.Create(&model.User{ID: userID, Name: "test", EncryptedPassword: "test"})
+	query.User.Create(&model.User{ID: userID, Email: "test1@example.com", Name: "test", EncryptedPassword: "test"})
 	query.Client.Create(&model.Client{ID: clientID, EncryptedSecret: "", UserID: 1})
 	err := authCodeRepo.Create(value, oauth.ClientID(clientID), domain.UserID(userID), scopes, expiresAt, authTime, "test_redirect_uri")
 	if err != nil {

@@ -14,7 +14,7 @@ func TestUserCreate(t *testing.T) {
 	db := infrastructure.GetDB()
 	query := query.Use(db.Client)
 	userRepo := NewUserRepo(db)
-	err := userRepo.Create("test", "test")
+	err := userRepo.Create("test@example.com", "test", "test")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -25,17 +25,21 @@ func TestUserCreate(t *testing.T) {
 	if user.EncryptedPassword != "test" {
 		t.Errorf("unexpected user.EncryptedPassword: %s", user.EncryptedPassword)
 	}
+	if user.Email != "test@example.com" {
+		t.Errorf("unexpected user.Email: %s", user.Email)
+	}
 }
 
 func TestUserFindById(t *testing.T) {
 	setup(t)
 
+	const email = "test@example.com"
 	const name = "test"
 	const password = "test"
 	db := infrastructure.GetDB()
 	query := query.Use(db.Client)
 	userRepo := NewUserRepo(db)
-	err := userRepo.Create(name, password)
+	err := userRepo.Create(email, name, password)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -69,12 +73,13 @@ func TestUserFindByIdNotFound(t *testing.T) {
 func TestUserFindByName(t *testing.T) {
 	setup(t)
 
+	const email = "test@example.com"
 	const name = "test"
 	const password = "test"
 
 	db := infrastructure.GetDB()
 	userRepo := NewUserRepo(db)
-	err := userRepo.Create(name, password)
+	err := userRepo.Create(email, name, password)
 	if err != nil {
 		t.Fatal(err)
 	}

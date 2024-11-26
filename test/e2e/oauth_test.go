@@ -34,8 +34,8 @@ func TestOAuthAuthorize(t *testing.T) {
 	const client2ID = "client2"
 	const client3ID = "client3"
 	initialUsers := []*model.User{
-		{ID: userID, Name: username, EncryptedPassword: string(hashed)},
-		{ID: clientOwnerID, Name: "client owner", EncryptedPassword: string(hashed)},
+		{ID: userID, Email: "test1@example.com", Name: username, EncryptedPassword: string(hashed)},
+		{ID: clientOwnerID, Email: "test2@example.com", Name: "client owner", EncryptedPassword: string(hashed)},
 	}
 	initialClients := []*model.Client{
 		{ID: client1ID, Name: "approved", EncryptedSecret: "secret", UserID: clientOwnerID},

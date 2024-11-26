@@ -11,6 +11,7 @@ import (
 type UserID int64
 type User struct {
 	ID                UserID
+	Email             string
 	Name              string
 	EncryptedPassword string
 	CreatedAt         time.Time
@@ -19,7 +20,7 @@ type User struct {
 type IUserRepo interface {
 	FindByID(id UserID) (*User, error)
 	FindByName(name string) (*User, error)
-	Create(name, encryptedPassword string) error
+	Create(email, name, encryptedPassword string) error
 }
 
 type UserService struct {
