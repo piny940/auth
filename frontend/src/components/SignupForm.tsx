@@ -9,6 +9,7 @@ import { Controller, useForm } from 'react-hook-form'
 
 type SignupInput = {
   name: string
+  email: string
   password: string
   passwordConfirmation: string
 }
@@ -20,13 +21,19 @@ export const SignupForm = ({ next }: SignupFormProps): JSX.Element => {
   const router = useRouter()
   const query = useSearchParams()
   const { control, handleSubmit, setError } = useForm<SignupInput>({
-    defaultValues: { name: '', password: '', passwordConfirmation: '' },
+    defaultValues: {
+      name: '',
+      email: '',
+      password: '',
+      passwordConfirmation: '',
+    },
   })
   const submit = useCallback(
     async (data: SignupInput) => {
       const { error } = await client.POST('/users/signup', {
         body: {
           name: data.name,
+          email: data.email,
           password: data.password,
           password_confirmation: data.passwordConfirmation,
         },
@@ -34,6 +41,11 @@ export const SignupForm = ({ next }: SignupFormProps): JSX.Element => {
       if (!!error) {
         if (error.error === 'name_already_used') {
           setError('name', { message: error.error })
+        } else if (
+          error.error === 'email_already_used' ||
+          error.error === 'email_format_invalid'
+        ) {
+          setError('email', { message: error.error_description })
         } else if (error.error === 'password_length_not_enough') {
           setError('password', { message: error.error_description })
         } else if (error.error === 'password_confirmation_not_match') {
@@ -66,6 +78,23 @@ export const SignupForm = ({ next }: SignupFormProps): JSX.Element => {
           render={({ field, fieldState }) => (
             <TextField
               label="Name"
+              variant="outlined"
+              fullWidth
+              required
+              error={fieldState.invalid}
+              helperText={fieldState.error?.message}
+              {...field}
+            />
+          )}
+        />
+      </Box>
+      <Box>
+        <Controller
+          name="email"
+          control={control}
+          render={({ field, fieldState }) => (
+            <TextField
+              label="Email"
               variant="outlined"
               fullWidth
               required
