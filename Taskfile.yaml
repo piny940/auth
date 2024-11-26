@@ -5,7 +5,6 @@ tasks:
     desc: "Install dependencies"
     cmds:
       - task install:aqua
-      - task migrate
       - task install:backend
       - task install:frontend
       - task install:spec
