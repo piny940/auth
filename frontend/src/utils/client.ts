@@ -5,7 +5,6 @@ import { fromCookie } from './cookie'
 export const client = createClient<paths>({
   fetch: (input: Request) => {
     const csrf = fromCookie('_csrf')
-    console.log('CSRF:', csrf)
     if (csrf) {
       input.headers.set('X-CSRF-Token', csrf)
     }
