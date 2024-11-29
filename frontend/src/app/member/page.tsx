@@ -14,8 +14,26 @@ export default function Page() {
   return (
     <Box sx={{ '> *': { margin: 2 } }}>
       <Typography mb={4} variant="h4">
-        ダッシュボード - {user.name}
+        ダッシュボード
       </Typography>
+      <Box p={4} borderRadius={2} maxWidth={800} bgcolor={blueGrey[50]}>
+        <Box display="flex" alignItems="center" mb={1}>
+          <Typography mr={3} variant="h5">
+            Account
+          </Typography>
+        </Box>
+        <Box bgcolor="white">
+          <Typography p={2} variant="h6">
+            ID: {user.id}
+          </Typography>
+          <Typography p={2} variant="h6">
+            Name: {user.name}
+          </Typography>
+          <Typography p={2} variant="h6">
+            Email: {user.email}
+          </Typography>
+        </Box>
+      </Box>
       <Box p={4} borderRadius={2} maxWidth={800} bgcolor={blueGrey[50]}>
         <Box display="flex" alignItems="center" mb={1}>
           <Typography mr={3} variant="h5">
