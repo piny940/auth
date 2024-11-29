@@ -21,6 +21,7 @@ var config = &Config{}
 type Config struct {
 	Port         string   `required:"true"`
 	AllowOrigins []string `split_words:"true" required:"true"`
+	CSRFEnabled  bool     `split_words:"true" default:"true"`
 }
 
 func Init() *echo.Echo {
@@ -36,9 +37,11 @@ func Init() *echo.Echo {
 	}
 	e.Use(middleware.Recover())
 	e.Use(middleware.Secure())
-	e.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
-		Skipper: func(c echo.Context) bool { return strings.HasPrefix(c.Path(), "/oauth") },
-	}))
+	if config.CSRFEnabled {
+		e.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
+			Skipper: func(c echo.Context) bool { return strings.HasPrefix(c.Path(), "/oauth") },
+		}))
+	}
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: config.AllowOrigins,
 		AllowHeaders: []string{
