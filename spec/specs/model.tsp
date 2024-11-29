@@ -3,6 +3,7 @@ model User {
   id: int64;
 
   name: string;
+  email: string;
 
   @visibility("create")
   password: string;

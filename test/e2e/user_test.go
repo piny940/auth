@@ -58,4 +58,7 @@ func TestSignupLogin(t *testing.T) {
 	if resBody.User.Name != name {
 		t.Fatalf("unexpected name: %v", resBody.User.Name)
 	}
+	if resBody.User.Email != email {
+		t.Fatalf("unexpected email: %v", resBody.User.Email)
+	}
 }

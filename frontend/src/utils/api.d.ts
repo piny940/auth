@@ -277,6 +277,7 @@ export interface components {
       /** Format: int64 */
       id: number
       name: string
+      email: string
     }
     'Users.ReqSignup': {
       email: string
