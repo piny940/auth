@@ -185,8 +185,8 @@ func TestOAuthToken(t *testing.T) {
 		t.Fatalf("failed to hash password: %v", err)
 	}
 	initialUsers := []*model.User{
-		{ID: userID, Name: username, EncryptedPassword: string(hashed)},
-		{ID: clientOwnerID, Name: "client owner", EncryptedPassword: "password"},
+		{ID: userID, Name: username, Email: "test1@example.com", EncryptedPassword: string(hashed)},
+		{ID: clientOwnerID, Name: "client owner", Email: "test2@example.com", EncryptedPassword: "password"},
 	}
 	const client1ID = "client1"
 	const client2ID = "client2"
@@ -361,8 +361,8 @@ func TestAuthTime(t *testing.T) {
 	}
 	const clientOwnerID = 32478
 	initialUsers := []*model.User{
-		{ID: clientOwnerID, Name: "client owner", EncryptedPassword: "password"},
-		{ID: userID, Name: username, EncryptedPassword: string(hashed)},
+		{ID: clientOwnerID, Name: "client owner", Email: "test1@example.com", EncryptedPassword: "password"},
+		{ID: userID, Name: username, Email: "test2@example.com", EncryptedPassword: string(hashed)},
 	}
 	const clientID = "client1"
 	const clientSecret = "secret"
