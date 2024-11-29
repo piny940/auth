@@ -7,8 +7,8 @@ import (
 )
 
 func (s *Server) UsersInterfaceSignup(ctx context.Context, request UsersInterfaceSignupRequestObject) (UsersInterfaceSignupResponseObject, error) {
-	user, err := s.UserUsecase.SignUp(
-		request.Body.Name, request.Body.Password, request.Body.PasswordConfirmation,
+	_, err := s.UserUsecase.SignUp(
+		request.Body.Email, request.Body.Name, request.Body.Password, request.Body.PasswordConfirmation,
 	)
 	if errors.Is(err, domain.ErrNameLengthNotEnough) {
 		s.logger.Infof("name length not enough: %v", err)
@@ -42,14 +42,5 @@ func (s *Server) UsersInterfaceSignup(ctx context.Context, request UsersInterfac
 		s.logger.Errorf("failed to signup: %v", err)
 		return nil, err
 	}
-	cookie, err := Login(ctx, user)
-	if err != nil {
-		s.logger.Errorf("failed to login: %v", err)
-		return nil, err
-	}
-	return &UsersInterfaceSignup204Response{
-		Headers: UsersInterfaceSignup204ResponseHeaders{
-			SetCookie: cookie.String(),
-		},
-	}, nil
+	return &UsersInterfaceSignup204Response{}, nil
 }

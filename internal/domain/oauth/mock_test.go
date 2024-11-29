@@ -95,7 +95,7 @@ type userRepo struct{ Users []*domain.User }
 var _ domain.IUserRepo = &userRepo{}
 
 // Create implements domain.IUserRepo.
-func (u *userRepo) Create(name string, encryptedPassword string) error {
+func (u *userRepo) Create(email, name, encryptedPassword string) error {
 	panic("unimplemented")
 }
 

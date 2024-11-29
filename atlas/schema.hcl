@@ -5,6 +5,13 @@ table "users" {
   column "id" {
     type = bigserial
   }
+  column "email" {
+    type = varchar(255)
+  }
+  column "email_verified" {
+    type = boolean
+    default = false
+  }
   column "name" {
     type = varchar(255)
   }
@@ -22,6 +29,10 @@ table "users" {
   }
   index "name" {
     columns = [column.name]
+    unique = true
+  }
+  index "email" {
+    columns = [column.email]
     unique = true
   }
 }

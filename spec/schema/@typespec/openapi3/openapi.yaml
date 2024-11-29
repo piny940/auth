@@ -463,11 +463,6 @@ paths:
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
-          headers:
-            set-cookie:
-              required: true
-              schema:
-                type: string
         '400':
           description: The server could not understand the request due to invalid syntax.
           content:
@@ -704,19 +699,25 @@ components:
       required:
         - id
         - name
+        - email
       properties:
         id:
           type: integer
           format: int64
         name:
           type: string
+        email:
+          type: string
     Users.ReqSignup:
       type: object
       required:
+        - email
         - name
         - password
         - password_confirmation
       properties:
+        email:
+          type: string
         name:
           type: string
         password:
@@ -728,6 +729,8 @@ components:
       enum:
         - name_length_not_enough
         - name_already_used
+        - email_already_used
+        - email_format_invalid
         - password_length_not_enough
         - password_confirmation_not_match
   securitySchemes:

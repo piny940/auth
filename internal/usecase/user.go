@@ -34,7 +34,7 @@ func (u *UserUsecase) Login(username, password string) (*domain.User, error) {
 	return user, nil
 }
 
-func (u *UserUsecase) SignUp(username, password, passwordConfirmation string) (*domain.User, error) {
+func (u *UserUsecase) SignUp(email, username, password, passwordConfirmation string) (*domain.User, error) {
 	if err := u.UserService.Validate(username, password, passwordConfirmation); err != nil {
 		return nil, err
 	}
@@ -42,7 +42,7 @@ func (u *UserUsecase) SignUp(username, password, passwordConfirmation string) (*
 	if err != nil {
 		return nil, err
 	}
-	err = u.UserRepo.Create(username, hash)
+	err = u.UserRepo.Create(email, username, hash)
 	if err != nil {
 		return nil, err
 	}

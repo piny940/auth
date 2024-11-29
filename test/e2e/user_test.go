@@ -12,11 +12,13 @@ func TestSignupLogin(t *testing.T) {
 	defer s.Close()
 
 	name := randomString(t, 10)
+	email := randomString(t, 10) + "@example.com"
 	password := randomString(t, 16)
 
 	{ // signup
 		signupInput := &api.UsersReqSignup{
 			Name:                 name,
+			Email:                email,
 			Password:             password,
 			PasswordConfirmation: password,
 		}
@@ -55,5 +57,8 @@ func TestSignupLogin(t *testing.T) {
 	fromJSONBody(t, resp.Body, resBody)
 	if resBody.User.Name != name {
 		t.Fatalf("unexpected name: %v", resBody.User.Name)
+	}
+	if resBody.User.Email != email {
+		t.Fatalf("unexpected email: %v", resBody.User.Email)
 	}
 }

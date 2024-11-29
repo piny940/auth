@@ -47,8 +47,9 @@ func (u *userRepo) FindByName(name string) (*domain.User, error) {
 	return toDomainUser(user), nil
 }
 
-func (u *userRepo) Create(name, encryptedPassword string) error {
+func (u *userRepo) Create(email, name, encryptedPassword string) error {
 	return u.query.User.Create(&model.User{
+		Email:             email,
 		Name:              name,
 		EncryptedPassword: encryptedPassword,
 	})
@@ -58,6 +59,7 @@ func toDomainUser(user *model.User) *domain.User {
 	return &domain.User{
 		ID:                domain.UserID(user.ID),
 		Name:              user.Name,
+		Email:             user.Email,
 		EncryptedPassword: user.EncryptedPassword,
 		CreatedAt:         user.CreatedAt,
 		UpdatedAt:         user.UpdatedAt,

@@ -277,8 +277,10 @@ export interface components {
       /** Format: int64 */
       id: number
       name: string
+      email: string
     }
     'Users.ReqSignup': {
+      email: string
       name: string
       password: string
       password_confirmation: string
@@ -287,6 +289,8 @@ export interface components {
     'Users.SignupErr':
       | 'name_length_not_enough'
       | 'name_already_used'
+      | 'email_already_used'
+      | 'email_format_invalid'
       | 'password_length_not_enough'
       | 'password_confirmation_not_match'
   }
@@ -789,7 +793,6 @@ export interface operations {
       /** @description There is no content to send for this request, but the headers may be useful.  */
       204: {
         headers: {
-          'set-cookie': string
           [name: string]: unknown
         }
         content?: never

@@ -125,8 +125,8 @@ func TestClientFindWithUserID(t *testing.T) {
 	const user2ID = 45329
 	const clientID = "client1"
 	initialUsers := []*model.User{
-		{Name: "test1", ID: userID, EncryptedPassword: "password"},
-		{Name: "test2", ID: user2ID, EncryptedPassword: "password"},
+		{Name: "test1", Email: "test1@example.com", ID: userID, EncryptedPassword: "password"},
+		{Name: "test2", Email: "test2@example.com", ID: user2ID, EncryptedPassword: "password"},
 	}
 	suites := []struct {
 		name     string
@@ -283,9 +283,9 @@ func TestClientList(t *testing.T) {
 	const user2ID = 45329
 	const user3ID = 45330
 	initialUsers := []*model.User{
-		{Name: "with clients", ID: userID, EncryptedPassword: "password"},
-		{Name: "with no client", ID: user2ID, EncryptedPassword: "password"},
-		{Name: "dummy user", ID: user3ID, EncryptedPassword: "password"},
+		{Name: "with clients", ID: userID, Email: "test1@example.com", EncryptedPassword: "password"},
+		{Name: "with no client", ID: user2ID, Email: "test2@example.com", EncryptedPassword: "password"},
+		{Name: "dummy user", ID: user3ID, Email: "test3@example.com", EncryptedPassword: "password"},
 	}
 	initialClients := []*oauth.ClientInput{
 		{ID: "with two uris", UserID: userID, RedirectURIs: []string{"http://example.com", "http://example1.com"}},

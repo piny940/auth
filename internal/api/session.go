@@ -60,8 +60,9 @@ func (s *Server) SessionInterfaceMe(ctx context.Context, request SessionInterfac
 	}
 	return &SessionInterfaceMe200JSONResponse{
 		User: &User{
-			Id:   int64(session.User.ID),
-			Name: session.User.Name,
+			Id:    int64(session.User.ID),
+			Name:  session.User.Name,
+			Email: session.User.Email,
 		},
 	}, nil
 }
