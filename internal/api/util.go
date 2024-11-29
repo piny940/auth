@@ -2,6 +2,7 @@ package api
 
 import (
 	"auth/internal/domain"
+	"auth/internal/domain/oauth"
 	"context"
 	"errors"
 	"fmt"
@@ -142,3 +143,23 @@ var (
 	ErrUnauthorized      = errors.New("unauthorized")
 	ErrNotFoundInSession = errors.New("not found in session")
 )
+
+type ScopeContextKey string
+
+var scopeContextKey ScopeContextKey = "scope"
+
+type AccessScope struct {
+	User   *domain.User
+	Scopes []oauth.TypeScope
+}
+
+func SetScopes(c context.Context, accessScope *AccessScope) context.Context {
+	return context.WithValue(c, scopeContextKey, accessScope)
+}
+func GetScopes(c context.Context) *AccessScope {
+	accessScope, ok := c.Value(scopeContextKey).(*AccessScope)
+	if !ok {
+		return nil
+	}
+	return accessScope
+}
