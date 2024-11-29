@@ -8,28 +8,41 @@ import (
 	"crypto/rsa"
 	"encoding/base64"
 	"fmt"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/getkin/kin-openapi/openapi3filter"
 	"github.com/golang-jwt/jwt"
+	"github.com/gorilla/sessions"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/labstack/echo/v4"
 	middleware "github.com/oapi-codegen/echo-middleware"
 )
 
 type AuthConfig struct {
-	Issuer       string `required:"true" envconfig:"OAUTH_ISSUER"`
-	RsaPublicKey string `required:"true" envconfig:"OAUTH_RSA_PUBLIC_KEY"`
+	Issuer        string `required:"true" envconfig:"OAUTH_ISSUER"`
+	RsaPublicKey  string `required:"true" envconfig:"OAUTH_RSA_PUBLIC_KEY"`
+	SessionSecret string `required:"true" envconfig:"SESSION_SECRET"`
 }
 
 type AuthMiddleware struct {
-	clientRepo oauth.IClientRepo
-	userRepo   domain.IUserRepo
-	issuer     string
-	rsaPubKey  *rsa.PublicKey
+	clientRepo   oauth.IClientRepo
+	userRepo     domain.IUserRepo
+	issuer       string
+	rsaPubKey    *rsa.PublicKey
+	sessionStore *sessions.CookieStore
 }
+
+const sessionName = "auth.middleware"
+const sessionUserKey = "user"
+const sessionAuthTimeKey = "auth_time"
+
+type typeAuthContextKey string
+
+const userContextKey typeAuthContextKey = "current_user"
+const scopesContextKey typeAuthContextKey = "scopes"
 
 func NewAuthMiddleware(clientRepo oauth.IClientRepo, userRepo domain.IUserRepo) *AuthMiddleware {
 	conf := &AuthConfig{}
@@ -41,16 +54,16 @@ func NewAuthMiddleware(clientRepo oauth.IClientRepo, userRepo domain.IUserRepo) 
 	if err != nil {
 		panic(err)
 	}
+	store := sessions.NewCookieStore([]byte(conf.SessionSecret))
 	return &AuthMiddleware{
-		clientRepo: clientRepo,
-		userRepo:   userRepo,
-		issuer:     conf.Issuer,
-		rsaPubKey:  pubKey,
+		clientRepo:   clientRepo,
+		userRepo:     userRepo,
+		issuer:       conf.Issuer,
+		rsaPubKey:    pubKey,
+		sessionStore: store,
 	}
 }
 
-// IMPORTANT: This middleware is dependent on the session middleware.
-// Make sure to add the session middleware before this middleware.
 func (m *AuthMiddleware) Auth() echo.MiddlewareFunc {
 	spec, err := api.GetSwagger()
 	if err != nil {
@@ -66,12 +79,14 @@ func (m *AuthMiddleware) Auth() echo.MiddlewareFunc {
 	return validator
 }
 
+var ErrUnsupportedAuthenticationScheme = fmt.Errorf("unsupported authentication scheme")
+
 func (m *AuthMiddleware) authenticate(ctx context.Context, input *openapi3filter.AuthenticationInput) error {
-	if input.RequestValidationInput.Request.URL.Path == "/oauth/token" && input.SecuritySchemeName == "BasicAuth" {
+	if input.SecuritySchemeName == "BasicAuth" {
 		return m.authClient(ctx, input)
 	}
 	if input.SecuritySchemeName == "BearerAuth" {
-
+		return m.bearerAuth(ctx, input)
 	}
 	if input.SecuritySchemeName != "ApiKeyAuth" || input.SecurityScheme.In != "cookie" {
 		return ErrUnsupportedAuthenticationScheme
@@ -79,8 +94,9 @@ func (m *AuthMiddleware) authenticate(ctx context.Context, input *openapi3filter
 	return m.cookieAuth(ctx, input)
 }
 
-func (m *AuthMiddleware) bearerAuth(c context.Context, input *openapi3filter.AuthenticationInput) error {
-	auth := input.RequestValidationInput.Request.Header.Get("Authorization")
+func (m *AuthMiddleware) bearerAuth(_ context.Context, input *openapi3filter.AuthenticationInput) error {
+	req := input.RequestValidationInput.Request
+	auth := req.Header.Get("Authorization")
 	if !strings.HasPrefix(auth, "Bearer ") {
 		return fmt.Errorf("invalid bearer token")
 	}
@@ -108,13 +124,46 @@ func (m *AuthMiddleware) bearerAuth(c context.Context, input *openapi3filter.Aut
 	if err != nil {
 		return fmt.Errorf("user not found: %w", err)
 	}
-	api.SetScopes(c, &api.AccessScope{User: user})
+	authTime := int64(claims["auth_time"].(float64))
+	authSession := &api.AuthSession{
+		User:     user,
+		AuthTime: time.Unix(authTime, 0),
+	}
+	newReq := req.WithContext(context.WithValue(req.Context(), userContextKey, authSession))
+	*req = *newReq
 	return err
 }
 
 func (m *AuthMiddleware) cookieAuth(_ context.Context, input *openapi3filter.AuthenticationInput) error {
-	_, err := api.CurrentUser(input.RequestValidationInput.Request.Context())
-	return err
+	req := input.RequestValidationInput.Request
+	reg := sessions.GetRegistry(req)
+	session, err := reg.Get(m.sessionStore, sessionName)
+	if err != nil {
+		return fmt.Errorf("failed to get session: %w", err)
+	}
+	userObj, ok := session.Values[sessionUserKey]
+	if !ok {
+		return fmt.Errorf("user not found in session")
+	}
+	user, ok := userObj.(*domain.User)
+	if !ok {
+		return fmt.Errorf("invalid user in session")
+	}
+	authTime, ok := session.Values[sessionAuthTimeKey]
+	if !ok {
+		return fmt.Errorf("auth time not found in session")
+	}
+	t, ok := authTime.(int64)
+	if !ok {
+		return fmt.Errorf("invalid auth time in session")
+	}
+	authSession := &api.AuthSession{
+		User:     user,
+		AuthTime: time.Unix(t, 0),
+	}
+	newReq := req.WithContext(context.WithValue(req.Context(), userContextKey, authSession))
+	*req = *newReq
+	return nil
 }
 
 func (m *AuthMiddleware) authClient(_ context.Context, input *openapi3filter.AuthenticationInput) error {
@@ -137,4 +186,31 @@ func (m *AuthMiddleware) authClient(_ context.Context, input *openapi3filter.Aut
 	return client.SecretCorrect(clientArr[1])
 }
 
-var ErrUnsupportedAuthenticationScheme = fmt.Errorf("unsupported authentication scheme")
+type Auth struct {
+}
+
+var _ api.Auth = &Auth{}
+
+func (a *Auth) CurrentUser(ctx context.Context) (*api.AuthSession, error) {
+	authSession, ok := ctx.Value(userContextKey).(*api.AuthSession)
+	if !ok {
+		return nil, api.ErrUnauthorized
+	}
+	return authSession, nil
+}
+
+func (a *Auth) AccessScopes(ctx context.Context) ([]oauth.TypeScope, error) {
+	scopes, ok := ctx.Value(scopesContextKey).([]oauth.TypeScope)
+	if !ok {
+		return nil, api.ErrUnauthorized
+	}
+	return scopes, nil
+}
+
+func (a *Auth) Login(ctx context.Context, user *domain.User) (*http.Cookie, error) {
+	panic("unimplemented")
+}
+
+func (a *Auth) Logout(ctx context.Context) (*http.Cookie, error) {
+	panic("unimplemented")
+}

@@ -32,11 +32,6 @@ const (
 	CtxKeySessionRegistry CtxKey = "sessionRegistry"
 )
 
-type AuthSession struct {
-	User     *domain.User
-	AuthTime time.Time
-}
-
 const SESSION_USER_KEY = "user"
 const SESSION_AUTH_TIME_KEY = "auth_time"
 
