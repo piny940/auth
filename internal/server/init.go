@@ -2,8 +2,8 @@ package server
 
 import (
 	"auth/internal/api"
+	"auth/internal/api/middleware"
 	"auth/internal/di"
-	myMiddleware "auth/internal/middleware"
 	"context"
 	"os"
 	"os/signal"
@@ -12,7 +12,7 @@ import (
 
 	"github.com/kelseyhightower/envconfig"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	echoMid "github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
 )
 
@@ -30,20 +30,20 @@ func Init() *echo.Echo {
 		panic(err)
 	}
 	e := echo.New()
-	e.Use(middleware.RequestID())
-	e.Use(middleware.Logger())
+	e.Use(echoMid.RequestID())
+	e.Use(echoMid.Logger())
 	if l, ok := e.Logger.(*log.Logger); ok {
 		l.SetLevel(log.INFO)
 	}
-	e.Use(middleware.Recover())
-	e.Use(middleware.Secure())
+	e.Use(echoMid.Recover())
+	e.Use(echoMid.Secure())
 	if config.CSRFEnabled {
-		e.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
+		e.Use(echoMid.CSRFWithConfig(echoMid.CSRFConfig{
 			Skipper:    func(c echo.Context) bool { return strings.HasPrefix(c.Path(), "/oauth") },
 			CookiePath: "/",
 		}))
 	}
-	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+	e.Use(echoMid.CORSWithConfig(echoMid.CORSConfig{
 		AllowOrigins: config.AllowOrigins,
 		AllowHeaders: []string{
 			echo.HeaderOrigin,
@@ -53,7 +53,7 @@ func Init() *echo.Echo {
 		},
 		AllowCredentials: true,
 	}))
-	e.Use(myMiddleware.Session())
+	e.Use(middleware.Session())
 	e.Use(di.NewAuthMiddleware().Auth())
 	server := di.NewServer()
 	api.RegisterHandlers(e, api.NewStrictHandler(server, nil))
