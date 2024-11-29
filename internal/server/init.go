@@ -35,9 +35,15 @@ func Init() *echo.Echo {
 	}
 	e.Use(middleware.Recover())
 	e.Use(middleware.Secure())
+	e.Use(middleware.CSRF())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     config.AllowOrigins,
-		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+		AllowOrigins: config.AllowOrigins,
+		AllowHeaders: []string{
+			echo.HeaderOrigin,
+			echo.HeaderContentType,
+			echo.HeaderAccept,
+			echo.HeaderXCSRFToken,
+		},
 		AllowCredentials: true,
 	}))
 	e.Use(myMiddleware.Session())
