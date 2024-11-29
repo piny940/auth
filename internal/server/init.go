@@ -7,6 +7,7 @@ import (
 	"context"
 	"os"
 	"os/signal"
+	"strings"
 	"time"
 
 	"github.com/kelseyhightower/envconfig"
@@ -35,7 +36,9 @@ func Init() *echo.Echo {
 	}
 	e.Use(middleware.Recover())
 	e.Use(middleware.Secure())
-	e.Use(middleware.CSRF())
+	e.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
+		Skipper: func(c echo.Context) bool { return strings.HasPrefix(c.Path(), "/oauth") },
+	}))
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: config.AllowOrigins,
 		AllowHeaders: []string{
