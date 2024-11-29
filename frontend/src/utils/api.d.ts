@@ -144,6 +144,23 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/resources/userinfo': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get userinfo */
+    get: operations['Userinfo_getUserinfo']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/session': {
     parameters: {
       query?: never
@@ -261,6 +278,11 @@ export interface components {
     PublicClient: {
       id: string
       name: string
+    }
+    'Resources.Userinfo.UserinfoRes': {
+      sub: string
+      name: string
+      email: string
     }
     /** @enum {string} */
     'Session.LoginErr': 'invalid_name_or_password'
@@ -695,6 +717,26 @@ export interface operations {
             error: components['schemas']['OAuth.TokenErr']
             error_description: string
           }
+        }
+      }
+    }
+  }
+  Userinfo_getUserinfo: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description The request has succeeded. */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Resources.Userinfo.UserinfoRes']
         }
       }
     }
