@@ -7,6 +7,7 @@ import (
 	"context"
 	"os"
 	"os/signal"
+	"strings"
 	"time"
 
 	"github.com/kelseyhightower/envconfig"
@@ -20,6 +21,7 @@ var config = &Config{}
 type Config struct {
 	Port         string   `required:"true"`
 	AllowOrigins []string `split_words:"true" required:"true"`
+	CSRFEnabled  bool     `split_words:"true" default:"true"`
 }
 
 func Init() *echo.Echo {
@@ -35,9 +37,20 @@ func Init() *echo.Echo {
 	}
 	e.Use(middleware.Recover())
 	e.Use(middleware.Secure())
+	if config.CSRFEnabled {
+		e.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
+			Skipper:    func(c echo.Context) bool { return strings.HasPrefix(c.Path(), "/oauth") },
+			CookiePath: "/",
+		}))
+	}
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     config.AllowOrigins,
-		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+		AllowOrigins: config.AllowOrigins,
+		AllowHeaders: []string{
+			echo.HeaderOrigin,
+			echo.HeaderContentType,
+			echo.HeaderAccept,
+			echo.HeaderXCSRFToken,
+		},
 		AllowCredentials: true,
 	}))
 	e.Use(myMiddleware.Session())
