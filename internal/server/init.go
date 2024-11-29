@@ -39,7 +39,8 @@ func Init() *echo.Echo {
 	e.Use(middleware.Secure())
 	if config.CSRFEnabled {
 		e.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
-			Skipper: func(c echo.Context) bool { return strings.HasPrefix(c.Path(), "/oauth") },
+			Skipper:    func(c echo.Context) bool { return strings.HasPrefix(c.Path(), "/oauth") },
+			CookiePath: "/",
 		}))
 	}
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
