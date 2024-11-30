@@ -8,7 +8,7 @@ import (
 )
 
 func (s *Server) ApprovalsInterfaceApprove(ctx context.Context, request ApprovalsInterfaceApproveRequestObject) (ApprovalsInterfaceApproveResponseObject, error) {
-	session, err := CurrentUser(ctx)
+	session, err := s.Auth.CurrentUser(ctx)
 	if err != nil {
 		s.logger.Errorf("failed to get current user: %v", err)
 		return nil, err

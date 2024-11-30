@@ -26,7 +26,7 @@ func (s *Server) SessionInterfaceLogin(ctx context.Context, request SessionInter
 
 // SessionInterfaceLogout implements StrictServerInterface.
 func (s *Server) SessionInterfaceLogout(ctx context.Context, request SessionInterfaceLogoutRequestObject) (SessionInterfaceLogoutResponseObject, error) {
-	session, err := CurrentUser(ctx)
+	session, err := s.Auth.CurrentUser(ctx)
 	if err != nil {
 		s.logger.Errorf("failed to get current user: %v", err)
 		return nil, err
@@ -43,7 +43,7 @@ func (s *Server) SessionInterfaceLogout(ctx context.Context, request SessionInte
 
 // SessionInterfaceMe implements StrictServerInterface.
 func (s *Server) SessionInterfaceMe(ctx context.Context, request SessionInterfaceMeRequestObject) (SessionInterfaceMeResponseObject, error) {
-	session, err := CurrentUser(ctx)
+	session, err := s.Auth.CurrentUser(ctx)
 	if err != nil {
 		s.logger.Errorf("failed to get current user: %v", err)
 		return nil, err
