@@ -13,6 +13,7 @@ type Server struct {
 	OAuthUsecase  *usecase.OAuthUsecase
 	ClientUsecase usecase.IClientUsecase
 	Conf          *Config
+	Auth          Auth
 	logger        echo.Logger
 }
 
@@ -24,7 +25,12 @@ type Config struct {
 
 var _ StrictServerInterface = &Server{}
 
-func NewServer(userUsecase *usecase.UserUsecase, oauthUsecase *usecase.OAuthUsecase, clientUC usecase.IClientUsecase) *Server {
+func NewServer(
+	userUsecase *usecase.UserUsecase,
+	oauthUsecase *usecase.OAuthUsecase,
+	clientUC usecase.IClientUsecase,
+	auth Auth,
+) *Server {
 	conf := &Config{}
 	err := envconfig.Process("api", conf)
 	if err != nil {
@@ -35,6 +41,7 @@ func NewServer(userUsecase *usecase.UserUsecase, oauthUsecase *usecase.OAuthUsec
 		OAuthUsecase:  oauthUsecase,
 		ClientUsecase: clientUC,
 		Conf:          conf,
+		Auth:          auth,
 	}
 }
 

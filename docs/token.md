@@ -14,7 +14,8 @@
   "sub": "id:{userID};name:{username}",
   "iat": 0000000000,
   "jti": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", // 32字のランダム文字列
-  "scope": "openid profile email" // スペース区切り
+  "scope": "openid profile email", // スペース区切り
+  "auth_time": 0000000000, // 認証日時
 }
 ```
 
@@ -33,5 +34,6 @@
   "exp": 0000000000,
   "iat": 0000000000, // トークン発行日時
   "jti": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", // 32字のランダム文字列
+  "auth_time": 0000000000, // 認証日時
 }
 ```

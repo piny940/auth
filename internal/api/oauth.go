@@ -50,7 +50,7 @@ func (s *Server) OAuthInterfaceAuthorize(ctx context.Context, request OAuthInter
 		return s.Conf.LoginUrl + "?" + toQueryString(query), nil
 	}
 
-	authSession, err := CurrentUser(ctx)
+	authSession, err := s.Auth.CurrentUser(ctx)
 	if errors.Is(err, ErrUnauthorized) {
 		loginUrl, err := loginUrl()
 		if err != nil {

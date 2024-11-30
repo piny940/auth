@@ -32,7 +32,7 @@ func (s *Server) ClientsInterfaceGetClient(ctx context.Context, request ClientsI
 // ----------------------------------- private api -------------------------------
 
 func (s *Server) AccountClientsCreateClient(ctx context.Context, request AccountClientsCreateClientRequestObject) (AccountClientsCreateClientResponseObject, error) {
-	session, err := CurrentUser(ctx)
+	session, err := s.Auth.CurrentUser(ctx)
 	if err != nil {
 		s.logger.Errorf("failed to get current user: %v", err)
 		return nil, err
@@ -55,7 +55,7 @@ func (s *Server) AccountClientsCreateClient(ctx context.Context, request Account
 }
 
 func (s *Server) AccountClientsDeleteClient(ctx context.Context, request AccountClientsDeleteClientRequestObject) (AccountClientsDeleteClientResponseObject, error) {
-	session, err := CurrentUser(ctx)
+	session, err := s.Auth.CurrentUser(ctx)
 	if err != nil {
 		s.logger.Errorf("failed to get current user: %v", err)
 		return nil, err
@@ -68,7 +68,7 @@ func (s *Server) AccountClientsDeleteClient(ctx context.Context, request Account
 }
 
 func (s *Server) AccountClientsListClients(ctx context.Context, request AccountClientsListClientsRequestObject) (AccountClientsListClientsResponseObject, error) {
-	session, err := CurrentUser(ctx)
+	session, err := s.Auth.CurrentUser(ctx)
 	if err != nil {
 		s.logger.Errorf("failed to get current user: %v", err)
 		return nil, err
@@ -92,7 +92,7 @@ func (s *Server) AccountClientsListClients(ctx context.Context, request AccountC
 }
 
 func (s *Server) AccountClientsGetClient(ctx context.Context, request AccountClientsGetClientRequestObject) (AccountClientsGetClientResponseObject, error) {
-	session, err := CurrentUser(ctx)
+	session, err := s.Auth.CurrentUser(ctx)
 	if err != nil {
 		s.logger.Errorf("failed to get current user: %v", err)
 		return nil, err
@@ -114,7 +114,7 @@ func (s *Server) AccountClientsGetClient(ctx context.Context, request AccountCli
 }
 
 func (s *Server) AccountClientsUpdateClient(ctx context.Context, request AccountClientsUpdateClientRequestObject) (AccountClientsUpdateClientResponseObject, error) {
-	session, err := CurrentUser(ctx)
+	session, err := s.Auth.CurrentUser(ctx)
 	if err != nil {
 		s.logger.Errorf("failed to get current user: %v", err)
 		return nil, err

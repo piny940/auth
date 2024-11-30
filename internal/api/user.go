@@ -42,14 +42,9 @@ func (s *Server) UsersInterfaceSignup(ctx context.Context, request UsersInterfac
 		s.logger.Errorf("failed to signup: %v", err)
 		return nil, err
 	}
-	cookie, err := Login(ctx, user)
-	if err != nil {
+	if err := s.Auth.Login(ctx, user); err != nil {
 		s.logger.Errorf("failed to login: %v", err)
 		return nil, err
 	}
-	return &UsersInterfaceSignup204Response{
-		Headers: UsersInterfaceSignup204ResponseHeaders{
-			SetCookie: cookie.String(),
-		},
-	}, nil
+	return &UsersInterfaceSignup204Response{}, nil
 }

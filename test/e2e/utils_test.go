@@ -2,6 +2,9 @@ package e2e
 
 import (
 	"auth/internal/api"
+	"auth/internal/di"
+	"auth/internal/domain"
+	"auth/internal/domain/oauth"
 	"auth/internal/infrastructure"
 	"auth/internal/infrastructure/model"
 	"auth/internal/infrastructure/query"
@@ -15,6 +18,9 @@ import (
 	"net/url"
 	"strings"
 	"testing"
+	"time"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 func toJSON(t *testing.T, v interface{}) []byte {
@@ -134,6 +140,44 @@ func seed(
 			t.Fatalf("failed to create authCodeScopes: %v", err)
 		}
 	}
+}
+
+func accessToken(t *testing.T, userID domain.UserID, scopes []oauth.TypeScope) string {
+	t.Helper()
+
+	db := infrastructure.GetDB()
+	query := query.Use(db.Client)
+
+	clientOwnerID := domain.UserID(43283)
+	clientOwnerName := randomString(t, 10)
+	password := randomString(t, 16)
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		t.Fatalf("failed to hash password: %v", err)
+	}
+	clientID := randomString(t, 16)
+	query.User.Create(&model.User{
+		ID:                int64(clientOwnerID),
+		Name:              clientOwnerName,
+		EncryptedPassword: string(hash),
+	})
+	query.Client.Create(&model.Client{
+		ID:              clientID,
+		EncryptedSecret: string(hash),
+		Name:            "client",
+		UserID:          int64(clientOwnerID),
+	})
+	tokenSvc := di.NewTokenService()
+	token, err := tokenSvc.IssueAccessToken(&oauth.AuthCode{
+		ClientID: oauth.ClientID(clientID),
+		UserID:   userID,
+		AuthTime: time.Now(),
+		Scopes:   scopes,
+	})
+	if err != nil {
+		t.Fatalf("failed to issue access token: %v", err)
+	}
+	return token.Value
 }
 
 func authedGet(t *testing.T, url string, cookie *string) *http.Response {

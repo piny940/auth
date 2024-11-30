@@ -4,11 +4,11 @@ package di
 
 import (
 	"auth/internal/api"
+	"auth/internal/api/middleware"
 	"auth/internal/domain"
 	"auth/internal/domain/oauth"
 	"auth/internal/infrastructure"
 	"auth/internal/infrastructure/gateway"
-	"auth/internal/middleware"
 	"auth/internal/usecase"
 
 	"github.com/google/wire"
@@ -17,6 +17,9 @@ import (
 func NewServer() *api.Server {
 	wire.Build(
 		api.NewServer,
+		middleware.NewAuth,
+		middleware.NewConfig,
+		middleware.NewEchoContextReg,
 		usecase.NewAuthUsecase,
 		usecase.NewOAuthUsecase,
 		gateway.NewApprovalRepo,
@@ -37,8 +40,27 @@ func NewServer() *api.Server {
 
 func NewAuthMiddleware() *middleware.AuthMiddleware {
 	wire.Build(
+		middleware.NewConfig,
 		middleware.NewAuthMiddleware,
+		gateway.NewUserRepo,
 		gateway.NewClientRepo,
+		infrastructure.GetDB,
+	)
+	return nil
+}
+
+func NewEchoContextMiddleware() *middleware.EchoContextMiddleware {
+	wire.Build(
+		middleware.NewEchoContextMiddleware,
+	)
+	return nil
+}
+
+func NewTokenService() *oauth.TokenService {
+	wire.Build(
+		oauth.NewTokenService,
+		oauth.NewConfig,
+		gateway.NewUserRepo,
 		infrastructure.GetDB,
 	)
 	return nil

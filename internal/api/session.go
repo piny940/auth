@@ -17,21 +17,16 @@ func (s *Server) SessionInterfaceLogin(ctx context.Context, request SessionInter
 			ErrorDescription: "name or password is incorrect",
 		}, nil
 	}
-	cookie, err := Login(ctx, user)
-	if err != nil {
+	if err := s.Auth.Login(ctx, user); err != nil {
 		s.logger.Errorf("failed to login: %v", err)
 		return nil, err
 	}
-	return &SessionInterfaceLogin204Response{
-		Headers: SessionInterfaceLogin204ResponseHeaders{
-			SetCookie: cookie.String(),
-		},
-	}, nil
+	return &SessionInterfaceLogin204Response{}, nil
 }
 
 // SessionInterfaceLogout implements StrictServerInterface.
 func (s *Server) SessionInterfaceLogout(ctx context.Context, request SessionInterfaceLogoutRequestObject) (SessionInterfaceLogoutResponseObject, error) {
-	session, err := CurrentUser(ctx)
+	session, err := s.Auth.CurrentUser(ctx)
 	if err != nil {
 		s.logger.Errorf("failed to get current user: %v", err)
 		return nil, err
@@ -39,21 +34,16 @@ func (s *Server) SessionInterfaceLogout(ctx context.Context, request SessionInte
 	if session == nil {
 		return nil, echo.ErrUnauthorized
 	}
-	cookie, err := Logout(ctx)
-	if err != nil {
+	if err := s.Auth.Logout(ctx); err != nil {
 		s.logger.Errorf("failed to logout: %v", err)
 		return nil, err
 	}
-	return &SessionInterfaceLogout204Response{
-		Headers: SessionInterfaceLogout204ResponseHeaders{
-			SetCookie: cookie.String(),
-		},
-	}, nil
+	return &SessionInterfaceLogout204Response{}, nil
 }
 
 // SessionInterfaceMe implements StrictServerInterface.
 func (s *Server) SessionInterfaceMe(ctx context.Context, request SessionInterfaceMeRequestObject) (SessionInterfaceMeResponseObject, error) {
-	session, err := CurrentUser(ctx)
+	session, err := s.Auth.CurrentUser(ctx)
 	if err != nil {
 		s.logger.Errorf("failed to get current user: %v", err)
 		return nil, err

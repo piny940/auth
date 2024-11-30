@@ -8,13 +8,15 @@ import (
 type TypeScope string
 
 const (
-	ScopeOpenID TypeScope = "openid"
-	ScopeEmail  TypeScope = "email"
+	ScopeOpenID  TypeScope = "openid"
+	ScopeEmail   TypeScope = "email"
+	ScopeProfile TypeScope = "profile"
 )
 
 var AllScopes = []TypeScope{
 	ScopeOpenID,
 	ScopeEmail,
+	ScopeProfile,
 }
 
 func ValidScopes(scopes []TypeScope) error {

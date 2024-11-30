@@ -416,11 +416,6 @@ paths:
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
-          headers:
-            set-cookie:
-              required: true
-              schema:
-                type: string
         '400':
           description: The server could not understand the request due to invalid syntax.
           content:
@@ -448,13 +443,22 @@ paths:
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
-          headers:
-            set-cookie:
-              required: true
-              schema:
-                type: string
       security:
         - ApiKeyAuth: []
+  /userinfo:
+    get:
+      operationId: Userinfo_getUserinfo
+      summary: Get userinfo
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Userinfo.UserinfoRes'
+      security:
+        - BearerAuth: []
   /users/signup:
     post:
       operationId: UsersInterface_signup
@@ -710,6 +714,15 @@ components:
           format: int64
         name:
           type: string
+    Userinfo.UserinfoRes:
+      type: object
+      required:
+        - sub
+      properties:
+        sub:
+          type: string
+        name:
+          type: string
     Users.ReqSignup:
       type: object
       required:
@@ -738,6 +751,9 @@ components:
     BasicAuth:
       type: http
       scheme: basic
+    BearerAuth:
+      type: http
+      scheme: bearer
 servers:
   - url: https://auth.piny940.com/api/v1
     description: Auth Server
