@@ -143,7 +143,7 @@ func (m *AuthMiddleware) cookieAuth(_ context.Context, input *openapi3filter.Aut
 func (m *AuthMiddleware) authClient(_ context.Context, input *openapi3filter.AuthenticationInput) error {
 	auth := input.RequestValidationInput.Request.Header.Get("Authorization")
 	if !strings.HasPrefix(auth, "Basic ") {
-		return fmt.Errorf("invalid basic auth header")
+		return fmt.Errorf("invalid basic auth header. expected: Basic <base64>")
 	}
 	decoded, err := base64.StdEncoding.DecodeString(auth[6:])
 	if err != nil {
@@ -151,7 +151,7 @@ func (m *AuthMiddleware) authClient(_ context.Context, input *openapi3filter.Aut
 	}
 	clientArr := strings.Split(string(decoded), ":")
 	if len(clientArr) != 2 {
-		return fmt.Errorf("invalid basic auth header")
+		return fmt.Errorf("invalid basic auth header. expected: Basic <client_id>:<client_secret>")
 	}
 	client, err := m.clientRepo.FindByID(oauth.ClientID(clientArr[0]))
 	if err != nil {
