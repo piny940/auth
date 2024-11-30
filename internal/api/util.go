@@ -40,3 +40,7 @@ var (
 	ErrUnauthorized      = errors.New("unauthorized")
 	ErrNotFoundInSession = errors.New("not found in session")
 )
+
+func ptr[T any](v T) *T {
+	return &v
+}

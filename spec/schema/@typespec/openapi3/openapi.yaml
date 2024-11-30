@@ -395,20 +395,6 @@ paths:
               $ref: '#/components/schemas/OAuth.TokenReq'
       security:
         - BasicAuth: []
-  /resources/userinfo:
-    get:
-      operationId: Userinfo_getUserinfo
-      summary: Get userinfo
-      parameters: []
-      responses:
-        '200':
-          description: The request has succeeded.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Userinfo.UserinfoRes'
-      security:
-        - BearerAuth: []
   /session:
     get:
       operationId: SessionInterface_me
@@ -459,6 +445,20 @@ paths:
           description: 'There is no content to send for this request, but the headers may be useful. '
       security:
         - ApiKeyAuth: []
+  /userinfo:
+    get:
+      operationId: Userinfo_getUserinfo
+      summary: Get userinfo
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Userinfo.UserinfoRes'
+      security:
+        - BearerAuth: []
   /users/signup:
     post:
       operationId: UsersInterface_signup
@@ -722,8 +722,6 @@ components:
         sub:
           type: string
         name:
-          type: string
-        email:
           type: string
     Users.ReqSignup:
       type: object

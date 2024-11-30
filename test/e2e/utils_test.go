@@ -172,15 +172,12 @@ func accessToken(t *testing.T, userID domain.UserID, scopes []oauth.TypeScope) s
 		ClientID: oauth.ClientID(clientID),
 		UserID:   userID,
 		AuthTime: time.Now(),
+		Scopes:   scopes,
 	})
 	if err != nil {
 		t.Fatalf("failed to issue access token: %v", err)
 	}
-	v, err := json.Marshal(token)
-	if err != nil {
-		t.Fatalf("failed to marshal json: %v", err)
-	}
-	return string(v)
+	return token.Value
 }
 
 func authedGet(t *testing.T, url string, cookie *string) *http.Response {

@@ -10,10 +10,9 @@ namespace Auth.Userinfo;
 model UserinfoRes {
   sub: string;
   name?: string;
-  email?: string;
 }
 
-@route("/resources/userinfo")
+@route("/userinfo")
 @useAuth(BearerAuth)
 interface Userinfo {
   @route("")

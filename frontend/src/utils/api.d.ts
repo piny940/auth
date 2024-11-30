@@ -144,23 +144,6 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/resources/userinfo': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** Get userinfo */
-    get: operations['Userinfo_getUserinfo']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
   '/session': {
     parameters: {
       query?: never
@@ -175,6 +158,23 @@ export interface paths {
     post: operations['SessionInterface_login']
     /** Logout */
     delete: operations['SessionInterface_logout']
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/userinfo': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get userinfo */
+    get: operations['Userinfo_getUserinfo']
+    put?: never
+    post?: never
+    delete?: never
     options?: never
     head?: never
     patch?: never
@@ -298,7 +298,6 @@ export interface components {
     'Userinfo.UserinfoRes': {
       sub: string
       name?: string
-      email?: string
     }
     'Users.ReqSignup': {
       name: string
@@ -721,26 +720,6 @@ export interface operations {
       }
     }
   }
-  Userinfo_getUserinfo: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description The request has succeeded. */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['Userinfo.UserinfoRes']
-        }
-      }
-    }
-  }
   SessionInterface_me: {
     parameters: {
       query?: never
@@ -810,6 +789,26 @@ export interface operations {
           [name: string]: unknown
         }
         content?: never
+      }
+    }
+  }
+  Userinfo_getUserinfo: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description The request has succeeded. */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Userinfo.UserinfoRes']
+        }
       }
     }
   }
