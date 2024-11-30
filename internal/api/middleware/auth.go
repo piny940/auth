@@ -8,6 +8,7 @@ import (
 	"crypto/rsa"
 	"encoding/base64"
 	"fmt"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -130,30 +131,9 @@ func (m *AuthMiddleware) bearerAuth(_ context.Context, input *openapi3filter.Aut
 
 func (m *AuthMiddleware) cookieAuth(_ context.Context, input *openapi3filter.AuthenticationInput) error {
 	req := input.RequestValidationInput.Request
-	reg := sessions.GetRegistry(req)
-	session, err := reg.Get(m.sessionStore, sessionName)
+	authSession, err := authSessionFromCookie(req, m.sessionStore)
 	if err != nil {
-		return fmt.Errorf("failed to get session: %w", err)
-	}
-	userObj, ok := session.Values[sessionUserKey]
-	if !ok {
-		return fmt.Errorf("user not found in session")
-	}
-	user, ok := userObj.(*domain.User)
-	if !ok {
-		return fmt.Errorf("invalid user in session")
-	}
-	authTime, ok := session.Values[sessionAuthTimeKey]
-	if !ok {
-		return fmt.Errorf("auth time not found in session")
-	}
-	t, ok := authTime.(int64)
-	if !ok {
-		return fmt.Errorf("invalid auth time in session")
-	}
-	authSession := &api.AuthSession{
-		User:     user,
-		AuthTime: time.Unix(t, 0),
+		return fmt.Errorf("failed to get auth session from cookie: %w", err)
 	}
 	newReq := req.WithContext(context.WithValue(req.Context(), userContextKey, authSession))
 	*req = *newReq
@@ -196,8 +176,17 @@ func NewAuth(conf *Config, echoContextReg *EchoContextReg) api.Auth {
 
 func (a *Auth) CurrentUser(ctx context.Context) (*api.AuthSession, error) {
 	authSession, ok := ctx.Value(userContextKey).(*api.AuthSession)
-	if !ok {
-		return nil, api.ErrUnauthorized
+	if ok {
+		return authSession, nil
+	}
+	echoCtx, err := a.echoContextReg.Context(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get echo context: %w", err)
+	}
+	req := echoCtx.Request()
+	authSession, err = authSessionFromCookie(req, a.store)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get auth session from cookie: %w", err)
 	}
 	return authSession, nil
 }
@@ -238,10 +227,38 @@ func (a *Auth) Logout(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("failed to get session: %w", err)
 	}
-	session.Values[sessionUserKey] = nil
-	session.Values[sessionAuthTimeKey] = nil
+	delete(session.Values, sessionUserKey)
+	delete(session.Values, sessionAuthTimeKey)
 	if err := session.Save(echoCtx.Request(), echoCtx.Response().Writer); err != nil {
 		return fmt.Errorf("failed to save session: %w", err)
 	}
 	return nil
+}
+
+func authSessionFromCookie(req *http.Request, store *sessions.CookieStore) (*api.AuthSession, error) {
+	reg := sessions.GetRegistry(req)
+	session, err := reg.Get(store, sessionName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get session: %w", err)
+	}
+	userObj, ok := session.Values[sessionUserKey]
+	if !ok {
+		return nil, api.ErrUnauthorized
+	}
+	user, ok := userObj.(*domain.User)
+	if !ok {
+		return nil, fmt.Errorf("failed to get user from session")
+	}
+	authTime, ok := session.Values[sessionAuthTimeKey]
+	if !ok {
+		return nil, api.ErrUnauthorized
+	}
+	t, ok := authTime.(int64)
+	if !ok {
+		return nil, fmt.Errorf("failed to get auth time from session")
+	}
+	return &api.AuthSession{
+		User:     user,
+		AuthTime: time.Unix(t, 0),
+	}, nil
 }
