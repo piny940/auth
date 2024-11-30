@@ -8,11 +8,11 @@ package di
 
 import (
 	"auth/internal/api"
+	"auth/internal/api/middleware"
 	"auth/internal/domain"
 	"auth/internal/domain/oauth"
 	"auth/internal/infrastructure"
 	"auth/internal/infrastructure/gateway"
-	"auth/internal/middleware"
 	"auth/internal/usecase"
 )
 
@@ -33,13 +33,23 @@ func NewServer() *api.Server {
 	iClientRepo := gateway.NewClientRepo(db)
 	oAuthUsecase := usecase.NewOAuthUsecase(authCodeService, jwKsService, approvalService, iApprovalRepo, tokenService, iClientRepo)
 	iClientUsecase := usecase.NewClientUsecase(iClientRepo)
-	server := api.NewServer(userUsecase, oAuthUsecase, iClientUsecase)
+	middlewareConfig := middleware.NewConfig()
+	echoContextReg := middleware.NewEchoContextReg()
+	auth := middleware.NewAuth(middlewareConfig, echoContextReg)
+	server := api.NewServer(userUsecase, oAuthUsecase, iClientUsecase, auth)
 	return server
 }
 
 func NewAuthMiddleware() *middleware.AuthMiddleware {
+	config := middleware.NewConfig()
 	db := infrastructure.GetDB()
 	iClientRepo := gateway.NewClientRepo(db)
-	authMiddleware := middleware.NewAuthMiddleware(iClientRepo)
+	iUserRepo := gateway.NewUserRepo(db)
+	authMiddleware := middleware.NewAuthMiddleware(config, iClientRepo, iUserRepo)
 	return authMiddleware
+}
+
+func NewEchoContextMiddleware() *middleware.EchoContextMiddleware {
+	echoContextMiddleware := middleware.NewEchoContextMiddleware()
+	return echoContextMiddleware
 }

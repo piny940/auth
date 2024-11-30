@@ -8,7 +8,6 @@ import (
 	"crypto/rsa"
 	"encoding/base64"
 	"fmt"
-	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -16,16 +15,9 @@ import (
 	"github.com/getkin/kin-openapi/openapi3filter"
 	"github.com/golang-jwt/jwt"
 	"github.com/gorilla/sessions"
-	"github.com/kelseyhightower/envconfig"
 	"github.com/labstack/echo/v4"
 	middleware "github.com/oapi-codegen/echo-middleware"
 )
-
-type AuthConfig struct {
-	Issuer        string `required:"true" envconfig:"OAUTH_ISSUER"`
-	RsaPublicKey  string `required:"true" envconfig:"OAUTH_RSA_PUBLIC_KEY"`
-	SessionSecret string `required:"true" envconfig:"SESSION_SECRET"`
-}
 
 type AuthMiddleware struct {
 	clientRepo   oauth.IClientRepo
@@ -44,12 +36,7 @@ type typeAuthContextKey string
 const userContextKey typeAuthContextKey = "current_user"
 const scopesContextKey typeAuthContextKey = "scopes"
 
-func NewAuthMiddleware(clientRepo oauth.IClientRepo, userRepo domain.IUserRepo) *AuthMiddleware {
-	conf := &AuthConfig{}
-	err := envconfig.Process("auth", conf)
-	if err != nil {
-		panic(err)
-	}
+func NewAuthMiddleware(conf *Config, clientRepo oauth.IClientRepo, userRepo domain.IUserRepo) *AuthMiddleware {
 	pubKey, err := jwt.ParseRSAPublicKeyFromPEM([]byte(conf.RsaPublicKey))
 	if err != nil {
 		panic(err)
@@ -187,9 +174,18 @@ func (m *AuthMiddleware) authClient(_ context.Context, input *openapi3filter.Aut
 }
 
 type Auth struct {
+	echoContextReg *EchoContextReg
+	store          *sessions.CookieStore
 }
 
 var _ api.Auth = &Auth{}
+
+func NewAuth(conf *Config, echoContextReg *EchoContextReg) api.Auth {
+	return &Auth{
+		echoContextReg: echoContextReg,
+		store:          sessions.NewCookieStore([]byte(conf.SessionSecret)),
+	}
+}
 
 func (a *Auth) CurrentUser(ctx context.Context) (*api.AuthSession, error) {
 	authSession, ok := ctx.Value(userContextKey).(*api.AuthSession)
@@ -207,10 +203,38 @@ func (a *Auth) AccessScopes(ctx context.Context) ([]oauth.TypeScope, error) {
 	return scopes, nil
 }
 
-func (a *Auth) Login(ctx context.Context, user *domain.User) (*http.Cookie, error) {
-	panic("unimplemented")
+func (a *Auth) Login(ctx context.Context, user *domain.User) error {
+	echoCtx, err := a.echoContextReg.Context(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to get echo context: %w", err)
+	}
+	reg := sessions.GetRegistry(echoCtx.Request())
+	session, err := reg.Get(a.store, sessionName)
+	if err != nil {
+		return fmt.Errorf("failed to get session: %w", err)
+	}
+	session.Values[sessionUserKey] = user
+	session.Values[sessionAuthTimeKey] = time.Now().Unix()
+	if err := session.Save(echoCtx.Request(), echoCtx.Response().Writer); err != nil {
+		return fmt.Errorf("failed to save session: %w", err)
+	}
+	return nil
 }
 
-func (a *Auth) Logout(ctx context.Context) (*http.Cookie, error) {
-	panic("unimplemented")
+func (a *Auth) Logout(ctx context.Context) error {
+	echoCtx, err := a.echoContextReg.Context(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to get echo context: %w", err)
+	}
+	reg := sessions.GetRegistry(echoCtx.Request())
+	session, err := reg.Get(a.store, sessionName)
+	if err != nil {
+		return fmt.Errorf("failed to get session: %w", err)
+	}
+	session.Values[sessionUserKey] = nil
+	session.Values[sessionAuthTimeKey] = nil
+	if err := session.Save(echoCtx.Request(), echoCtx.Response().Writer); err != nil {
+		return fmt.Errorf("failed to save session: %w", err)
+	}
+	return nil
 }

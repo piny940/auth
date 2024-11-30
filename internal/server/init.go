@@ -53,8 +53,8 @@ func Init() *echo.Echo {
 		},
 		AllowCredentials: true,
 	}))
-	e.Use(middleware.Session())
 	e.Use(di.NewAuthMiddleware().Auth())
+	e.Use(middleware.NewEchoContextMiddleware().Context())
 	server := di.NewServer()
 	api.RegisterHandlers(e, api.NewStrictHandler(server, nil))
 	server.SetLogger(e.Logger)

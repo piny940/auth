@@ -13,7 +13,24 @@ import (
 
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
+	"github.com/labstack/echo/v4"
 )
+
+type AuthSession struct {
+	User     *domain.User
+	AuthTime time.Time
+}
+
+type Auth interface {
+	CurrentUser(ctx context.Context) (*AuthSession, error)
+	Login(ctx context.Context, user *domain.User) error
+	Logout(ctx context.Context) error
+	AccessScopes(ctx context.Context) ([]oauth.TypeScope, error)
+}
+
+type EchoContextReg interface {
+	Context(c context.Context) (echo.Context, error)
+}
 
 const SESSION_NAME = "auth"
 

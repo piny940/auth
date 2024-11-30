@@ -36,7 +36,6 @@ interface SessionInterface {
   @summary("Login")
   login(@body body: LoginReq): {
     @statusCode statusCode: 204;
-    @header setCookie: string;
   } | {
     @statusCode statusCode: 400;
     error: LoginErr;
@@ -49,6 +48,5 @@ interface SessionInterface {
   @useAuth(ApiKeyAuth<ApiKeyLocation.cookie, "auth">)
   logout(): {
     @statusCode statusCode: 204;
-    @header setCookie: string;
   };
 }

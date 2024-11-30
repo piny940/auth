@@ -430,11 +430,6 @@ paths:
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
-          headers:
-            set-cookie:
-              required: true
-              schema:
-                type: string
         '400':
           description: The server could not understand the request due to invalid syntax.
           content:
@@ -462,11 +457,6 @@ paths:
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
-          headers:
-            set-cookie:
-              required: true
-              schema:
-                type: string
       security:
         - ApiKeyAuth: []
   /users/signup:
