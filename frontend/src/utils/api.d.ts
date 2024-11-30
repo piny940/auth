@@ -279,11 +279,6 @@ export interface components {
       id: string
       name: string
     }
-    'Resources.Userinfo.UserinfoRes': {
-      sub: string
-      name: string
-      email: string
-    }
     /** @enum {string} */
     'Session.LoginErr': 'invalid_name_or_password'
     'Session.LoginReq': {
@@ -299,6 +294,11 @@ export interface components {
       /** Format: int64 */
       id: number
       name: string
+    }
+    'Userinfo.UserinfoRes': {
+      sub: string
+      name?: string
+      email?: string
     }
     'Users.ReqSignup': {
       name: string
@@ -736,7 +736,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['Resources.Userinfo.UserinfoRes']
+          'application/json': components['schemas']['Userinfo.UserinfoRes']
         }
       }
     }

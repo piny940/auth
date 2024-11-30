@@ -116,7 +116,14 @@ func (m *AuthMiddleware) bearerAuth(_ context.Context, input *openapi3filter.Aut
 		User:     user,
 		AuthTime: time.Unix(authTime, 0),
 	}
-	newReq := req.WithContext(context.WithValue(req.Context(), userContextKey, authSession))
+	scopesStr := strings.Split(claims["scope"].(string), " ")
+	scopes := make([]oauth.TypeScope, 0, len(scopesStr))
+	for _, s := range scopesStr {
+		scopes = append(scopes, oauth.TypeScope(s))
+	}
+	newCtx := context.WithValue(req.Context(), userContextKey, authSession)
+	newCtx = context.WithValue(newCtx, scopesContextKey, scopes)
+	newReq := req.WithContext(newCtx)
 	*req = *newReq
 	return err
 }

@@ -406,7 +406,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Resources.Userinfo.UserinfoRes'
+                $ref: '#/components/schemas/Userinfo.UserinfoRes'
       security:
         - BearerAuth: []
   /session:
@@ -675,19 +675,6 @@ components:
           type: string
         name:
           type: string
-    Resources.Userinfo.UserinfoRes:
-      type: object
-      required:
-        - sub
-        - name
-        - email
-      properties:
-        sub:
-          type: string
-        name:
-          type: string
-        email:
-          type: string
     Session.LoginErr:
       type: string
       enum:
@@ -726,6 +713,17 @@ components:
           type: integer
           format: int64
         name:
+          type: string
+    Userinfo.UserinfoRes:
+      type: object
+      required:
+        - sub
+      properties:
+        sub:
+          type: string
+        name:
+          type: string
+        email:
           type: string
     Users.ReqSignup:
       type: object

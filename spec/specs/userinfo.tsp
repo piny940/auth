@@ -5,12 +5,12 @@ import "./model.tsp";
 using TypeSpec.Http;
 using TypeSpec.Rest;
 
-namespace Auth.Resources.Userinfo;
+namespace Auth.Userinfo;
 
 model UserinfoRes {
   sub: string;
-  name: string;
-  email: string;
+  name?: string;
+  email?: string;
 }
 
 @route("/resources/userinfo")

@@ -53,3 +53,11 @@ func NewEchoContextMiddleware() *middleware.EchoContextMiddleware {
 	echoContextMiddleware := middleware.NewEchoContextMiddleware()
 	return echoContextMiddleware
 }
+
+func NewTokenService() *oauth.TokenService {
+	config := oauth.NewConfig()
+	db := infrastructure.GetDB()
+	iUserRepo := gateway.NewUserRepo(db)
+	tokenService := oauth.NewTokenService(config, iUserRepo)
+	return tokenService
+}

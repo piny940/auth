@@ -55,3 +55,13 @@ func NewEchoContextMiddleware() *middleware.EchoContextMiddleware {
 	)
 	return nil
 }
+
+func NewTokenService() *oauth.TokenService {
+	wire.Build(
+		oauth.NewTokenService,
+		oauth.NewConfig,
+		gateway.NewUserRepo,
+		infrastructure.GetDB,
+	)
+	return nil
+}

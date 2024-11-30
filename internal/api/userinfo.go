@@ -1,7 +1,11 @@
 package api
 
-import "context"
+import (
+	"context"
+	"fmt"
+)
 
 func (s *Server) UserinfoGetUserinfo(ctx context.Context, request UserinfoGetUserinfoRequestObject) (UserinfoGetUserinfoResponseObject, error) {
-	panic("unimplemented")
+	fmt.Println(s.Auth.AccessScopes(ctx))
+	return nil, nil
 }
