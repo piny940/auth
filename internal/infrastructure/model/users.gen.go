@@ -17,8 +17,6 @@ type User struct {
 	EncryptedPassword string    `gorm:"column:encrypted_password;not null" json:"encrypted_password"`
 	CreatedAt         time.Time `gorm:"column:created_at;not null" json:"created_at"`
 	UpdatedAt         time.Time `gorm:"column:updated_at;not null" json:"updated_at"`
-	Email             string    `gorm:"column:email;not null" json:"email"`
-	EmailVerified     bool      `gorm:"column:email_verified;not null" json:"email_verified"`
 }
 
 // TableName User's table name
