@@ -201,17 +201,17 @@ export interface paths {
 export type webhooks = Record<string, never>
 export interface components {
   schemas: {
-    'AccountClients.CreateClientReq': {
+    'Account.Clients.CreateClientReq': {
       name: string
       redirect_urls: string[]
     }
-    'AccountClients.CreatedClient': {
+    'Account.Clients.CreatedClient': {
       id: string
       name: string
       secret: string
       redirect_urls: string[]
     }
-    'AccountClients.UpdateClientReq': {
+    'Account.Clients.UpdateClientReq': {
       name: string
       redirect_urls: string[]
     }
@@ -384,7 +384,7 @@ export interface operations {
     requestBody: {
       content: {
         'application/json': {
-          client: components['schemas']['AccountClients.CreateClientReq']
+          client: components['schemas']['Account.Clients.CreateClientReq']
         }
       }
     }
@@ -396,7 +396,7 @@ export interface operations {
         }
         content: {
           'application/json': {
-            client: components['schemas']['AccountClients.CreatedClient']
+            client: components['schemas']['Account.Clients.CreatedClient']
           }
         }
       }
@@ -460,7 +460,7 @@ export interface operations {
     requestBody: {
       content: {
         'application/json': {
-          client: components['schemas']['AccountClients.UpdateClientReq']
+          client: components['schemas']['Account.Clients.UpdateClientReq']
         }
       }
     }

@@ -68,7 +68,7 @@ paths:
                 type: object
                 properties:
                   client:
-                    $ref: '#/components/schemas/AccountClients.CreatedClient'
+                    $ref: '#/components/schemas/Account.Clients.CreatedClient'
                 required:
                   - client
         '400':
@@ -90,7 +90,7 @@ paths:
               type: object
               properties:
                 client:
-                  $ref: '#/components/schemas/AccountClients.CreateClientReq'
+                  $ref: '#/components/schemas/Account.Clients.CreateClientReq'
               required:
                 - client
       security:
@@ -161,7 +161,7 @@ paths:
               type: object
               properties:
                 client:
-                  $ref: '#/components/schemas/AccountClients.UpdateClientReq'
+                  $ref: '#/components/schemas/Account.Clients.UpdateClientReq'
               required:
                 - client
       security:
@@ -494,7 +494,7 @@ paths:
               $ref: '#/components/schemas/Users.ReqSignup'
 components:
   schemas:
-    AccountClients.CreateClientReq:
+    Account.Clients.CreateClientReq:
       type: object
       required:
         - name
@@ -506,7 +506,7 @@ components:
           type: array
           items:
             type: string
-    AccountClients.CreatedClient:
+    Account.Clients.CreatedClient:
       type: object
       required:
         - id
@@ -524,7 +524,7 @@ components:
           type: array
           items:
             type: string
-    AccountClients.UpdateClientReq:
+    Account.Clients.UpdateClientReq:
       type: object
       required:
         - name
