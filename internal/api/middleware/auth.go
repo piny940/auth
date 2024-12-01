@@ -36,6 +36,7 @@ type typeAuthContextKey string
 
 const userContextKey typeAuthContextKey = "current_user"
 const scopesContextKey typeAuthContextKey = "scopes"
+const clientContextKey typeAuthContextKey = "current_client"
 
 func NewAuthMiddleware(conf *Config, clientRepo oauth.IClientRepo, userRepo domain.IUserRepo) *AuthMiddleware {
 	pubKey, err := jwt.ParseRSAPublicKeyFromPEM([]byte(conf.RsaPublicKey))
@@ -141,7 +142,8 @@ func (m *AuthMiddleware) cookieAuth(_ context.Context, input *openapi3filter.Aut
 }
 
 func (m *AuthMiddleware) authClient(_ context.Context, input *openapi3filter.AuthenticationInput) error {
-	auth := input.RequestValidationInput.Request.Header.Get("Authorization")
+	req := input.RequestValidationInput.Request
+	auth := req.Header.Get("Authorization")
 	if !strings.HasPrefix(auth, "Basic ") {
 		return fmt.Errorf("invalid basic auth header. expected: Basic <base64>")
 	}
@@ -155,9 +157,14 @@ func (m *AuthMiddleware) authClient(_ context.Context, input *openapi3filter.Aut
 	}
 	client, err := m.clientRepo.FindByID(oauth.ClientID(clientArr[0]))
 	if err != nil {
-		return err
+		return fmt.Errorf("client not found: %w", err)
 	}
-	return client.SecretCorrect(clientArr[1])
+	if err := client.SecretCorrect(clientArr[1]); err != nil {
+		return fmt.Errorf("invalid client secret: %w", err)
+	}
+	newReq := req.WithContext(context.WithValue(req.Context(), clientContextKey, client))
+	*req = *newReq
+	return nil
 }
 
 type Auth struct {
@@ -233,6 +240,14 @@ func (a *Auth) Logout(ctx context.Context) error {
 		return fmt.Errorf("failed to save session: %w", err)
 	}
 	return nil
+}
+
+func (a *Auth) CurrentClient(ctx context.Context) (*oauth.Client, error) {
+	client, ok := ctx.Value(clientContextKey).(*oauth.Client)
+	if !ok {
+		return nil, api.ErrUnauthorized
+	}
+	return client, nil
 }
 
 func authSessionFromCookie(req *http.Request, store *sessions.CookieStore) (*api.AuthSession, error) {

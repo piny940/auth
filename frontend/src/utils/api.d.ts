@@ -263,7 +263,6 @@ export interface components {
       grant_type: components['schemas']['OAuth.TokenGrantType']
       code: string
       redirect_uri: string
-      client_id: string
     }
     'OAuth.TokenRes': {
       access_token: string

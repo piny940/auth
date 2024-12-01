@@ -152,11 +152,15 @@ func (s *Server) OAuthInterfaceAuthorize(ctx context.Context, request OAuthInter
 
 // OAuthInterfaceGetToken implements StrictServerInterface.
 func (s *Server) OAuthInterfaceGetToken(ctx context.Context, request OAuthInterfaceGetTokenRequestObject) (OAuthInterfaceGetTokenResponseObject, error) {
+	client, err := s.Auth.CurrentClient(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get current client: %w", err)
+	}
 	accessToken, idToken, err := s.OAuthUsecase.RequestToken(&usecase.TokenRequest{
 		GrantType:   string(request.Body.GrantType),
 		AuthCode:    request.Body.Code,
 		RedirectURI: request.Body.RedirectUri,
-		ClientID:    oauth.ClientID(request.Body.ClientId),
+		ClientID:    client.ID,
 	})
 	if errors.Is(err, usecase.ErrInvalidGrantType) {
 		s.logger.Infof("invalid grant type: %v", err)

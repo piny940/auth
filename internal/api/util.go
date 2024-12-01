@@ -22,6 +22,7 @@ type Auth interface {
 	Login(ctx context.Context, user *domain.User) error
 	Logout(ctx context.Context) error
 	AccessScopes(ctx context.Context) ([]oauth.TypeScope, error)
+	CurrentClient(ctx context.Context) (*oauth.Client, error) // for token request
 }
 
 type EchoContextReg interface {
