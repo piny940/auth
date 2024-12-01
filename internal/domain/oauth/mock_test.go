@@ -2,6 +2,7 @@ package oauth
 
 import (
 	"auth/internal/domain"
+	"context"
 	"time"
 )
 
@@ -65,6 +66,16 @@ func (a *approvalRepo) Find(clientID ClientID, userID domain.UserID) (*Approval,
 		}
 	}
 	return nil, domain.ErrRecordNotFound
+}
+
+// Delete implements IApprovalRepo.
+func (a *approvalRepo) Delete(ctx context.Context, userID domain.UserID, clientID ClientID) error {
+	panic("unimplemented")
+}
+
+// List implements IApprovalRepo.
+func (a *approvalRepo) List(ctx context.Context, userID domain.UserID) ([]*Approval, error) {
+	panic("unimplemented")
 }
 
 type clientRepo struct{}

@@ -11,11 +11,29 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    get?: never
+    /** Get all approvals */
+    get: operations['Approvals_listApprovals']
     put?: never
     /** Approve a auth request */
     post: operations['ApprovalsInterface_approve']
     delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/account/approvals/{id}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    /** Delete an approval */
+    delete: operations['Approvals_deleteApproval']
     options?: never
     head?: never
     patch?: never
@@ -201,6 +219,9 @@ export interface paths {
 export type webhooks = Record<string, never>
 export interface components {
   schemas: {
+    'Account.Approvals.ListApprovalsRes': {
+      approvals: components['schemas']['Approval'][]
+    }
     'Account.Clients.CreateClientReq': {
       name: string
       redirect_urls: string[]
@@ -214,6 +235,11 @@ export interface components {
     'Account.Clients.UpdateClientReq': {
       name: string
       redirect_urls: string[]
+    }
+    Approval: {
+      id: string
+      client: components['schemas']['PublicClient']
+      scopes: string[]
     }
     /** @enum {string} */
     'Approvals.ApproveErr': 'invalid_client' | 'invalid_scope'
@@ -318,6 +344,26 @@ export interface components {
 }
 export type $defs = Record<string, never>
 export interface operations {
+  Approvals_listApprovals: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description The request has succeeded. */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Account.Approvals.ListApprovalsRes']
+        }
+      }
+    }
+  }
   ApprovalsInterface_approve: {
     parameters: {
       query?: never
@@ -347,6 +393,37 @@ export interface operations {
           'application/json': {
             error: components['schemas']['Approvals.ApproveErr']
             error_description: string
+          }
+        }
+      }
+    }
+  }
+  Approvals_deleteApproval: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description There is no content to send for this request, but the headers may be useful.  */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description The server cannot find the requested resource. */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            error: string
           }
         }
       }

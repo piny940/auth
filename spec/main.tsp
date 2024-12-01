@@ -9,6 +9,7 @@ import "./specs/oauth.tsp";
 import "./specs/session.tsp";
 import "./specs/users.tsp";
 import "./specs/account/clients.tsp";
+import "./specs/account/approvals.tsp";
 import "./specs/userinfo.tsp";
 import "./specs/healthz.tsp";
 

@@ -38,3 +38,14 @@ func (s *Server) ApprovalsInterfaceApprove(ctx context.Context, request Approval
 	}
 	return ApprovalsInterfaceApprove204Response{}, nil
 }
+
+// ----------------------------------- dashboard api -------------------------------
+
+func (s *Server) ApprovalsDeleteApproval(ctx context.Context, request ApprovalsDeleteApprovalRequestObject) (ApprovalsDeleteApprovalResponseObject, error) {
+	panic("unimplemented")
+}
+
+// ApprovalsListApprovals implements StrictServerInterface.
+func (s *Server) ApprovalsListApprovals(ctx context.Context, request ApprovalsListApprovalsRequestObject) (ApprovalsListApprovalsResponseObject, error) {
+	panic("unimplemented")
+}

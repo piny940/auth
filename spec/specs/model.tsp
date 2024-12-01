@@ -19,3 +19,8 @@ model PublicClient {
   id: string;
   name: string;
 }
+model Approval {
+  id: string;
+  client: PublicClient;
+  scopes: string[];
+}

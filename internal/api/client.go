@@ -29,7 +29,7 @@ func (s *Server) ClientsInterfaceGetClient(ctx context.Context, request ClientsI
 	}, nil
 }
 
-// ----------------------------------- private api -------------------------------
+// ----------------------------------- dashboard api -------------------------------
 
 func (s *Server) AccountClientsCreateClient(ctx context.Context, request AccountClientsCreateClientRequestObject) (AccountClientsCreateClientResponseObject, error) {
 	session, err := s.Auth.CurrentUser(ctx)
