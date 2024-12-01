@@ -142,6 +142,7 @@ func (m *AuthMiddleware) cookieAuth(_ context.Context, input *openapi3filter.Aut
 
 func (m *AuthMiddleware) authClient(_ context.Context, input *openapi3filter.AuthenticationInput) error {
 	auth := input.RequestValidationInput.Request.Header.Get("Authorization")
+	fmt.Println(auth)
 	if !strings.HasPrefix(auth, "Basic ") {
 		return fmt.Errorf("invalid basic auth header. expected: Basic <base64>")
 	}
