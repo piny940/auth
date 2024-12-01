@@ -85,9 +85,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: filter
     if: needs.filter.outputs.spec == 'true'
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -102,12 +99,8 @@ jobs:
           cache-dependency-path: "spec/package.json"
       - name: Build doc
         run: cd spec && pnpm run export
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - uses: cloudflare/wrangler-action@v3
         with:
-          path: "./spec/out"
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          command: |
+            pages deploy --project-name=auth-doc spec/out
