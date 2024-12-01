@@ -5,7 +5,7 @@ import "../model.tsp";
 using TypeSpec.Http;
 using TypeSpec.Rest;
 
-namespace Auth.AccountClients;
+namespace Auth.Account.Clients;
 
 model CreateClientReq {
   name: string;
