@@ -34,7 +34,6 @@ model TokenReq {
   grant_type: TokenGrantType;
   code: string;
   redirect_uri: string;
-  client_id: string;
 }
 model TokenRes {
   access_token: string;

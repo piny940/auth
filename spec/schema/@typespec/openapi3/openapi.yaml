@@ -634,15 +634,12 @@ components:
         - grant_type
         - code
         - redirect_uri
-        - client_id
       properties:
         grant_type:
           $ref: '#/components/schemas/OAuth.TokenGrantType'
         code:
           type: string
         redirect_uri:
-          type: string
-        client_id:
           type: string
     OAuth.TokenRes:
       type: object
