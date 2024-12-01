@@ -6,6 +6,7 @@ import (
 	"auth/internal/infrastructure"
 	"auth/internal/infrastructure/model"
 	"auth/internal/infrastructure/query"
+	"context"
 	"errors"
 	"slices"
 	"testing"
@@ -136,6 +137,86 @@ func TestApprovalFind(t *testing.T) {
 			for _, scope := range actual.Scopes {
 				if !slices.Contains(s.Scopes, scope) {
 					t.Errorf("expected: %v, got: %v", s.Scopes, actual.Scopes)
+				}
+			}
+		})
+	}
+}
+
+func TestApprovalList(t *testing.T) {
+	const userID = 87392
+	const client1ID = "client1"
+	const client2ID = "client2"
+	clientIds := []string{client1ID, client2ID}
+	initialUsers := []*model.User{
+		{ID: userID, Name: "test", EncryptedPassword: "test"},
+	}
+	initialClients := []*model.Client{
+		{ID: clientIds[0], EncryptedSecret: "", UserID: userID, Name: "Not Approved"},
+		{ID: clientIds[1], EncryptedSecret: "", UserID: userID, Name: "Not Approved"},
+	}
+	suites := []struct {
+		name      string
+		scopesArr [][]oauth.TypeScope
+	}{
+		{"two scopes, two scopes", [][]oauth.TypeScope{{oauth.ScopeOpenID, oauth.ScopeEmail}, {oauth.ScopeEmail, oauth.ScopeProfile}}},
+		{"one scopes, no scopes", [][]oauth.TypeScope{{oauth.ScopeOpenID}, {}}},
+		{"no scopes, no scopes", [][]oauth.TypeScope{{}, {}}},
+		{"one with two scopes", [][]oauth.TypeScope{{oauth.ScopeOpenID, oauth.ScopeEmail}}},
+		{"one with one scope", [][]oauth.TypeScope{{oauth.ScopeOpenID}}},
+		{"one with no scopes", [][]oauth.TypeScope{{}}},
+		{"no approvals", [][]oauth.TypeScope{}},
+	}
+	for _, s := range suites {
+		t.Run(s.name, func(t *testing.T) {
+			setup(t)
+			db := infrastructure.GetDB()
+			query := query.Use(db.Client)
+			if err := query.User.CreateInBatches(initialUsers, len(initialUsers)); err != nil {
+				t.Fatal(err)
+			}
+			if err := query.Client.CreateInBatches(initialClients, len(initialClients)); err != nil {
+				t.Fatal(err)
+			}
+			for i, scopes := range s.scopesArr {
+				if err := query.Approval.Create(&model.Approval{
+					ClientID: clientIds[i],
+					UserID:   userID,
+				}); err != nil {
+					t.Fatal(err)
+				}
+				approval, err := query.Approval.Where(
+					query.Approval.ClientID.Eq(clientIds[i]),
+					query.Approval.UserID.Eq(userID),
+				).First()
+				if err != nil {
+					t.Fatal(err)
+				}
+				for _, scope := range scopes {
+					if err := query.ApprovalScope.Create(&model.ApprovalScope{
+						ApprovalID: approval.ID,
+						ScopeID:    ScopeMapReverse[scope],
+					}); err != nil {
+						t.Fatal(err)
+					}
+				}
+			}
+			repo := NewApprovalRepo(db)
+			actual, err := repo.List(context.Background(), userID)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(actual) != len(s.scopesArr) {
+				t.Errorf("expected: %v, got: %v", len(s.scopesArr), len(actual))
+			}
+			for i, scopes := range s.scopesArr {
+				if len(actual[i].Scopes) != len(scopes) {
+					t.Errorf("expected: %v, got: %v", scopes, actual[i].Scopes)
+				}
+				for _, scope := range actual[i].Scopes {
+					if !slices.Contains(scopes, scope) {
+						t.Errorf("expected: %v, got: %v", scopes, actual[i].Scopes)
+					}
 				}
 			}
 		})
