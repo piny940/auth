@@ -11,7 +11,7 @@ permissions:
   pages: write
   packages: write
 env:
-  PNPM_VERSION: 9.12.2
+  PNPM_VERSION: 9.14.4
   NODE_VERSION: 20.9.0
 
 jobs:
