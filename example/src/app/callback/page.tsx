@@ -39,7 +39,6 @@ export default async function Page({
         Authorization: `Basic ${secret.toString("base64")}`,
       },
       body: new URLSearchParams({
-        client_id: process.env.NEXT_PUBLIC_CLIENT_ID,
         code: query.code,
         grant_type: "authorization_code",
         redirect_uri: process.env.NEXT_PUBLIC_APP_URL + "/callback",
