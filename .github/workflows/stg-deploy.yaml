@@ -118,3 +118,27 @@ jobs:
           tags: ghcr.io/${{ github.repository }}-example:stg-${{ github.sha }}-${{ github.run_number }}
           path: "./example"
           cache-registry: ghcr.io/${{ github.repository }}-example:buildcache
+
+  build-doc:
+    runs-on: ubuntu-latest
+    needs: filter
+    if: needs.filter.outputs.spec == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION}}
+          package_json_file: "spec/package.json"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+          cache-dependency-path: "spec/package.json"
+      - name: Build doc
+        run: cd spec && pnpm run export
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          command: |
+            page deploy --project-name=auth-doc spec/out
