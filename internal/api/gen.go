@@ -98,6 +98,11 @@ const (
 	PasswordLengthNotEnough      UsersSignupErr = "password_length_not_enough"
 )
 
+// AccountApprovalsListApprovalsRes defines model for Account.Approvals.ListApprovalsRes.
+type AccountApprovalsListApprovalsRes struct {
+	Approvals []Approval `json:"approvals"`
+}
+
 // AccountClientsCreateClientReq defines model for Account.Clients.CreateClientReq.
 type AccountClientsCreateClientReq struct {
 	Name         string   `json:"name"`
@@ -116,6 +121,13 @@ type AccountClientsCreatedClient struct {
 type AccountClientsUpdateClientReq struct {
 	Name         string   `json:"name"`
 	RedirectUrls []string `json:"redirect_urls"`
+}
+
+// Approval defines model for Approval.
+type Approval struct {
+	Client PublicClient `json:"client"`
+	Id     string       `json:"id"`
+	Scopes []string     `json:"scopes"`
 }
 
 // ApprovalsApproveErr defines model for Approvals.ApproveErr.
@@ -281,9 +293,15 @@ type UsersInterfaceSignupJSONRequestBody = UsersReqSignup
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// Get all approvals
+	// (GET /account/approvals)
+	ApprovalsListApprovals(ctx echo.Context) error
 	// Approve a auth request
 	// (POST /account/approvals)
 	ApprovalsInterfaceApprove(ctx echo.Context) error
+	// Delete an approval
+	// (DELETE /account/approvals/{id})
+	ApprovalsDeleteApproval(ctx echo.Context, id string) error
 	// Get all clients
 	// (GET /account/clients)
 	AccountClientsListClients(ctx echo.Context) error
@@ -339,6 +357,17 @@ type ServerInterfaceWrapper struct {
 	Handler ServerInterface
 }
 
+// ApprovalsListApprovals converts echo context to params.
+func (w *ServerInterfaceWrapper) ApprovalsListApprovals(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(ApiKeyAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.ApprovalsListApprovals(ctx)
+	return err
+}
+
 // ApprovalsInterfaceApprove converts echo context to params.
 func (w *ServerInterfaceWrapper) ApprovalsInterfaceApprove(ctx echo.Context) error {
 	var err error
@@ -347,6 +376,24 @@ func (w *ServerInterfaceWrapper) ApprovalsInterfaceApprove(ctx echo.Context) err
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.ApprovalsInterfaceApprove(ctx)
+	return err
+}
+
+// ApprovalsDeleteApproval converts echo context to params.
+func (w *ServerInterfaceWrapper) ApprovalsDeleteApproval(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", ctx.Param("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	ctx.Set(ApiKeyAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.ApprovalsDeleteApproval(ctx, id)
 	return err
 }
 
@@ -634,7 +681,9 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 		Handler: si,
 	}
 
+	router.GET(baseURL+"/account/approvals", wrapper.ApprovalsListApprovals)
 	router.POST(baseURL+"/account/approvals", wrapper.ApprovalsInterfaceApprove)
+	router.DELETE(baseURL+"/account/approvals/:id", wrapper.ApprovalsDeleteApproval)
 	router.GET(baseURL+"/account/clients", wrapper.AccountClientsListClients)
 	router.POST(baseURL+"/account/clients", wrapper.AccountClientsCreateClient)
 	router.DELETE(baseURL+"/account/clients/:id", wrapper.AccountClientsDeleteClient)
@@ -652,6 +701,22 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/userinfo", wrapper.UserinfoGetUserinfo)
 	router.POST(baseURL+"/users/signup", wrapper.UsersInterfaceSignup)
 
+}
+
+type ApprovalsListApprovalsRequestObject struct {
+}
+
+type ApprovalsListApprovalsResponseObject interface {
+	VisitApprovalsListApprovalsResponse(w http.ResponseWriter) error
+}
+
+type ApprovalsListApprovals200JSONResponse AccountApprovalsListApprovalsRes
+
+func (response ApprovalsListApprovals200JSONResponse) VisitApprovalsListApprovalsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
 }
 
 type ApprovalsInterfaceApproveRequestObject struct {
@@ -678,6 +743,33 @@ type ApprovalsInterfaceApprove400JSONResponse struct {
 func (response ApprovalsInterfaceApprove400JSONResponse) VisitApprovalsInterfaceApproveResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ApprovalsDeleteApprovalRequestObject struct {
+	Id string `json:"id"`
+}
+
+type ApprovalsDeleteApprovalResponseObject interface {
+	VisitApprovalsDeleteApprovalResponse(w http.ResponseWriter) error
+}
+
+type ApprovalsDeleteApproval204Response struct {
+}
+
+func (response ApprovalsDeleteApproval204Response) VisitApprovalsDeleteApprovalResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type ApprovalsDeleteApproval404JSONResponse struct {
+	Error string `json:"error"`
+}
+
+func (response ApprovalsDeleteApproval404JSONResponse) VisitApprovalsDeleteApprovalResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -1112,9 +1204,15 @@ func (response UsersInterfaceSignup400JSONResponse) VisitUsersInterfaceSignupRes
 
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
+	// Get all approvals
+	// (GET /account/approvals)
+	ApprovalsListApprovals(ctx context.Context, request ApprovalsListApprovalsRequestObject) (ApprovalsListApprovalsResponseObject, error)
 	// Approve a auth request
 	// (POST /account/approvals)
 	ApprovalsInterfaceApprove(ctx context.Context, request ApprovalsInterfaceApproveRequestObject) (ApprovalsInterfaceApproveResponseObject, error)
+	// Delete an approval
+	// (DELETE /account/approvals/{id})
+	ApprovalsDeleteApproval(ctx context.Context, request ApprovalsDeleteApprovalRequestObject) (ApprovalsDeleteApprovalResponseObject, error)
 	// Get all clients
 	// (GET /account/clients)
 	AccountClientsListClients(ctx context.Context, request AccountClientsListClientsRequestObject) (AccountClientsListClientsResponseObject, error)
@@ -1177,6 +1275,29 @@ type strictHandler struct {
 	middlewares []StrictMiddlewareFunc
 }
 
+// ApprovalsListApprovals operation middleware
+func (sh *strictHandler) ApprovalsListApprovals(ctx echo.Context) error {
+	var request ApprovalsListApprovalsRequestObject
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.ApprovalsListApprovals(ctx.Request().Context(), request.(ApprovalsListApprovalsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ApprovalsListApprovals")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(ApprovalsListApprovalsResponseObject); ok {
+		return validResponse.VisitApprovalsListApprovalsResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
 // ApprovalsInterfaceApprove operation middleware
 func (sh *strictHandler) ApprovalsInterfaceApprove(ctx echo.Context) error {
 	var request ApprovalsInterfaceApproveRequestObject
@@ -1200,6 +1321,31 @@ func (sh *strictHandler) ApprovalsInterfaceApprove(ctx echo.Context) error {
 		return err
 	} else if validResponse, ok := response.(ApprovalsInterfaceApproveResponseObject); ok {
 		return validResponse.VisitApprovalsInterfaceApproveResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// ApprovalsDeleteApproval operation middleware
+func (sh *strictHandler) ApprovalsDeleteApproval(ctx echo.Context, id string) error {
+	var request ApprovalsDeleteApprovalRequestObject
+
+	request.Id = id
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.ApprovalsDeleteApproval(ctx.Request().Context(), request.(ApprovalsDeleteApprovalRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ApprovalsDeleteApproval")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(ApprovalsDeleteApprovalResponseObject); ok {
+		return validResponse.VisitApprovalsDeleteApprovalResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
@@ -1629,41 +1775,42 @@ func (sh *strictHandler) UsersInterfaceSignup(ctx echo.Context) error {
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"AP//JWTrcRg3AAA=",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

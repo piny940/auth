@@ -2,6 +2,7 @@ package oauth
 
 import (
 	"auth/internal/domain"
+	"context"
 	"errors"
 	"slices"
 	"time"
@@ -19,6 +20,8 @@ type Approval struct {
 type IApprovalRepo interface {
 	Find(clientID ClientID, userID domain.UserID) (*Approval, error)
 	Approve(clientID ClientID, userID domain.UserID, scopes []TypeScope) error
+	List(ctx context.Context, userID domain.UserID) ([]*Approval, error)
+	Delete(ctx context.Context, userID domain.UserID, clientID ClientID) error
 }
 
 type ApprovalService struct {
