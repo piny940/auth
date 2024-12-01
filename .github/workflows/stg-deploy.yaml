@@ -143,4 +143,4 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           command: |
-            page deploy --project-name=auth-doc spec/out
+            pages deploy --project-name=auth-doc spec/out
