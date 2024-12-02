@@ -140,8 +140,14 @@ func (a *ApprovalRepo) List(ctx context.Context, userID domain.UserID) ([]*oauth
 	return dApprovals, nil
 }
 
-func (a *ApprovalRepo) Delete(ctx context.Context, userID domain.UserID, clientID oauth.ClientID) error {
-	panic("unimplemented")
+func (a *ApprovalRepo) Delete(ctx context.Context, ID oauth.ApprovalID, userID domain.UserID) error {
+	if _, err := a.query.Approval.Where(
+		a.query.Approval.ID.Eq(int64(ID)),
+		a.query.Approval.UserID.Eq(int64(userID)),
+	).WithContext(ctx).Delete(); err != nil {
+		return fmt.Errorf("failed to find approval: %w", err)
+	}
+	return nil
 }
 
 func toDomainApproval(approval *model.Approval, approvalScopes []*model.ApprovalScope) *oauth.Approval {

@@ -6,6 +6,7 @@ import (
 	"auth/internal/infrastructure"
 	"auth/internal/infrastructure/model"
 	"auth/internal/infrastructure/query"
+	"context"
 	"errors"
 	"slices"
 
@@ -148,7 +149,41 @@ func (c *ClientRepo) List(userID domain.UserID) ([]*oauth.Client, error) {
 	for _, client := range clients {
 		clientIDs = append(clientIDs, client.ID)
 	}
-	uris, err := c.query.RedirectURI.Where(c.query.RedirectURI.ClientID.In(clientIDs...)).Find()
+	urisByClientID, err := c.collectRedirectURIs(context.Background(), clientIDs) // TODO: use context from caller
+	if err != nil {
+		return nil, err
+	}
+	result := make([]*oauth.Client, 0, len(clients))
+	for _, client := range clients {
+		result = append(result, toDomainClient(client, urisByClientID[client.ID]))
+	}
+	return result, nil
+}
+
+func (c *ClientRepo) ListByIds(ctx context.Context, ids []oauth.ClientID) ([]*oauth.Client, error) {
+	clientIDs := make([]string, 0, len(ids))
+	for _, id := range ids {
+		clientIDs = append(clientIDs, string(id))
+	}
+	clients, err := c.query.Client.Where(c.query.Client.ID.In(clientIDs...)).Find()
+	if err != nil {
+		return nil, err
+	}
+	urisByClientID, err := c.collectRedirectURIs(ctx, clientIDs)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]*oauth.Client, 0, len(clients))
+	for _, client := range clients {
+		result = append(result, toDomainClient(client, urisByClientID[client.ID]))
+	}
+	return result, nil
+}
+
+func (c *ClientRepo) collectRedirectURIs(ctx context.Context, clientIDs []string) (map[string][]*model.RedirectURI, error) {
+	uris, err := c.query.RedirectURI.Where(
+		c.query.RedirectURI.ClientID.In(clientIDs...),
+	).WithContext(ctx).Find()
 	if err != nil {
 		return nil, err
 	}
@@ -159,11 +194,7 @@ func (c *ClientRepo) List(userID domain.UserID) ([]*oauth.Client, error) {
 		}
 		urisByClientID[uri.ClientID] = append(urisByClientID[uri.ClientID], uri)
 	}
-	result := make([]*oauth.Client, 0, len(clients))
-	for _, client := range clients {
-		result = append(result, toDomainClient(client, urisByClientID[client.ID]))
-	}
-	return result, nil
+	return urisByClientID, nil
 }
 
 func toDomainClient(client *model.Client, redirectUris []*model.RedirectURI) *oauth.Client {

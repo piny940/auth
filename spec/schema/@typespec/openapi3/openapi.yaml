@@ -56,7 +56,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            type: integer
+            format: int64
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
@@ -592,7 +593,8 @@ components:
         - scopes
       properties:
         id:
-          type: string
+          type: integer
+          format: int64
         client:
           $ref: '#/components/schemas/PublicClient'
         scopes:

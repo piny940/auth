@@ -21,7 +21,7 @@ type IApprovalRepo interface {
 	Find(clientID ClientID, userID domain.UserID) (*Approval, error)
 	Approve(clientID ClientID, userID domain.UserID, scopes []TypeScope) error
 	List(ctx context.Context, userID domain.UserID) ([]*Approval, error)
-	Delete(ctx context.Context, userID domain.UserID, clientID ClientID) error
+	Delete(ctx context.Context, ID ApprovalID, userID domain.UserID) error
 }
 
 type ApprovalService struct {

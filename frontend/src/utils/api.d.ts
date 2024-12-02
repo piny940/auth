@@ -237,7 +237,8 @@ export interface components {
       redirect_urls: string[]
     }
     Approval: {
-      id: string
+      /** Format: int64 */
+      id: number
       client: components['schemas']['PublicClient']
       scopes: string[]
     }
@@ -403,7 +404,7 @@ export interface operations {
       query?: never
       header?: never
       path: {
-        id: string
+        id: number
       }
       cookie?: never
     }

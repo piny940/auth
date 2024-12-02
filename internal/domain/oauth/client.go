@@ -2,6 +2,7 @@ package oauth
 
 import (
 	"auth/internal/domain"
+	"context"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -32,6 +33,7 @@ type IClientRepo interface {
 	FindByID(id ClientID) (*Client, error)
 	FindWithUserID(id ClientID, userID domain.UserID) (*Client, error)
 	List(userID domain.UserID) ([]*Client, error)
+	ListByIds(ctx context.Context, ids []ClientID) ([]*Client, error)
 	Create(client *ClientInput) error
 	Update(client *ClientInput, userID domain.UserID) error
 	Delete(id ClientID, userID domain.UserID) error
