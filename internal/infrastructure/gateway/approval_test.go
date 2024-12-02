@@ -10,6 +10,8 @@ import (
 	"errors"
 	"slices"
 	"testing"
+
+	"gorm.io/gorm"
 )
 
 func TestApprovalApprove(t *testing.T) {
@@ -217,6 +219,97 @@ func TestApprovalList(t *testing.T) {
 					if !slices.Contains(scopes, scope) {
 						t.Errorf("expected: %v, got: %v", scopes, actual[i].Scopes)
 					}
+				}
+			}
+		})
+	}
+}
+
+func TestApprovalDelete(t *testing.T) {
+	const userID = 87392
+	clientIds := []string{"client1", "client2"}
+	initialUsers := []*model.User{
+		{ID: userID, Name: "test", EncryptedPassword: "test"},
+	}
+	initialClients := []*model.Client{
+		{ID: clientIds[0], EncryptedSecret: "", UserID: userID, Name: "Not Approved"},
+		{ID: clientIds[1], EncryptedSecret: "", UserID: userID, Name: "Not Approved"},
+	}
+	suites := []struct {
+		name     string
+		initials [][]oauth.TypeScope
+	}{
+		{"delete one with two scopes", [][]oauth.TypeScope{{oauth.ScopeOpenID, oauth.ScopeEmail}, {oauth.ScopeEmail}}},
+		{"delete one with one scope", [][]oauth.TypeScope{{oauth.ScopeOpenID}, {oauth.ScopeEmail}}},
+		{"delete one with no scope", [][]oauth.TypeScope{{}, {oauth.ScopeEmail}}},
+	}
+	for _, s := range suites {
+		t.Run(s.name, func(t *testing.T) {
+			setup(t)
+			db := infrastructure.GetDB()
+			query := query.Use(db.Client)
+			if err := query.User.CreateInBatches(initialUsers, len(initialUsers)); err != nil {
+				t.Fatal(err)
+			}
+			if err := query.Client.CreateInBatches(initialClients, len(initialClients)); err != nil {
+				t.Fatal(err)
+			}
+			for i, scopes := range s.initials {
+				if err := query.Approval.Create(&model.Approval{
+					ClientID: clientIds[i],
+					UserID:   userID,
+				}); err != nil {
+					t.Fatal(err)
+				}
+				approval, err := query.Approval.Where(
+					query.Approval.ClientID.Eq(clientIds[i]),
+					query.Approval.UserID.Eq(userID),
+				).First()
+				if err != nil {
+					t.Fatal(err)
+				}
+				for _, scope := range scopes {
+					if err := query.ApprovalScope.Create(&model.ApprovalScope{
+						ApprovalID: approval.ID,
+						ScopeID:    ScopeMapReverse[scope],
+					}); err != nil {
+						t.Fatal(err)
+					}
+				}
+			}
+			repo := NewApprovalRepo(db)
+			targetClient := clientIds[0]
+			otherClient := clientIds[1]
+			target, err := query.Approval.Where(query.Approval.ClientID.Eq(targetClient)).First()
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := repo.Delete(context.Background(), oauth.ApprovalID(target.ID), userID); err != nil {
+				t.Fatal(err)
+			}
+			_, err = query.Approval.Where(
+				query.Approval.ClientID.Eq(targetClient),
+				query.Approval.UserID.Eq(userID),
+			).First()
+			if !errors.Is(err, gorm.ErrRecordNotFound) {
+				t.Errorf("expected: %v, got: %v", gorm.ErrRecordNotFound, err)
+			}
+
+			// make sure the other approval is still there
+			other, err := query.Approval.Where(query.Approval.ClientID.Eq(otherClient)).First()
+			if err != nil {
+				t.Fatal(err)
+			}
+			otuherScopes, err := query.ApprovalScope.Where(query.ApprovalScope.ApprovalID.Eq(other.ID)).Find()
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(otuherScopes) != len(s.initials[1]) {
+				t.Errorf("expected: %v, got: %v", len(s.initials[1]), len(otuherScopes))
+			}
+			for _, scope := range otuherScopes {
+				if !slices.Contains(s.initials[1], ScopeMap[scope.ScopeID]) {
+					t.Errorf("expected: %v, got: %v", s.initials[1], otuherScopes)
 				}
 			}
 		})

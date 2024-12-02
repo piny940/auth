@@ -25,7 +25,7 @@ interface Approvals {
   @route("/{id}")
   @delete
   @summary("Delete an approval")
-  deleteApproval(@path id: string): {
+  deleteApproval(@path id: int64): {
     @statusCode statusCode: 204;
   } | {
     @statusCode statusCode: 404;
