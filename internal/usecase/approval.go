@@ -12,9 +12,10 @@ type ApprovalUsecase struct {
 	ClientRepo   oauth.IClientRepo
 }
 
-func NewApprovalUsecase(approvalRepo oauth.IApprovalRepo) *ApprovalUsecase {
+func NewApprovalUsecase(approvalRepo oauth.IApprovalRepo, clientRepo oauth.IClientRepo) *ApprovalUsecase {
 	return &ApprovalUsecase{
 		ApprovalRepo: approvalRepo,
+		ClientRepo:   clientRepo,
 	}
 }
 
