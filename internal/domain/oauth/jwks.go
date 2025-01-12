@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/golang-jwt/jwt"
-	"github.com/lestrrat-go/jwx/jwk"
+	"github.com/lestrrat-go/jwx/v2/jwk"
 )
 
 type JWKsService struct {
@@ -26,7 +26,7 @@ func NewJWKsService(conf *Config) *JWKsService {
 }
 
 func (s *JWKsService) IssueJwks() (jwk.Set, error) {
-	key, err := jwk.New(s.rsaPublicKey)
+	key, err := jwk.PublicKeyOf(s.rsaPublicKey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create JWKs: %w", err)
 	}
@@ -35,7 +35,7 @@ func (s *JWKsService) IssueJwks() (jwk.Set, error) {
 	}
 	key.Set(jwk.KeyIDKey, s.rsaKeyId)
 	jwks := jwk.NewSet()
-	jwks.Add(key)
+	jwks.AddKey(key)
 	return jwks, nil
 }
 
