@@ -9,12 +9,13 @@ import (
 )
 
 type Server struct {
-	UserUsecase   *usecase.UserUsecase
-	OAuthUsecase  *usecase.OAuthUsecase
-	ClientUsecase usecase.IClientUsecase
-	Conf          *Config
-	Auth          Auth
-	logger        echo.Logger
+	UserUsecase     *usecase.UserUsecase
+	OAuthUsecase    *usecase.OAuthUsecase
+	ClientUsecase   usecase.IClientUsecase
+	ApprovalUsecase *usecase.ApprovalUsecase
+	Conf            *Config
+	Auth            Auth
+	logger          echo.Logger
 }
 
 type Config struct {
@@ -29,6 +30,7 @@ func NewServer(
 	userUsecase *usecase.UserUsecase,
 	oauthUsecase *usecase.OAuthUsecase,
 	clientUC usecase.IClientUsecase,
+	approvalUC *usecase.ApprovalUsecase,
 	auth Auth,
 ) *Server {
 	conf := &Config{}
@@ -37,11 +39,12 @@ func NewServer(
 		panic(err)
 	}
 	return &Server{
-		UserUsecase:   userUsecase,
-		OAuthUsecase:  oauthUsecase,
-		ClientUsecase: clientUC,
-		Conf:          conf,
-		Auth:          auth,
+		UserUsecase:     userUsecase,
+		OAuthUsecase:    oauthUsecase,
+		ClientUsecase:   clientUC,
+		ApprovalUsecase: approvalUC,
+		Conf:            conf,
+		Auth:            auth,
 	}
 }
 

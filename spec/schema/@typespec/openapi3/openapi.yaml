@@ -34,6 +34,46 @@ paths:
               $ref: '#/components/schemas/Approvals.ApproveReq'
       security:
         - ApiKeyAuth: []
+    get:
+      operationId: Approvals_listApprovals
+      summary: Get all approvals
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account.Approvals.ListApprovalsRes'
+      security:
+        - ApiKeyAuth: []
+  /account/approvals/{id}:
+    delete:
+      operationId: Approvals_deleteApproval
+      summary: Delete an approval
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                required:
+                  - error
+      security:
+        - ApiKeyAuth: []
   /account/clients:
     get:
       operationId: AccountClients_listClients
@@ -494,6 +534,15 @@ paths:
               $ref: '#/components/schemas/Users.ReqSignup'
 components:
   schemas:
+    Account.Approvals.ListApprovalsRes:
+      type: object
+      required:
+        - approvals
+      properties:
+        approvals:
+          type: array
+          items:
+            $ref: '#/components/schemas/Approval'
     Account.Clients.CreateClientReq:
       type: object
       required:
@@ -533,6 +582,22 @@ components:
         name:
           type: string
         redirect_urls:
+          type: array
+          items:
+            type: string
+    Approval:
+      type: object
+      required:
+        - id
+        - client
+        - scopes
+      properties:
+        id:
+          type: integer
+          format: int64
+        client:
+          $ref: '#/components/schemas/PublicClient'
+        scopes:
           type: array
           items:
             type: string
