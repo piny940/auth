@@ -15,6 +15,7 @@ import {
   useFieldArray,
 } from 'react-hook-form'
 import DeleteIcon from '@mui/icons-material/Delete'
+import { JSX } from 'react'
 
 export interface RedirectURIsFields extends FieldValues {
   redirectURIs: Array<{ url: string }>

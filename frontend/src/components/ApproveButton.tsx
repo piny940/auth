@@ -2,7 +2,7 @@
 import { client } from '@/utils/client'
 import { Button } from '@mui/material'
 import { useRouter } from 'next/navigation'
-import { useCallback } from 'react'
+import { useCallback, JSX } from 'react'
 
 type ApproveButtonProps = {
   clientID: string

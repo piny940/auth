@@ -8,6 +8,7 @@ import {
   useContext,
   useEffect,
   useState,
+  JSX,
 } from 'react'
 
 interface UserContextInterface {

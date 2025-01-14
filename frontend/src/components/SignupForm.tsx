@@ -4,7 +4,7 @@ import { client } from '@/utils/client'
 import { Box, Button, TextField, Typography } from '@mui/material'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useCallback } from 'react'
+import { useCallback, JSX } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 
 type SignupInput = {

@@ -4,7 +4,7 @@ import CopyIcon from '@mui/icons-material/FileCopy'
 import { Client } from '@/utils/types'
 import { Box, IconButton, List, ListItem, Typography } from '@mui/material'
 import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, JSX } from 'react'
 import { useUser } from '@/context/user'
 import { client } from '@/utils/client'
 

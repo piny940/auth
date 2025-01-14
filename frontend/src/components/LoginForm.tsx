@@ -2,7 +2,7 @@
 
 import { Controller, useForm } from 'react-hook-form'
 import { Box, Button, TextField, Typography } from '@mui/material'
-import { useCallback } from 'react'
+import { useCallback, JSX } from 'react'
 import { client } from '@/utils/client'
 import Link from 'next/link'
 import { useUser } from '@/context/user'
