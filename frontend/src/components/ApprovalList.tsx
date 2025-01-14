@@ -1,17 +1,7 @@
-import EditIcon from '@mui/icons-material/Edit'
-import DeleteIcon from '@mui/icons-material/Delete'
-import CopyIcon from '@mui/icons-material/FileCopy'
 import { Approval } from '@/utils/types'
-import {
-  Box,
-  Button,
-  IconButton,
-  List,
-  ListItem,
-  Typography,
-} from '@mui/material'
+import { Button, List, ListItem, Typography } from '@mui/material'
 import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, JSX } from 'react'
 import { useUser } from '@/context/user'
 import { client } from '@/utils/client'
 

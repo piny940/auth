@@ -3,7 +3,7 @@ import { useUser } from '@/context/user'
 import { client } from '@/utils/client'
 import { AppBar, Box, Button, Toolbar, Typography } from '@mui/material'
 import Link from 'next/link'
-import { useCallback } from 'react'
+import { useCallback, JSX } from 'react'
 
 export const Header = (): JSX.Element => {
   const { user, refresh } = useUser()
