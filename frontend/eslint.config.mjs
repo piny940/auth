@@ -47,25 +47,14 @@ const config = [
     'prettier'
   ),
   {
-    plugins: {
-      react,
-      prettier,
-    },
-
+    plugins: { react, prettier },
     languageOptions: {
-      globals: {
-        ...globals.browser,
-      },
-
+      globals: { ...globals.browser },
       parser: tsParser,
       ecmaVersion: 'latest',
       sourceType: 'module',
-
-      parserOptions: {
-        project: './tsconfig.json',
-      },
+      parserOptions: { project: './tsconfig.json' },
     },
-
     rules: {
       '@typescript-eslint/consistent-type-definitions': 'off',
       '@typescript-eslint/consistent-type-imports': 'off',
