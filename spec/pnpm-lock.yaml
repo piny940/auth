@@ -14,19 +14,19 @@ importers:
     devDependencies:
       '@typespec/compiler':
         specifier: latest
-        version: 0.63.0
+        version: 0.64.0
       '@typespec/http':
         specifier: latest
-        version: 0.63.0(@typespec/compiler@0.63.0)
+        version: 0.64.0(@typespec/compiler@0.64.0)
       '@typespec/openapi3':
         specifier: latest
-        version: 0.63.0(@typespec/compiler@0.63.0)(@typespec/http@0.63.0(@typespec/compiler@0.63.0))(@typespec/openapi@0.62.0(@typespec/compiler@0.63.0)(@typespec/http@0.63.0(@typespec/compiler@0.63.0)))(@typespec/versioning@0.62.0(@typespec/compiler@0.63.0))
+        version: 0.64.0(@typespec/compiler@0.64.0)(@typespec/http@0.64.0(@typespec/compiler@0.64.0))(@typespec/openapi@0.62.0(@typespec/compiler@0.64.0)(@typespec/http@0.64.0(@typespec/compiler@0.64.0)))(@typespec/versioning@0.62.0(@typespec/compiler@0.64.0))
       '@typespec/prettier-plugin-typespec':
-        specifier: ^0.63.0
-        version: 0.63.0
+        specifier: ^0.64.0
+        version: 0.64.0
       '@typespec/rest':
         specifier: latest
-        version: 0.63.0(@typespec/compiler@0.63.0)(@typespec/http@0.63.0(@typespec/compiler@0.63.0))
+        version: 0.64.0(@typespec/compiler@0.64.0)(@typespec/http@0.64.0(@typespec/compiler@0.64.0))
       redoc-cli:
         specifier: ^0.13.21
         version: 0.13.21(@babel/core@7.26.0)(core-js@3.39.0)(react-is@18.3.1)(webpack@5.96.1)
@@ -259,32 +259,35 @@ packages:
   '@types/trusted-types@2.0.7':
     resolution: {integrity: sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==}
 
-  '@typespec/compiler@0.63.0':
-    resolution: {integrity: sha512-cC3YniwbFghn1fASX3r1IgNjMrwaY4gmzznkHT4f/NxE+HK4XoXWn4EG7287QgVMCaHUykzJCIfW9k7kIleW5A==}
+  '@typespec/compiler@0.64.0':
+    resolution: {integrity: sha512-LnQGlQMWyqvhGg4Z9iyr5qSBTjI9zd49sodbEJbLafrxbj9pbHyjfSFbvt60gVbfuNvLErsdXvZiqqXV5nZdmQ==}
     engines: {node: '>=18.0.0'}
     hasBin: true
 
-  '@typespec/http@0.63.0':
-    resolution: {integrity: sha512-SYVbBmLPAPdWZfdMs0QlbpTnFREDnkINu2FR+0kRX12qzbRgpRbLsdhg59qx4TfKoh4IAPgSV+Fq84w7BWGsyQ==}
+  '@typespec/http@0.64.0':
+    resolution: {integrity: sha512-vyyZP3Woo7or/2Oiq1fH+R0X/4WOBDjAlGsb9tLQzswfQHp710kNfiecA10y9gDC/9h+PjKsTElS1RcRRanpwA==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
-      '@typespec/compiler': ~0.63.0
-      '@typespec/streams': ~0.63.0
+      '@typespec/compiler': ~0.64.0
+      '@typespec/streams': ~0.64.0
     peerDependenciesMeta:
       '@typespec/streams':
         optional: true
 
-  '@typespec/openapi3@0.63.0':
-    resolution: {integrity: sha512-HC8VeakPznXNn7euAyAxUFNsOcfSzM8tQwYPNUMWs0qGJqGgb6vjf5rShQmfgrCe5Y6zcMM2PPBuxaFV3xXYLw==}
+  '@typespec/openapi3@0.64.0':
+    resolution: {integrity: sha512-k6WQ/5lTAnlg8TvdzB89W4mO8HhS3MHbdr5VMS4sS8j1K8uCC9xUPR0v+5TF9EDpKpa53LewetzNduP9KjMUmA==}
     engines: {node: '>=18.0.0'}
     hasBin: true
     peerDependencies:
-      '@typespec/compiler': ~0.63.0
-      '@typespec/http': ~0.63.0
-      '@typespec/openapi': ~0.63.0
-      '@typespec/versioning': ~0.63.0
+      '@typespec/compiler': ~0.64.0
+      '@typespec/http': ~0.64.0
+      '@typespec/json-schema': ~0.64.0
+      '@typespec/openapi': ~0.64.0
+      '@typespec/versioning': ~0.64.0
       '@typespec/xml': '*'
     peerDependenciesMeta:
+      '@typespec/json-schema':
+        optional: true
       '@typespec/xml':
         optional: true
 
@@ -295,15 +298,15 @@ packages:
       '@typespec/compiler': ~0.62.0
       '@typespec/http': ~0.62.0
 
-  '@typespec/prettier-plugin-typespec@0.63.0':
-    resolution: {integrity: sha512-ZVnTk1B/8EzqDjHbhkicP8lH5Zj+R7Ft0wv4N34Au3SzxNFCNMzMKuA+ie3GsbQYrYi3T7gBiotW+Xt0lPKSOA==}
+  '@typespec/prettier-plugin-typespec@0.64.0':
+    resolution: {integrity: sha512-hL/DOo7+PFp/HGeZgkKqkbG9Q4iUYbhvqHcwXhzCOIaBFn50fgNQbBRdQD9VgvrGGbwN7fyTJmsGWyFnuSNjJA==}
 
-  '@typespec/rest@0.63.0':
-    resolution: {integrity: sha512-HftzMjSDHAYX+ILE9C6pFS4oAq7oBHMCtpA8QgSFPDF4V5a8l1k2K8c4x1B+7yl+GkREmIdtpc6S0xZm2G7hXg==}
+  '@typespec/rest@0.64.0':
+    resolution: {integrity: sha512-7+oUajQzOkZPTMtRiGp6hzTTmy7mRaxOYqxIPgDhYyr9I6oQPLAcBsYhFNk/ulcqld/ApaV5ycXaOlK41REOyQ==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
-      '@typespec/compiler': ~0.63.0
-      '@typespec/http': ~0.63.0
+      '@typespec/compiler': ~0.64.0
+      '@typespec/http': ~0.64.0
 
   '@typespec/versioning@0.62.0':
     resolution: {integrity: sha512-M5KTCVH5fBniZU8eQlw+NV13vAmPr58HyBLDIyxeOuV+SHNlx+f+qanUEDIPaJheKlaSSNTEZKsDhs83/iIMMA==}
@@ -2435,7 +2438,7 @@ snapshots:
   '@types/trusted-types@2.0.7':
     optional: true
 
-  '@typespec/compiler@0.63.0':
+  '@typespec/compiler@0.64.0':
     dependencies:
       '@babel/code-frame': 7.25.9
       ajv: 8.17.1
@@ -2452,37 +2455,37 @@ snapshots:
       yaml: 2.5.1
       yargs: 17.7.2
 
-  '@typespec/http@0.63.0(@typespec/compiler@0.63.0)':
+  '@typespec/http@0.64.0(@typespec/compiler@0.64.0)':
     dependencies:
-      '@typespec/compiler': 0.63.0
+      '@typespec/compiler': 0.64.0
 
-  '@typespec/openapi3@0.63.0(@typespec/compiler@0.63.0)(@typespec/http@0.63.0(@typespec/compiler@0.63.0))(@typespec/openapi@0.62.0(@typespec/compiler@0.63.0)(@typespec/http@0.63.0(@typespec/compiler@0.63.0)))(@typespec/versioning@0.62.0(@typespec/compiler@0.63.0))':
+  '@typespec/openapi3@0.64.0(@typespec/compiler@0.64.0)(@typespec/http@0.64.0(@typespec/compiler@0.64.0))(@typespec/openapi@0.62.0(@typespec/compiler@0.64.0)(@typespec/http@0.64.0(@typespec/compiler@0.64.0)))(@typespec/versioning@0.62.0(@typespec/compiler@0.64.0))':
     dependencies:
       '@readme/openapi-parser': 2.6.0(openapi-types@12.1.3)
-      '@typespec/compiler': 0.63.0
-      '@typespec/http': 0.63.0(@typespec/compiler@0.63.0)
-      '@typespec/openapi': 0.62.0(@typespec/compiler@0.63.0)(@typespec/http@0.63.0(@typespec/compiler@0.63.0))
-      '@typespec/versioning': 0.62.0(@typespec/compiler@0.63.0)
+      '@typespec/compiler': 0.64.0
+      '@typespec/http': 0.64.0(@typespec/compiler@0.64.0)
+      '@typespec/openapi': 0.62.0(@typespec/compiler@0.64.0)(@typespec/http@0.64.0(@typespec/compiler@0.64.0))
+      '@typespec/versioning': 0.62.0(@typespec/compiler@0.64.0)
       openapi-types: 12.1.3
       yaml: 2.5.1
 
-  '@typespec/openapi@0.62.0(@typespec/compiler@0.63.0)(@typespec/http@0.63.0(@typespec/compiler@0.63.0))':
+  '@typespec/openapi@0.62.0(@typespec/compiler@0.64.0)(@typespec/http@0.64.0(@typespec/compiler@0.64.0))':
     dependencies:
-      '@typespec/compiler': 0.63.0
-      '@typespec/http': 0.63.0(@typespec/compiler@0.63.0)
+      '@typespec/compiler': 0.64.0
+      '@typespec/http': 0.64.0(@typespec/compiler@0.64.0)
 
-  '@typespec/prettier-plugin-typespec@0.63.0':
+  '@typespec/prettier-plugin-typespec@0.64.0':
     dependencies:
       prettier: 3.3.3
 
-  '@typespec/rest@0.63.0(@typespec/compiler@0.63.0)(@typespec/http@0.63.0(@typespec/compiler@0.63.0))':
+  '@typespec/rest@0.64.0(@typespec/compiler@0.64.0)(@typespec/http@0.64.0(@typespec/compiler@0.64.0))':
     dependencies:
-      '@typespec/compiler': 0.63.0
-      '@typespec/http': 0.63.0(@typespec/compiler@0.63.0)
+      '@typespec/compiler': 0.64.0
+      '@typespec/http': 0.64.0(@typespec/compiler@0.64.0)
 
-  '@typespec/versioning@0.62.0(@typespec/compiler@0.63.0)':
+  '@typespec/versioning@0.62.0(@typespec/compiler@0.64.0)':
     dependencies:
-      '@typespec/compiler': 0.63.0
+      '@typespec/compiler': 0.64.0
 
   '@webassemblyjs/ast@1.14.1':
     dependencies:
