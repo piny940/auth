@@ -11,6 +11,7 @@ ENV PNPM_HOME "/pnpm"
 ENV PATH "$PNPM_HOME:$PATH"
 
 RUN corepack enable
+RUN corepack --version
 
 ################################################################################
 FROM base AS deps
