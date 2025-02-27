@@ -12,7 +12,7 @@ runs:
     - name: Copy .env.sample
       shell: bash
       run: cp .env.sample .env.test && cp .env.sample .env
-    - uses: actions/cache@v4.2.1
+    - uses: actions/cache@v4.2.2
       with:
         path: ~/.local/share/aquaproj-aqua
         key: v1-aqua-installer-${{runner.os}}-${{runner.arch}}-${{hashFiles('aqua.yaml')}}
