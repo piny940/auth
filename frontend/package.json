@@ -18,8 +18,8 @@
     "@mui/material": "^6.1.8",
     "next": "15.2.4",
     "openapi-fetch": "^0.13.0",
-    "react": "19.0.0",
-    "react-dom": "19.0.0",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
     "react-hook-form": "^7.53.2"
   },
   "devDependencies": {
