@@ -34,7 +34,7 @@ importers:
         version: 19.1.0(react@19.1.0)
       react-hook-form:
         specifier: ^7.53.2
-        version: 7.56.1(react@19.1.0)
+        version: 7.56.2(react@19.1.0)
     devDependencies:
       '@eslint/eslintrc':
         specifier: ^3.2.0
@@ -1818,8 +1818,8 @@ packages:
     peerDependencies:
       react: ^19.1.0
 
-  react-hook-form@7.56.1:
-    resolution: {integrity: sha512-qWAVokhSpshhcEuQDSANHx3jiAEFzu2HAaaQIzi/r9FNPm1ioAvuJSD4EuZzWd7Al7nTRKcKPnBKO7sRn+zavQ==}
+  react-hook-form@7.56.2:
+    resolution: {integrity: sha512-vpfuHuQMF/L6GpuQ4c3ZDo+pRYxIi40gQqsCmmfUBwm+oqvBhKhwghCuj2o00YCgSfU6bR9KC/xnQGWm3Gr08A==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       react: ^16.8.0 || ^17 || ^18 || ^19
@@ -4183,7 +4183,7 @@ snapshots:
       react: 19.1.0
       scheduler: 0.26.0
 
-  react-hook-form@7.56.1(react@19.1.0):
+  react-hook-form@7.56.2(react@19.1.0):
     dependencies:
       react: 19.1.0
 
