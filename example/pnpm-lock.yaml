@@ -32,7 +32,7 @@ importers:
         version: 9.0.9
       '@types/node':
         specifier: ^20.17.0
-        version: 20.17.55
+        version: 20.17.56
       '@types/react':
         specifier: ^19.0.0
         version: 19.1.6
@@ -358,8 +358,8 @@ packages:
   '@types/ms@2.1.0':
     resolution: {integrity: sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA==}
 
-  '@types/node@20.17.55':
-    resolution: {integrity: sha512-ESpPDUEtW1a9nueMQtcTq/5iY/7osurPpBpFKH2VAyREKdzoFRRod6Oms0SSTfV7u52CcH7b6dFVnjfPD8fxWg==}
+  '@types/node@20.17.56':
+    resolution: {integrity: sha512-HQk2cDZsA+HYGyqCfWbScO+OUI9RKEZr/sqiASBFpeYoN4Ro3PyaApDG5ipcLY//PvQPhK/a3VsFq2NrQ+Zz1A==}
 
   '@types/react-dom@19.1.5':
     resolution: {integrity: sha512-CMCjrWucUBZvohgZxkjd6S9h0nZxXjzus6yDfUb+xLxYM7VvjKNH1tQrE9GWLql1XoOP4/Ds3bwFqShHUYraGg==}
@@ -2013,11 +2013,11 @@ snapshots:
   '@types/jsonwebtoken@9.0.9':
     dependencies:
       '@types/ms': 2.1.0
-      '@types/node': 20.17.55
+      '@types/node': 20.17.56
 
   '@types/ms@2.1.0': {}
 
-  '@types/node@20.17.55':
+  '@types/node@20.17.56':
     dependencies:
       undici-types: 6.19.8
 
