@@ -17,7 +17,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
-	"github.com/lestrrat-go/jwx/v3/jwk"
+	"github.com/lestrrat-go/jwx/v2/jwk"
 	"golang.org/x/crypto/bcrypt"
 )
 
