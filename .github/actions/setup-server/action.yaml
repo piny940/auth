@@ -28,7 +28,6 @@ runs:
         cache: true
     - run: go mod download
       shell: bash
-    - uses: ariga/setup-atlas@v0
     - uses: ariga/atlas-action/migrate/apply@v1
       with:
         dir: file://atlas/migrations
