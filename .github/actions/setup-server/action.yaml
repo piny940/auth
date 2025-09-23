@@ -20,7 +20,7 @@ runs:
           v1-aqua-installer-${{runner.os}}-${{runner.arch}}-
     - uses: aquaproj/aqua-installer@v4.0.2
       with:
-        aqua_version: v2.28.0
+        aqua_version: v2.43.1
     - name: Setup Go
       uses: actions/setup-go@v5
       with:
@@ -28,7 +28,6 @@ runs:
         cache: true
     - run: go mod download
       shell: bash
-    - uses: ariga/setup-atlas@v0
     - uses: ariga/atlas-action/migrate/apply@v1
       with:
         dir: file://atlas/migrations
