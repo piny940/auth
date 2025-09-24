@@ -20,5 +20,5 @@ export default defineConfig([
   stylistic.configs.recommended,
 
   includeIgnoreFile(gitignorePath, 'Imported .gitignore patterns'),
-  globalIgnores(['*.config.*']),
+  globalIgnores(['*.config.*', 'src/utils/api.d.ts']),
 ])
