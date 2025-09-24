@@ -1,9 +1,9 @@
 import js from '@eslint/js'
 import { FlatCompat } from '@eslint/eslintrc'
-import { includeIgnoreFile } from "@eslint/compat";
+import { includeIgnoreFile } from '@eslint/compat';
 import { defineConfig, globalIgnores } from 'eslint/config';
 import { fileURLToPath } from 'node:url';
-import path from "node:path";
+import path from 'node:path';
 import stylistic from '@stylistic/eslint-plugin'
 
 const __filename = fileURLToPath(import.meta.url);
