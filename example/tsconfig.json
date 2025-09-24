@@ -33,7 +33,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "eslint.config.js",
+    "eslint.config.mjs",
     "next.config.mjs"
   ],
   "exclude": [
