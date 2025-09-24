@@ -236,7 +236,7 @@ export interface components {
       name: string
       redirect_urls: string[]
     }
-    Approval: {
+    'Approval': {
       /** Format: int64 */
       id: number
       client: components['schemas']['PublicClient']
@@ -248,7 +248,7 @@ export interface components {
       client_id: string
       scope: string
     }
-    Client: {
+    'Client': {
       id: string
       name: string
       redirect_urls: string[]
@@ -301,7 +301,7 @@ export interface components {
     }
     /** @enum {string} */
     'OAuth.TokenTokenType': 'Bearer'
-    PublicClient: {
+    'PublicClient': {
       id: string
       name: string
     }
@@ -316,7 +316,7 @@ export interface components {
     'Session.MeRes': {
       user: components['schemas']['User'] | null
     }
-    User: {
+    'User': {
       /** Format: int64 */
       id: number
       name: string
@@ -776,7 +776,7 @@ export interface operations {
       200: {
         headers: {
           'cache-control': components['schemas']['OAuth.TokenCacheControlHeader']
-          pragma: components['schemas']['OAuth.TokenPragmaHeader']
+          'pragma': components['schemas']['OAuth.TokenPragmaHeader']
           [name: string]: unknown
         }
         content: {

@@ -31,7 +31,7 @@ export const ApprovalList = ({}: ApprovalListProps): JSX.Element => {
       }
       fetchApprovals()
     },
-    [fetchApprovals]
+    [fetchApprovals],
   )
   const router = useRouter()
 
@@ -45,9 +45,9 @@ export const ApprovalList = ({}: ApprovalListProps): JSX.Element => {
 
   return (
     <List>
-      {approvals.map((approval) => (
+      {approvals.map(approval => (
         <ListItem
-          secondaryAction={
+          secondaryAction={(
             <Button
               onClick={() => deleteApproval(approval.id)}
               size="small"
@@ -56,7 +56,7 @@ export const ApprovalList = ({}: ApprovalListProps): JSX.Element => {
             >
               連携解除
             </Button>
-          }
+          )}
           key={approval.id}
           sx={{
             bgcolor: 'white',

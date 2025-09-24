@@ -2,6 +2,7 @@
   "name": "auth",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "packageManager": "pnpm@10.12.4",
   "scripts": {
     "dev": "next dev --turbopack --port 3001",
@@ -12,33 +13,27 @@
     "lint-check": "npx prettier -c . & npx eslint ."
   },
   "dependencies": {
-    "@emotion/react": "^11.13.5",
-    "@emotion/styled": "^11.13.5",
-    "@mui/icons-material": "^7.0.0",
-    "@mui/material": "^7.0.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^7.3.2",
+    "@mui/material": "^7.3.2",
     "next": "15.3.5",
     "openapi-fetch": "^0.14.0",
     "react": "19.1.1",
     "react-dom": "19.1.1",
-    "react-hook-form": "^7.53.2"
+    "react-hook-form": "^7.63.0"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.2.0",
-    "@eslint/js": "^9.18.0",
-    "@types/node": "^20.17.0",
+    "@eslint/compat": "^1.4.0",
+    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/js": "^9.36.0",
+    "@stylistic/eslint-plugin": "^5.4.0",
+    "@types/node": "^20.19.17",
     "@types/react": "19.1.13",
     "@types/react-dom": "19.1.9",
-    "dotenv": "^17.0.0",
-    "eslint": "^9.18.0",
-    "eslint-config-love": "^119.0.0",
+    "eslint": "^9.36.0",
     "eslint-config-next": "15.3.5",
-    "eslint-config-prettier": "^10.0.0",
-    "eslint-plugin-prettier": "^5.2.1",
-    "eslint-plugin-promise": "^7.1.0",
-    "eslint-plugin-react": "^7.37.2",
-    "globals": "^16.0.0",
-    "openapi-typescript": "^7.4.3",
-    "prettier": "^3.3.3",
-    "typescript": "^5.6.3"
+    "openapi-typescript": "^7.9.1",
+    "typescript": "^5.9.2"
   }
 }
