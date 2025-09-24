@@ -15,7 +15,7 @@
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^7.3.2",
     "@mui/material": "^7.3.2",
-    "next": "15.3.5",
+    "next": "15.4.5",
     "openapi-fetch": "^0.14.0",
     "react": "19.1.1",
     "react-dom": "19.1.1",
@@ -30,7 +30,7 @@
     "@types/react": "19.1.13",
     "@types/react-dom": "19.1.9",
     "eslint": "^9.36.0",
-    "eslint-config-next": "15.3.5",
+    "eslint-config-next": "15.4.5",
     "openapi-typescript": "^7.9.1",
     "typescript": "^5.9.2"
   }
