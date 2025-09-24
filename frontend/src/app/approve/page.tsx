@@ -30,11 +30,17 @@ export default async function Page(props: Props) {
         gutterBottom
         mt={5}
       >
-        Will you authorize client: {data.client.name} ?
+        Will you authorize client:
+        {' '}
+        {data.client.name}
+        {' '}
+        ?
       </Typography>
       <Box sx={{ '> *': { margin: 2 } }}>
         <Typography component="p" mt={2}>
-          Scope: {query.scope}
+          Scope:
+          {' '}
+          {query.scope}
         </Typography>
         <ApproveButton
           clientID={query.client_id}

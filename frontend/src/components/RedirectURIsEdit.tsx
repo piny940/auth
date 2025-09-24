@@ -21,7 +21,7 @@ export interface RedirectURIsFields extends FieldValues {
   redirectURIs: Array<{ url: string }>
 }
 export type RedirectURIsEditProps = {
-  control: Control<RedirectURIsFields, any>
+  control: Control<RedirectURIsFields>
 }
 export const RedirectURIsEdit = ({
   control,

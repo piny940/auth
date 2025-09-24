@@ -15,7 +15,9 @@ export default function Page() {
   return (
     <Box sx={{ '> *': { margin: 2 } }}>
       <Typography mb={4} variant="h4">
-        ダッシュボード - {user.name}
+        ダッシュボード -
+        {' '}
+        {user.name}
       </Typography>
       <Box p={4} borderRadius={2} maxWidth={800} bgcolor={blueGrey[50]}>
         <Box display="flex" alignItems="center" mb={1}>

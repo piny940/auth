@@ -31,17 +31,21 @@ export const SignupForm = ({ next }: SignupFormProps): JSX.Element => {
           password_confirmation: data.passwordConfirmation,
         },
       })
-      if (!!error) {
+      if (error) {
         if (error.error === 'name_already_used') {
           setError('name', { message: error.error })
-        } else if (error.error === 'password_length_not_enough') {
+        }
+        else if (error.error === 'password_length_not_enough') {
           setError('password', { message: error.error_description })
-        } else if (error.error === 'password_confirmation_not_match') {
+        }
+        else if (error.error === 'password_confirmation_not_match') {
           setError('password', { message: error.error_description })
           setError('passwordConfirmation', { message: error.error_description })
-        } else if (error.error === 'name_length_not_enough') {
+        }
+        else if (error.error === 'name_length_not_enough') {
           setError('name', { message: error.error_description })
-        } else {
+        }
+        else {
           setError('name', { message: error.error_description })
           setError('password', { message: error.error_description })
           setError('passwordConfirmation', { message: error.error_description })
@@ -51,7 +55,7 @@ export const SignupForm = ({ next }: SignupFormProps): JSX.Element => {
       refresh()
       router.push(next)
     },
-    [setError, refresh, router, next]
+    [setError, refresh, router, next],
   )
   return (
     <Box

@@ -1,13 +1,13 @@
 model User {
-  @visibility("read", "update")
+  @visibility(Lifecycle.Read, Lifecycle.Update)
   id: int64;
 
   name: string;
 
-  @visibility("create")
+  @visibility(Lifecycle.Create)
   password: string;
 
-  @visibility("create")
+  @visibility(Lifecycle.Create)
   password_confirmation: string;
 }
 model Client {

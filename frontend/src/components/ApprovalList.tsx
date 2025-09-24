@@ -1,12 +1,10 @@
 import { Approval } from '@/utils/types'
 import { Button, List, ListItem, Typography } from '@mui/material'
-import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState, JSX } from 'react'
 import { useUser } from '@/context/user'
 import { client } from '@/utils/client'
 
-type ApprovalListProps = {}
-export const ApprovalList = ({}: ApprovalListProps): JSX.Element => {
+export const ApprovalList = (): JSX.Element => {
   const [approvals, setApprovals] = useState<Approval[]>([])
   const { user } = useUser()
   const fetchApprovals = useCallback(async () => {
@@ -31,9 +29,8 @@ export const ApprovalList = ({}: ApprovalListProps): JSX.Element => {
       }
       fetchApprovals()
     },
-    [fetchApprovals]
+    [fetchApprovals],
   )
-  const router = useRouter()
 
   useEffect(() => {
     fetchApprovals()
@@ -45,9 +42,9 @@ export const ApprovalList = ({}: ApprovalListProps): JSX.Element => {
 
   return (
     <List>
-      {approvals.map((approval) => (
+      {approvals.map(approval => (
         <ListItem
-          secondaryAction={
+          secondaryAction={(
             <Button
               onClick={() => deleteApproval(approval.id)}
               size="small"
@@ -56,7 +53,7 @@ export const ApprovalList = ({}: ApprovalListProps): JSX.Element => {
             >
               連携解除
             </Button>
-          }
+          )}
           key={approval.id}
           sx={{
             bgcolor: 'white',

@@ -27,7 +27,7 @@ export const LoginForm = ({ next }: LoginFormProps): JSX.Element => {
       const { error } = await client.POST('/session', {
         body: { name: data.name, password: data.password },
       })
-      if (!!error) {
+      if (error) {
         setError('name', { message: error.error_description })
         setError('password', { message: error.error_description })
         return
@@ -35,7 +35,7 @@ export const LoginForm = ({ next }: LoginFormProps): JSX.Element => {
       refresh()
       router.push(next)
     },
-    [setError, refresh, router, next]
+    [setError, refresh, router, next],
   )
 
   return (

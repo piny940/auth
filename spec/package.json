@@ -6,25 +6,22 @@
   "scripts": {
     "compile": "tsp compile .",
     "dev": "tsp compile . --watch",
-    "doc": "redocly preview-docs schema/@typespec/openapi3/openapi.yaml",
+    "doc": "npx @redocly/cli preview -d schema/@typespec/openapi3",
     "export": "npx @redocly/cli build-docs schema/@typespec/openapi3/openapi.yaml -o out/index.html",
     "lint": "tsp format '**/*.tsp'",
     "lint-check": "tsp format --check '**/*.tsp'"
   },
   "peerDependencies": {
-    "@redocly/cli": "^1.25.7",
-    "@typespec/compiler": "^0.62.0 || ^0.63.0 || ^0.64.0 || ^0.65.0 || ^0.66.0 || ^0.67.0 || ^1.0.0",
-    "@typespec/http": "^0.62.0 || ^0.63.0 || ^0.64.0 || ^0.65.0 || ^0.66.0 || ^0.67.0 || ^1.0.0",
-    "@typespec/openapi3": "^0.62.0 || ^0.63.0 || ^0.64.0 || ^0.65.0 || ^0.66.0 || ^0.67.0 || ^1.0.0",
-    "@typespec/rest": "^0.62.0 || ^0.63.0 || ^0.64.0 || ^0.65.0 || ^0.66.0 || ^0.67.0 || ^0.68.0 || ^0.69.0 || ^0.70.0 || ^0.71.0 || ^0.74.0"
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "@typespec/compiler": "latest",
-    "@typespec/http": "latest",
-    "@typespec/openapi3": "latest",
+    "@redocly/cli": "^2.2.0",
+    "@typespec/compiler": "1.4.0",
+    "@typespec/http": "1.4.0",
+    "@typespec/openapi3": "1.4.0",
     "@typespec/prettier-plugin-typespec": "^1.0.0",
-    "@typespec/rest": "latest",
-    "redoc-cli": "^0.13.21"
+    "@typespec/rest": "0.74.0"
   },
   "private": true
 }

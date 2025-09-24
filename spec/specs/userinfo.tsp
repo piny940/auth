@@ -8,7 +8,7 @@ using TypeSpec.Rest;
 namespace Auth.Userinfo;
 
 model UserinfoRes {
-  sub: string;
+  `sub`: string;
   name?: string;
 }
 

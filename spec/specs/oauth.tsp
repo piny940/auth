@@ -11,12 +11,12 @@ enum AuthorizeResponseType {
   code,
 }
 model AuthorizeReq {
-  response_type: AuthorizeResponseType;
-  client_id: string;
-  redirect_uri: string;
-  scope: string;
-  state?: string;
-  max_age?: int32;
+  response_type: HttpPart<AuthorizeResponseType>;
+  client_id: HttpPart<string>;
+  redirect_uri: HttpPart<string>;
+  scope: HttpPart<string>;
+  state?: HttpPart<string>;
+  max_age?: HttpPart<int32>;
 }
 enum AuthorizeErr {
   invalid_request,
@@ -85,7 +85,7 @@ interface OAuthInterface {
   @summary("Authorization Request")
   postAuthorize(
     @header contentType: "multipart/form-data",
-    @body body: AuthorizeReq,
+    @multipartBody body: AuthorizeReq,
   ): {
     @statusCode statusCode: 204;
   } | {

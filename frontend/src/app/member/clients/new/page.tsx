@@ -16,14 +16,14 @@ export default function Page() {
       redirectUris: [],
     },
   })
-  const { control: redirectURIsControl, getValues: getRedirectURIsValues } =
-    useForm<RedirectURIsFields>({
+  const { control: redirectURIsControl, getValues: getRedirectURIsValues }
+    = useForm<RedirectURIsFields>({
       defaultValues: {
         redirectURIs: [],
       },
     })
-  const [created, setCreated] = useState<{ id: string; secret: string } | null>(
-    null
+  const [created, setCreated] = useState<{ id: string, secret: string } | null>(
+    null,
   )
   const submit = useCallback(async () => {
     const c = getValues()
@@ -32,7 +32,7 @@ export default function Page() {
       body: {
         client: {
           name: c.name,
-          redirect_urls: redirectURIs.redirectURIs.map((r) => r.url),
+          redirect_urls: redirectURIs.redirectURIs.map(r => r.url),
         },
       },
     })
@@ -45,49 +45,51 @@ export default function Page() {
   return (
     <Box>
       <Typography variant="h4">New Client</Typography>
-      {created ? (
-        <Box m={2}>
-          <Typography variant="h5">Clientを作成しました。</Typography>
-          <Typography component="p">
-            Secretは後で確認できません。必ず保存してください。
-          </Typography>
-          <Box m={2}>
-            <Typography>
-              Client ID:
-              <Typography component="span">
-                <IconButton
-                  onClick={() => navigator.clipboard.writeText(created.id)}
-                >
-                  <CopyIcon />
-                </IconButton>
-                {created.id}
+      {created
+        ? (
+            <Box m={2}>
+              <Typography variant="h5">Clientを作成しました。</Typography>
+              <Typography component="p">
+                Secretは後で確認できません。必ず保存してください。
               </Typography>
-            </Typography>
-            <Typography>
-              Client Secret:
-              <Typography component="span">
-                <IconButton
-                  onClick={() => navigator.clipboard.writeText(created.secret)}
-                >
-                  <CopyIcon />
-                </IconButton>
-                {created.secret}
-              </Typography>
-            </Typography>
-          </Box>
-          <Link href="/member">
-            <Typography sx={{ color: blue[700] }}>
-              Back to member page
-            </Typography>
-          </Link>
-        </Box>
-      ) : (
-        <ClientForm
-          control={control}
-          redirectURIsControl={redirectURIsControl}
-          submit={handleSubmit(submit)}
-        />
-      )}
+              <Box m={2}>
+                <Typography>
+                  Client ID:
+                  <Typography component="span">
+                    <IconButton
+                      onClick={() => navigator.clipboard.writeText(created.id)}
+                    >
+                      <CopyIcon />
+                    </IconButton>
+                    {created.id}
+                  </Typography>
+                </Typography>
+                <Typography>
+                  Client Secret:
+                  <Typography component="span">
+                    <IconButton
+                      onClick={() => navigator.clipboard.writeText(created.secret)}
+                    >
+                      <CopyIcon />
+                    </IconButton>
+                    {created.secret}
+                  </Typography>
+                </Typography>
+              </Box>
+              <Link href="/member">
+                <Typography sx={{ color: blue[700] }}>
+                  Back to member page
+                </Typography>
+              </Link>
+            </Box>
+          )
+        : (
+            <ClientForm
+              control={control}
+              redirectURIsControl={redirectURIsControl}
+              submit={handleSubmit(submit)}
+            />
+          )}
     </Box>
   )
 }

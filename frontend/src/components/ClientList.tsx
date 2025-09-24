@@ -8,8 +8,7 @@ import { useCallback, useEffect, useState, JSX } from 'react'
 import { useUser } from '@/context/user'
 import { client } from '@/utils/client'
 
-type ClientListProps = {}
-export const ClientList = ({}: ClientListProps): JSX.Element => {
+export const ClientList = (): JSX.Element => {
   const [clients, setClients] = useState<Client[]>([])
   const { user } = useUser()
   const fetchClients = useCallback(async () => {
@@ -34,7 +33,7 @@ export const ClientList = ({}: ClientListProps): JSX.Element => {
       }
       fetchClients()
     },
-    [fetchClients]
+    [fetchClients],
   )
   const router = useRouter()
   const [copiedClient, setCopiedClient] = useState<string | null>(null)
@@ -52,7 +51,7 @@ export const ClientList = ({}: ClientListProps): JSX.Element => {
       }, 3000)
       setCopiedTimer(timer)
     },
-    [copiedTimer, setCopiedClient, setCopiedTimer]
+    [copiedTimer, setCopiedClient, setCopiedTimer],
   )
 
   useEffect(() => {
@@ -65,9 +64,9 @@ export const ClientList = ({}: ClientListProps): JSX.Element => {
 
   return (
     <List>
-      {clients.map((client) => (
+      {clients.map(client => (
         <ListItem
-          secondaryAction={
+          secondaryAction={(
             <Box>
               <IconButton
                 sx={{ marginX: 1 }}
@@ -85,7 +84,7 @@ export const ClientList = ({}: ClientListProps): JSX.Element => {
                 <DeleteIcon />
               </IconButton>
             </Box>
-          }
+          )}
           key={client.id}
           sx={{
             bgcolor: 'white',

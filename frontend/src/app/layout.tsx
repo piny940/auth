@@ -1,8 +1,7 @@
 import type { Metadata } from 'next'
 import localFont from 'next/font/local'
 import './globals.css'
-import { AppBar, Box, Container, Toolbar, Typography } from '@mui/material'
-import Link from 'next/link'
+import { Box } from '@mui/material'
 import { Header } from '@/components/Header'
 import { UserProvider } from '@/context/user'
 

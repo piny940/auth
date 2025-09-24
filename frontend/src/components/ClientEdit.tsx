@@ -20,16 +20,16 @@ export const ClientEdit = ({ client }: ClientEditProps) => {
       redirectUris: client.redirect_urls,
     },
   })
-  const { control: redirectURIsControl, getValues: getRedirectURIsValues } =
-    useForm<RedirectURIsFields>({
+  const { control: redirectURIsControl, getValues: getRedirectURIsValues }
+    = useForm<RedirectURIsFields>({
       defaultValues: {
-        redirectURIs: client.redirect_urls.map((url) => ({ url })),
+        redirectURIs: client.redirect_urls.map(url => ({ url })),
       },
     })
   const router = useRouter()
   const submit = useCallback(async () => {
     const newClient = getValues()
-    const urls = getRedirectURIsValues().redirectURIs.map((uri) => uri.url)
+    const urls = getRedirectURIsValues().redirectURIs.map(uri => uri.url)
     const { error } = await apiClient.POST('/account/clients/{id}', {
       params: { path: { id: client.id } },
       body: {
