@@ -8,8 +8,7 @@ import { useCallback, useEffect, useState, JSX } from 'react'
 import { useUser } from '@/context/user'
 import { client } from '@/utils/client'
 
-type ClientListProps = {}
-export const ClientList = ({}: ClientListProps): JSX.Element => {
+export const ClientList = (): JSX.Element => {
   const [clients, setClients] = useState<Client[]>([])
   const { user } = useUser()
   const fetchClients = useCallback(async () => {
