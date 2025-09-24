@@ -14,7 +14,7 @@ import "./specs/userinfo.tsp";
 import "./specs/healthz.tsp";
 
 using TypeSpec.Http;
-@service({
+@service(#{
   title: "Auth",
 })
 @server("https://auth.piny940.com/api/v1", "Auth Server")

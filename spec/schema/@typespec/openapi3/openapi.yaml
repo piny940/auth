@@ -373,7 +373,12 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/OAuth.AuthorizeReqMultiPart'
+              $ref: '#/components/schemas/OAuth.AuthorizeReq'
+            encoding:
+              response_type:
+                contentType: application/json
+              max_age:
+                contentType: text/plain
   /oauth/jwks:
     get:
       operationId: OAuthInterface_getJwks
@@ -652,13 +657,8 @@ components:
         - invalid_scope
         - server_error
         - temporarily_unavailable
-    OAuth.AuthorizeReqMultiPart:
+    OAuth.AuthorizeReq:
       type: object
-      required:
-        - response_type
-        - client_id
-        - redirect_uri
-        - scope
       properties:
         response_type:
           $ref: '#/components/schemas/OAuth.AuthorizeResponseType'
@@ -673,6 +673,11 @@ components:
         max_age:
           type: integer
           format: int32
+      required:
+        - response_type
+        - client_id
+        - redirect_uri
+        - scope
     OAuth.AuthorizeResponseType:
       type: string
       enum:
@@ -812,10 +817,10 @@ components:
       name: auth
     BasicAuth:
       type: http
-      scheme: basic
+      scheme: Basic
     BearerAuth:
       type: http
-      scheme: bearer
+      scheme: Bearer
 servers:
   - url: https://auth.piny940.com/api/v1
     description: Auth Server
