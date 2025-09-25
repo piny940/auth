@@ -241,3 +241,25 @@ jobs:
       - name: Build Test
         run: cd example && pnpm build
 
+  build-doc:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: "spec/package.json"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+          cache-dependency-path: "spec/package.json"
+      - name: Build doc
+        run: cd spec && pnpm run export
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          command: |
+            pages deploy --project-name=auth-doc spec/out
+      - run: ls -al spec
+
