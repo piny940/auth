@@ -19,7 +19,7 @@ jobs:
       spec: ${{ steps.filter.outputs.spec }}
       example: ${{ steps.filter.outputs.example }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dorny/paths-filter@v3
         id: filter
         with:
@@ -38,7 +38,7 @@ jobs:
     if: github.event_name == 'pull_request'
     environment: staging # 管理者の承認を必要とする
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/docker-build
         with:
           gh-token: ${{ secrets.GITHUB_TOKEN }}
@@ -50,7 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/docker-build
         with:
           gh-token: ${{ secrets.GITHUB_TOKEN }}
@@ -65,7 +65,7 @@ jobs:
     if: github.event_name == 'pull_request' && needs.filter.outputs.frontend == 'true'
     environment: staging # 管理者の承認を必要とする
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/docker-build
         with:
           gh-token: ${{ secrets.GITHUB_TOKEN }}
@@ -80,7 +80,7 @@ jobs:
     needs: filter
     if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.filter.outputs.frontend == 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/docker-build
         with:
           gh-token: ${{ secrets.GITHUB_TOKEN }}
@@ -97,7 +97,7 @@ jobs:
     if: github.event_name == 'pull_request' && needs.filter.outputs.example == 'true'
     environment: staging # 管理者の承認を必要とする
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/docker-build
         with:
           gh-token: ${{ secrets.GITHUB_TOKEN }}
@@ -110,7 +110,7 @@ jobs:
     needs: filter
     if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.filter.outputs.example == 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/docker-build
         with:
           gh-token: ${{ secrets.GITHUB_TOKEN }}

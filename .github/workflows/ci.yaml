@@ -17,7 +17,7 @@ jobs:
       spec: ${{ steps.filter.outputs.spec }}
       example: ${{ steps.filter.outputs.example }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dorny/paths-filter@v3
         id: filter
         with:
@@ -43,7 +43,7 @@ jobs:
           - 5432:5432
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-server
         with:
           go-version: ${{ env.GO_VERSION }}
@@ -60,7 +60,7 @@ jobs:
           - 5432:5432
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-server
         with:
           go-version: ${{ env.GO_VERSION }}
@@ -79,7 +79,7 @@ jobs:
           - 5432:5432
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-server
         with:
           go-version: ${{ env.GO_VERSION }}
@@ -97,7 +97,7 @@ jobs:
           - 5432:5432
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-server
         with:
           go-version: ${{ env.GO_VERSION }}
@@ -109,7 +109,7 @@ jobs:
     needs: filter
     if: ${{ needs.filter.outputs.frontend == 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
         with:
           package_json_file: "frontend/package.json"
@@ -126,7 +126,7 @@ jobs:
     needs: filter
     if: ${{ needs.filter.outputs.frontend == 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
         with:
           package_json_file: "frontend/package.json"
@@ -158,7 +158,7 @@ jobs:
     needs: filter
     if: ${{ needs.filter.outputs.spec == 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
         with:
           package_json_file: "spec/package.json"
@@ -175,7 +175,7 @@ jobs:
     needs: filter
     if: ${{ needs.filter.outputs.spec == 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
         with:
           package_json_file: "spec/package.json"
@@ -193,7 +193,7 @@ jobs:
     needs: filter
     if: ${{ needs.filter.outputs.spec == 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
         with:
           package_json_file: "spec/package.json"
@@ -211,7 +211,7 @@ jobs:
     needs: filter
     if: ${{ needs.filter.outputs.example == 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
         with:
           package_json_file: "example/package.json"
@@ -228,7 +228,7 @@ jobs:
     needs: filter
     if: ${{ needs.filter.outputs.example == 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
         with:
           package_json_file: "example/package.json"
