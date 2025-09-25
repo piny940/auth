@@ -46,7 +46,6 @@ jobs:
           github-actor: ${{ github.actor }}
           tags: ghcr.io/${{ github.repository }}-backend:1.0.${{ github.run_number }}
           path: "."
-          cache-registry: ghcr.io/${{ github.repository }}-backend:buildcache
   prd-build-frontend:
     runs-on: ubuntu-latest
     environment: production
@@ -62,7 +61,6 @@ jobs:
           path: "./frontend"
           build-args: |
             NEXT_PUBLIC_API_URL=https://auth.piny940.com/api/v1
-          cache-registry: ghcr.io/${{ github.repository }}-frontend:buildcache
   prd-build-example:
     runs-on: ubuntu-latest
     environment: production
@@ -78,7 +76,6 @@ jobs:
           path: "./example"
           build-args: |
             NEXT_PUBLIC_API_URL=https://auth.piny940.com/api/v1
-          cache-registry: ghcr.io/${{ github.repository }}-example:buildcache
 
   build-doc:
     runs-on: ubuntu-latest
