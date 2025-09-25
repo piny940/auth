@@ -7,7 +7,7 @@ toolchain go1.25.1
 require (
 	github.com/getkin/kin-openapi v0.133.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
-	github.com/google/wire v0.6.0
+	github.com/google/wire v0.7.0
 	github.com/gorilla/sessions v1.4.0
 	github.com/joho/godotenv v1.5.1
 	github.com/kelseyhightower/envconfig v1.4.0
