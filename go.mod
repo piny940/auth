@@ -1,8 +1,6 @@
 module auth
 
-go 1.24.4
-
-toolchain go1.25.1
+go 1.25.1
 
 require (
 	github.com/getkin/kin-openapi v0.133.0
