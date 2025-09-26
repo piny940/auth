@@ -12,15 +12,15 @@
     "lint-check": "tsp format --check '**/*.tsp'"
   },
   "peerDependencies": {
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
   },
   "devDependencies": {
-    "@redocly/cli": "^2.2.0",
+    "@redocly/cli": "2.2.0",
     "@typespec/compiler": "1.4.0",
     "@typespec/http": "1.4.0",
     "@typespec/openapi3": "1.4.0",
-    "@typespec/prettier-plugin-typespec": "^1.0.0",
+    "@typespec/prettier-plugin-typespec": "1.0.0",
     "@typespec/rest": "0.74.0"
   },
   "private": true

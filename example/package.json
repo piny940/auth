@@ -10,24 +10,24 @@
     "lint": "eslint . --max-warnings 0"
   },
   "dependencies": {
-    "jsonwebtoken": "^9.0.2",
+    "jsonwebtoken": "9.0.2",
     "next": "15.5.4",
     "react": "19.1.1",
     "react-dom": "19.1.1"
   },
   "devDependencies": {
-    "@eslint/compat": "^1.4.0",
-    "@eslint/eslintrc": "^3.3.1",
-    "@eslint/js": "^9.36.0",
-    "@stylistic/eslint-plugin": "^5.4.0",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^22.0.0",
-    "@types/react": "^19.1.13",
-    "@types/react-dom": "^19.1.9",
-    "eslint": "^9.36.0",
+    "@eslint/compat": "1.4.0",
+    "@eslint/eslintrc": "3.3.1",
+    "@eslint/js": "9.36.0",
+    "@stylistic/eslint-plugin": "5.4.0",
+    "@types/jsonwebtoken": "9.0.10",
+    "@types/node": "22.0.0",
+    "@types/react": "19.1.13",
+    "@types/react-dom": "19.1.9",
+    "eslint": "9.36.0",
     "eslint-config-next": "15.5.4",
-    "postcss": "^8.5.6",
-    "tailwindcss": "^3.4.17",
+    "postcss": "8.5.6",
+    "tailwindcss": "3.4.17",
     "typescript": "5.9.2"
   }
 }
