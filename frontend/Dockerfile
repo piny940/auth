@@ -1,12 +1,12 @@
 # syntax=docker/dockerfile:1
 
 ################################################################################
-FROM node:22.20.0-alpine AS base
+FROM node:22.20.0-slim AS base
 
 WORKDIR /usr/src/app
 
-ENV PNPM_HOME "/pnpm"
-ENV PATH "$PNPM_HOME:$PATH"
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
 
 RUN corepack enable
 
@@ -26,14 +26,14 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
 COPY . .
 ARG NEXT_PUBLIC_API_URL
-ENV NEXT_PUBLIC_API_URL ${NEXT_PUBLIC_API_URL}
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 
 RUN pnpm run build
 
 ################################################################################
 FROM base AS final
 
-ENV NODE_ENV production
+ENV NODE_ENV=production
 RUN chown node:node -R /usr/src/app
 
 USER node
