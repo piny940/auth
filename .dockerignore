@@ -28,3 +28,6 @@ go.work
 
 .env
 .env.test
+
+frontend/
+example/
