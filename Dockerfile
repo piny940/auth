@@ -7,7 +7,7 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o main /app/cmd/main.go
+RUN CGO_ENABLED=0 go build -o main /app/cmd/main.go
 
 FROM scratch AS final
 
