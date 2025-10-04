@@ -19,7 +19,7 @@
     "openapi-fetch": "0.14.1",
     "react": "19.2.0",
     "react-dom": "19.2.0",
-    "react-hook-form": "7.63.0"
+    "react-hook-form": "7.64.0"
   },
   "devDependencies": {
     "@eslint/compat": "1.4.0",
