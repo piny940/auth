@@ -18,7 +18,7 @@ require (
 	golang.org/x/crypto v0.43.0
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gen v0.3.27
-	gorm.io/gorm v1.31.0
+	gorm.io/gorm v1.31.1
 	gorm.io/plugin/dbresolver v1.6.2
 )
 
