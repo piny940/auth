@@ -31,8 +31,8 @@ importers:
         specifier: 1.6.0
         version: 1.6.0
       '@typespec/rest':
-        specifier: 0.75.0
-        version: 0.75.0(@typespec/compiler@1.6.0(@types/node@24.5.2))(@typespec/http@1.6.0(@typespec/compiler@1.6.0(@types/node@24.5.2)))
+        specifier: 0.76.0
+        version: 0.76.0(@typespec/compiler@1.6.0(@types/node@24.5.2))(@typespec/http@1.6.0(@typespec/compiler@1.6.0(@types/node@24.5.2)))
 
 packages:
 
@@ -451,12 +451,12 @@ packages:
   '@typespec/prettier-plugin-typespec@1.6.0':
     resolution: {integrity: sha512-t7cx93fZjfYzZ9Hd/pEj/qdvmsLIVNS7env3I351BTqEWHR/01nXn1/VZi9t5eMvl1SBhKUsI/Pz49pYnuuCfw==}
 
-  '@typespec/rest@0.75.0':
-    resolution: {integrity: sha512-rQ+RP0kcrKWjbpCIkBd8hpxYSNc3CfQxl0MLP1+MYGRHlHL8ss4xbwdANIYZXZZ2i2Hqt19B7cEUGD4MLoCHvw==}
+  '@typespec/rest@0.76.0':
+    resolution: {integrity: sha512-6jtQWdcmuKyG9cmqWsJjaq64f6N5B/1DS4X3ZoTNgYhHA27Hnsxo1HZWXcpv7Wl+MxLAZM6kgpML0ugDEZcrYQ==}
     engines: {node: '>=20.0.0'}
     peerDependencies:
-      '@typespec/compiler': ^1.5.0
-      '@typespec/http': ^1.5.0
+      '@typespec/compiler': ^1.6.0
+      '@typespec/http': ^1.6.0
 
   abort-controller@3.0.0:
     resolution: {integrity: sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg==}
@@ -1928,7 +1928,7 @@ snapshots:
     dependencies:
       prettier: 3.6.2
 
-  '@typespec/rest@0.75.0(@typespec/compiler@1.6.0(@types/node@24.5.2))(@typespec/http@1.6.0(@typespec/compiler@1.6.0(@types/node@24.5.2)))':
+  '@typespec/rest@0.76.0(@typespec/compiler@1.6.0(@types/node@24.5.2))(@typespec/http@1.6.0(@typespec/compiler@1.6.0(@types/node@24.5.2)))':
     dependencies:
       '@typespec/compiler': 1.6.0(@types/node@24.5.2)
       '@typespec/http': 1.6.0(@typespec/compiler@1.6.0(@types/node@24.5.2))
