@@ -20,7 +20,7 @@
     "@typespec/compiler": "1.6.0",
     "@typespec/http": "1.6.0",
     "@typespec/openapi3": "1.6.0",
-    "@typespec/prettier-plugin-typespec": "1.5.0",
+    "@typespec/prettier-plugin-typespec": "1.6.0",
     "@typespec/rest": "0.75.0"
   },
   "private": true
