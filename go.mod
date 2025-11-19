@@ -15,7 +15,7 @@ require (
 	github.com/oapi-codegen/echo-middleware v1.0.2
 	github.com/oapi-codegen/oapi-codegen/v2 v2.5.0
 	github.com/oapi-codegen/runtime v1.1.2
-	golang.org/x/crypto v0.44.0
+	golang.org/x/crypto v0.45.0
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gen v0.3.27
 	gorm.io/gorm v1.31.1
@@ -63,7 +63,7 @@ require (
 	github.com/vmware-labs/yaml-jsonpath v0.3.2 // indirect
 	github.com/woodsbury/decimal128 v1.3.0 // indirect
 	golang.org/x/mod v0.29.0 // indirect
-	golang.org/x/net v0.46.0 // indirect
+	golang.org/x/net v0.47.0 // indirect
 	golang.org/x/sync v0.18.0 // indirect
 	golang.org/x/sys v0.38.0 // indirect
 	golang.org/x/text v0.31.0 // indirect
