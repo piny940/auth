@@ -19,7 +19,7 @@
     "@redocly/cli": "2.12.5",
     "@typespec/compiler": "1.7.0",
     "@typespec/http": "1.7.0",
-    "@typespec/openapi3": "1.6.0",
+    "@typespec/openapi3": "1.7.0",
     "@typespec/prettier-plugin-typespec": "1.7.0",
     "@typespec/rest": "0.77.0"
   },
