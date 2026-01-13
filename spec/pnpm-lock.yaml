@@ -19,20 +19,20 @@ importers:
         specifier: 2.14.5
         version: 2.14.5(@opentelemetry/api@1.9.0)(core-js@3.39.0)(encoding@0.1.13)
       '@typespec/compiler':
-        specifier: 1.7.1
-        version: 1.7.1(@types/node@24.5.2)
+        specifier: 1.8.0
+        version: 1.8.0(@types/node@24.5.2)
       '@typespec/http':
         specifier: 1.7.0
-        version: 1.7.0(@typespec/compiler@1.7.1(@types/node@24.5.2))
+        version: 1.7.0(@typespec/compiler@1.8.0(@types/node@24.5.2))
       '@typespec/openapi3':
         specifier: 1.7.0
-        version: 1.7.0(@typespec/compiler@1.7.1(@types/node@24.5.2))(@typespec/http@1.7.0(@typespec/compiler@1.7.1(@types/node@24.5.2)))(@typespec/openapi@1.4.0(@typespec/compiler@1.7.1(@types/node@24.5.2))(@typespec/http@1.7.0(@typespec/compiler@1.7.1(@types/node@24.5.2))))
+        version: 1.7.0(@typespec/compiler@1.8.0(@types/node@24.5.2))(@typespec/http@1.7.0(@typespec/compiler@1.8.0(@types/node@24.5.2)))(@typespec/openapi@1.4.0(@typespec/compiler@1.8.0(@types/node@24.5.2))(@typespec/http@1.7.0(@typespec/compiler@1.8.0(@types/node@24.5.2))))
       '@typespec/prettier-plugin-typespec':
         specifier: 1.7.0
         version: 1.7.0
       '@typespec/rest':
         specifier: 0.77.0
-        version: 0.77.0(@typespec/compiler@1.7.1(@types/node@24.5.2))(@typespec/http@1.7.0(@typespec/compiler@1.7.1(@types/node@24.5.2)))
+        version: 0.77.0(@typespec/compiler@1.8.0(@types/node@24.5.2))(@typespec/http@1.7.0(@typespec/compiler@1.8.0(@types/node@24.5.2)))
 
 packages:
 
@@ -408,8 +408,8 @@ packages:
     peerDependencies:
       '@typespec/compiler': ^1.7.0
 
-  '@typespec/compiler@1.7.1':
-    resolution: {integrity: sha512-sb3MEsKjFlAx8ZG484exs5Ec+JwmYf2anJqLjMusrV3rRMUhv3fbEulk9MD+l4eOkBS46VMNGqRu0wTn8suVVA==}
+  '@typespec/compiler@1.8.0':
+    resolution: {integrity: sha512-FeLb7Q0z6Bh5dDpqtnU2RlWiIWWWF7rujx2xGMta5dcTuIOZ4jbdyz1hVdxk4iM4qadvaSV4ey/qrSuffNoh3w==}
     engines: {node: '>=20.0.0'}
     hasBin: true
 
@@ -1017,6 +1017,11 @@ packages:
     engines: {node: '>=14'}
     hasBin: true
 
+  prettier@3.7.4:
+    resolution: {integrity: sha512-v6UNi1+3hSlVvv8fSaoUbggEM5VErKmmpGA7Pl3HF8V6uKY7rvClBOJlH6yNwQtfTueNkGVpOv/mtWL9L4bgRA==}
+    engines: {node: '>=14'}
+    hasBin: true
+
   prismjs@1.30.0:
     resolution: {integrity: sha512-DEvV2ZF2r2/63V+tK8hQvrR2ZGn10srHbXviTlcv7Kpzw8jWiNTqbVgjO3IY8RxrrOUF8VPMQQFysYYYv0YZxw==}
     engines: {node: '>=6'}
@@ -1329,6 +1334,11 @@ packages:
 
   yaml@2.8.1:
     resolution: {integrity: sha512-lcYcMxX2PO9XMGvAJkJ3OsNMw+/7FKes7/hgerGUYWIoWu5j/+YQqcZr5JnPZWzOsEBgMbSbiSTn/dv/69Mkpw==}
+    engines: {node: '>= 14.6'}
+    hasBin: true
+
+  yaml@2.8.2:
+    resolution: {integrity: sha512-mplynKqc1C2hTVYxd0PU2xQAc22TI1vShAYGksCCfxbn/dFwnHTNi1bvYsBTkhdUNtGIf5xNOg938rrSSYvS9A==}
     engines: {node: '>= 14.6'}
     hasBin: true
 
@@ -1765,11 +1775,11 @@ snapshots:
   '@types/trusted-types@2.0.7':
     optional: true
 
-  '@typespec/asset-emitter@0.77.0(@typespec/compiler@1.7.1(@types/node@24.5.2))':
+  '@typespec/asset-emitter@0.77.0(@typespec/compiler@1.8.0(@types/node@24.5.2))':
     dependencies:
-      '@typespec/compiler': 1.7.1(@types/node@24.5.2)
+      '@typespec/compiler': 1.8.0(@types/node@24.5.2)
 
-  '@typespec/compiler@1.7.1(@types/node@24.5.2)':
+  '@typespec/compiler@1.8.0(@types/node@24.5.2)':
     dependencies:
       '@babel/code-frame': 7.27.1
       '@inquirer/prompts': 8.0.2(@types/node@24.5.2)
@@ -1780,45 +1790,45 @@ snapshots:
       is-unicode-supported: 2.1.0
       mustache: 4.2.0
       picocolors: 1.1.1
-      prettier: 3.6.2
+      prettier: 3.7.4
       semver: 7.7.2
       tar: 7.5.2
       temporal-polyfill: 0.3.0
       vscode-languageserver: 9.0.1
       vscode-languageserver-textdocument: 1.0.12
-      yaml: 2.8.1
+      yaml: 2.8.2
       yargs: 18.0.0
     transitivePeerDependencies:
       - '@types/node'
 
-  '@typespec/http@1.7.0(@typespec/compiler@1.7.1(@types/node@24.5.2))':
+  '@typespec/http@1.7.0(@typespec/compiler@1.8.0(@types/node@24.5.2))':
     dependencies:
-      '@typespec/compiler': 1.7.1(@types/node@24.5.2)
+      '@typespec/compiler': 1.8.0(@types/node@24.5.2)
 
-  '@typespec/openapi3@1.7.0(@typespec/compiler@1.7.1(@types/node@24.5.2))(@typespec/http@1.7.0(@typespec/compiler@1.7.1(@types/node@24.5.2)))(@typespec/openapi@1.4.0(@typespec/compiler@1.7.1(@types/node@24.5.2))(@typespec/http@1.7.0(@typespec/compiler@1.7.1(@types/node@24.5.2))))':
+  '@typespec/openapi3@1.7.0(@typespec/compiler@1.8.0(@types/node@24.5.2))(@typespec/http@1.7.0(@typespec/compiler@1.8.0(@types/node@24.5.2)))(@typespec/openapi@1.4.0(@typespec/compiler@1.8.0(@types/node@24.5.2))(@typespec/http@1.7.0(@typespec/compiler@1.8.0(@types/node@24.5.2))))':
     dependencies:
       '@scalar/json-magic': 0.8.5
       '@scalar/openapi-parser': 0.23.6
       '@scalar/openapi-types': 0.5.1
-      '@typespec/asset-emitter': 0.77.0(@typespec/compiler@1.7.1(@types/node@24.5.2))
-      '@typespec/compiler': 1.7.1(@types/node@24.5.2)
-      '@typespec/http': 1.7.0(@typespec/compiler@1.7.1(@types/node@24.5.2))
-      '@typespec/openapi': 1.4.0(@typespec/compiler@1.7.1(@types/node@24.5.2))(@typespec/http@1.7.0(@typespec/compiler@1.7.1(@types/node@24.5.2)))
+      '@typespec/asset-emitter': 0.77.0(@typespec/compiler@1.8.0(@types/node@24.5.2))
+      '@typespec/compiler': 1.8.0(@types/node@24.5.2)
+      '@typespec/http': 1.7.0(@typespec/compiler@1.8.0(@types/node@24.5.2))
+      '@typespec/openapi': 1.4.0(@typespec/compiler@1.8.0(@types/node@24.5.2))(@typespec/http@1.7.0(@typespec/compiler@1.8.0(@types/node@24.5.2)))
       yaml: 2.8.1
 
-  '@typespec/openapi@1.4.0(@typespec/compiler@1.7.1(@types/node@24.5.2))(@typespec/http@1.7.0(@typespec/compiler@1.7.1(@types/node@24.5.2)))':
+  '@typespec/openapi@1.4.0(@typespec/compiler@1.8.0(@types/node@24.5.2))(@typespec/http@1.7.0(@typespec/compiler@1.8.0(@types/node@24.5.2)))':
     dependencies:
-      '@typespec/compiler': 1.7.1(@types/node@24.5.2)
-      '@typespec/http': 1.7.0(@typespec/compiler@1.7.1(@types/node@24.5.2))
+      '@typespec/compiler': 1.8.0(@types/node@24.5.2)
+      '@typespec/http': 1.7.0(@typespec/compiler@1.8.0(@types/node@24.5.2))
 
   '@typespec/prettier-plugin-typespec@1.7.0':
     dependencies:
       prettier: 3.6.2
 
-  '@typespec/rest@0.77.0(@typespec/compiler@1.7.1(@types/node@24.5.2))(@typespec/http@1.7.0(@typespec/compiler@1.7.1(@types/node@24.5.2)))':
+  '@typespec/rest@0.77.0(@typespec/compiler@1.8.0(@types/node@24.5.2))(@typespec/http@1.7.0(@typespec/compiler@1.8.0(@types/node@24.5.2)))':
     dependencies:
-      '@typespec/compiler': 1.7.1(@types/node@24.5.2)
-      '@typespec/http': 1.7.0(@typespec/compiler@1.7.1(@types/node@24.5.2))
+      '@typespec/compiler': 1.8.0(@types/node@24.5.2)
+      '@typespec/http': 1.7.0(@typespec/compiler@1.8.0(@types/node@24.5.2))
 
   abort-controller@3.0.0:
     dependencies:
@@ -2297,6 +2307,8 @@ snapshots:
 
   prettier@3.6.2: {}
 
+  prettier@3.7.4: {}
+
   prismjs@1.30.0: {}
 
   prop-types@15.8.1:
@@ -2632,6 +2644,8 @@ snapshots:
   yaml@1.10.2: {}
 
   yaml@2.8.1: {}
+
+  yaml@2.8.2: {}
 
   yargs-parser@20.2.9: {}
 
