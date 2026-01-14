@@ -28,8 +28,8 @@ importers:
         specifier: 1.8.0
         version: 1.8.0(@typespec/compiler@1.8.0(@types/node@24.5.2))(@typespec/http@1.8.0(@typespec/compiler@1.8.0(@types/node@24.5.2)))(@typespec/openapi@1.4.0(@typespec/compiler@1.8.0(@types/node@24.5.2))(@typespec/http@1.8.0(@typespec/compiler@1.8.0(@types/node@24.5.2))))
       '@typespec/prettier-plugin-typespec':
-        specifier: 1.7.0
-        version: 1.7.0
+        specifier: 1.8.0
+        version: 1.8.0
       '@typespec/rest':
         specifier: 0.78.0
         version: 0.78.0(@typespec/compiler@1.8.0(@types/node@24.5.2))(@typespec/http@1.8.0(@typespec/compiler@1.8.0(@types/node@24.5.2)))
@@ -454,8 +454,8 @@ packages:
       '@typespec/compiler': ^1.4.0
       '@typespec/http': ^1.4.0
 
-  '@typespec/prettier-plugin-typespec@1.7.0':
-    resolution: {integrity: sha512-QxCCjWOHqlf43ZMIqma4JU9dnsuknqlUO8yfYUXdxXIBxadevY6Pk3HbTR+ecNgeZlxuvd8ms2v1rhcojw3pTA==}
+  '@typespec/prettier-plugin-typespec@1.8.0':
+    resolution: {integrity: sha512-PGAWhnnX2CIQPS5irQEAidzog9IZigM4fXFIuiBLwAIh1ZXd31fluzRSU0gthvnkxVtNPOWSn8SR7R8ca/Z7yQ==}
 
   '@typespec/rest@0.78.0':
     resolution: {integrity: sha512-1clnDw1JbBvjLcfFvEvHdIrnsQuQI5/Cl6mRIrzWWX0pKJ+R89rCdZD1KpidEXw4B4qscD48LsssyrEIFLtuPg==}
@@ -1007,11 +1007,6 @@ packages:
   postcss@8.4.49:
     resolution: {integrity: sha512-OCVPnIObs4N29kxTjzLfUryOkvZEq+pf8jTF0lg8E7uETuWHA+v7j3c/xJmiqpX450191LlmZfUKkXxkTry7nA==}
     engines: {node: ^10 || ^12 || >=14}
-
-  prettier@3.6.2:
-    resolution: {integrity: sha512-I7AIg5boAr5R0FFtJ6rCfD+LFsWHp81dolrFD8S79U9tb8Az2nGrJncnMSnys+bpQJfRUzqs9hnA81OAA3hCuQ==}
-    engines: {node: '>=14'}
-    hasBin: true
 
   prettier@3.7.4:
     resolution: {integrity: sha512-v6UNi1+3hSlVvv8fSaoUbggEM5VErKmmpGA7Pl3HF8V6uKY7rvClBOJlH6yNwQtfTueNkGVpOv/mtWL9L4bgRA==}
@@ -1808,9 +1803,9 @@ snapshots:
       '@typespec/compiler': 1.8.0(@types/node@24.5.2)
       '@typespec/http': 1.8.0(@typespec/compiler@1.8.0(@types/node@24.5.2))
 
-  '@typespec/prettier-plugin-typespec@1.7.0':
+  '@typespec/prettier-plugin-typespec@1.8.0':
     dependencies:
-      prettier: 3.6.2
+      prettier: 3.7.4
 
   '@typespec/rest@0.78.0(@typespec/compiler@1.8.0(@types/node@24.5.2))(@typespec/http@1.8.0(@typespec/compiler@1.8.0(@types/node@24.5.2)))':
     dependencies:
@@ -2291,8 +2286,6 @@ snapshots:
       nanoid: 3.3.11
       picocolors: 1.1.1
       source-map-js: 1.2.1
-
-  prettier@3.6.2: {}
 
   prettier@3.7.4: {}
 
