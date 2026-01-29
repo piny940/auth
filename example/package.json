@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "jsonwebtoken": "9.0.3",
-    "next": "15.5.10",
+    "next": "15.5.11",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },
@@ -25,7 +25,7 @@
     "@types/react": "19.2.10",
     "@types/react-dom": "19.2.3",
     "eslint": "9.39.2",
-    "eslint-config-next": "15.5.10",
+    "eslint-config-next": "15.5.11",
     "postcss": "8.5.6",
     "tailwindcss": "3.4.19",
     "typescript": "5.9.3"
