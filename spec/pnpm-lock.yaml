@@ -22,17 +22,17 @@ importers:
         specifier: 1.9.0
         version: 1.9.0(@types/node@24.5.2)
       '@typespec/http':
-        specifier: 1.8.0
-        version: 1.8.0(@typespec/compiler@1.9.0(@types/node@24.5.2))
+        specifier: 1.9.0
+        version: 1.9.0(@typespec/compiler@1.9.0(@types/node@24.5.2))
       '@typespec/openapi3':
         specifier: 1.8.0
-        version: 1.8.0(@typespec/compiler@1.9.0(@types/node@24.5.2))(@typespec/http@1.8.0(@typespec/compiler@1.9.0(@types/node@24.5.2)))(@typespec/openapi@1.4.0(@typespec/compiler@1.9.0(@types/node@24.5.2))(@typespec/http@1.8.0(@typespec/compiler@1.9.0(@types/node@24.5.2))))
+        version: 1.8.0(@typespec/compiler@1.9.0(@types/node@24.5.2))(@typespec/http@1.9.0(@typespec/compiler@1.9.0(@types/node@24.5.2)))(@typespec/openapi@1.4.0(@typespec/compiler@1.9.0(@types/node@24.5.2))(@typespec/http@1.9.0(@typespec/compiler@1.9.0(@types/node@24.5.2))))
       '@typespec/prettier-plugin-typespec':
         specifier: 1.8.0
         version: 1.8.0
       '@typespec/rest':
         specifier: 0.78.0
-        version: 0.78.0(@typespec/compiler@1.9.0(@types/node@24.5.2))(@typespec/http@1.8.0(@typespec/compiler@1.9.0(@types/node@24.5.2)))
+        version: 0.78.0(@typespec/compiler@1.9.0(@types/node@24.5.2))(@typespec/http@1.9.0(@typespec/compiler@1.9.0(@types/node@24.5.2)))
 
 packages:
 
@@ -420,12 +420,12 @@ packages:
     engines: {node: '>=20.0.0'}
     hasBin: true
 
-  '@typespec/http@1.8.0':
-    resolution: {integrity: sha512-ZKa4RISabwL8cUAmE3BkoNmtCYRjerO0+1Ba6XdDJKG+vJC5EGM2hkDf+ZmYsYZgrX0cvbhPXUKKh28zBV60hw==}
+  '@typespec/http@1.9.0':
+    resolution: {integrity: sha512-JzlZZsgCo71f2KhWbf4BLOz5e+dVLj7gJJ4kvXvrmuG9QHoT41VaGPpCQamYgpZLMz2LQbsOtw34AmpovhuJSw==}
     engines: {node: '>=20.0.0'}
     peerDependencies:
-      '@typespec/compiler': ^1.8.0
-      '@typespec/streams': ^0.78.0
+      '@typespec/compiler': ^1.9.0
+      '@typespec/streams': ^0.79.0
     peerDependenciesMeta:
       '@typespec/streams':
         optional: true
@@ -1791,34 +1791,34 @@ snapshots:
     transitivePeerDependencies:
       - '@types/node'
 
-  '@typespec/http@1.8.0(@typespec/compiler@1.9.0(@types/node@24.5.2))':
+  '@typespec/http@1.9.0(@typespec/compiler@1.9.0(@types/node@24.5.2))':
     dependencies:
       '@typespec/compiler': 1.9.0(@types/node@24.5.2)
 
-  '@typespec/openapi3@1.8.0(@typespec/compiler@1.9.0(@types/node@24.5.2))(@typespec/http@1.8.0(@typespec/compiler@1.9.0(@types/node@24.5.2)))(@typespec/openapi@1.4.0(@typespec/compiler@1.9.0(@types/node@24.5.2))(@typespec/http@1.8.0(@typespec/compiler@1.9.0(@types/node@24.5.2))))':
+  '@typespec/openapi3@1.8.0(@typespec/compiler@1.9.0(@types/node@24.5.2))(@typespec/http@1.9.0(@typespec/compiler@1.9.0(@types/node@24.5.2)))(@typespec/openapi@1.4.0(@typespec/compiler@1.9.0(@types/node@24.5.2))(@typespec/http@1.9.0(@typespec/compiler@1.9.0(@types/node@24.5.2))))':
     dependencies:
       '@scalar/json-magic': 0.8.5
       '@scalar/openapi-parser': 0.23.6
       '@scalar/openapi-types': 0.5.3
       '@typespec/asset-emitter': 0.78.0(@typespec/compiler@1.9.0(@types/node@24.5.2))
       '@typespec/compiler': 1.9.0(@types/node@24.5.2)
-      '@typespec/http': 1.8.0(@typespec/compiler@1.9.0(@types/node@24.5.2))
-      '@typespec/openapi': 1.4.0(@typespec/compiler@1.9.0(@types/node@24.5.2))(@typespec/http@1.8.0(@typespec/compiler@1.9.0(@types/node@24.5.2)))
+      '@typespec/http': 1.9.0(@typespec/compiler@1.9.0(@types/node@24.5.2))
+      '@typespec/openapi': 1.4.0(@typespec/compiler@1.9.0(@types/node@24.5.2))(@typespec/http@1.9.0(@typespec/compiler@1.9.0(@types/node@24.5.2)))
       yaml: 2.8.2
 
-  '@typespec/openapi@1.4.0(@typespec/compiler@1.9.0(@types/node@24.5.2))(@typespec/http@1.8.0(@typespec/compiler@1.9.0(@types/node@24.5.2)))':
+  '@typespec/openapi@1.4.0(@typespec/compiler@1.9.0(@types/node@24.5.2))(@typespec/http@1.9.0(@typespec/compiler@1.9.0(@types/node@24.5.2)))':
     dependencies:
       '@typespec/compiler': 1.9.0(@types/node@24.5.2)
-      '@typespec/http': 1.8.0(@typespec/compiler@1.9.0(@types/node@24.5.2))
+      '@typespec/http': 1.9.0(@typespec/compiler@1.9.0(@types/node@24.5.2))
 
   '@typespec/prettier-plugin-typespec@1.8.0':
     dependencies:
       prettier: 3.7.4
 
-  '@typespec/rest@0.78.0(@typespec/compiler@1.9.0(@types/node@24.5.2))(@typespec/http@1.8.0(@typespec/compiler@1.9.0(@types/node@24.5.2)))':
+  '@typespec/rest@0.78.0(@typespec/compiler@1.9.0(@types/node@24.5.2))(@typespec/http@1.9.0(@typespec/compiler@1.9.0(@types/node@24.5.2)))':
     dependencies:
       '@typespec/compiler': 1.9.0(@types/node@24.5.2)
-      '@typespec/http': 1.8.0(@typespec/compiler@1.9.0(@types/node@24.5.2))
+      '@typespec/http': 1.9.0(@typespec/compiler@1.9.0(@types/node@24.5.2))
 
   abort-controller@3.0.0:
     dependencies:
