@@ -25,8 +25,8 @@ importers:
         specifier: 1.10.0
         version: 1.10.0(@typespec/compiler@1.10.0(@types/node@24.5.2))
       '@typespec/openapi3':
-        specifier: 1.9.0
-        version: 1.9.0(@typespec/compiler@1.10.0(@types/node@24.5.2))(@typespec/http@1.10.0(@typespec/compiler@1.10.0(@types/node@24.5.2)))(@typespec/openapi@1.4.0(@typespec/compiler@1.10.0(@types/node@24.5.2))(@typespec/http@1.10.0(@typespec/compiler@1.10.0(@types/node@24.5.2))))
+        specifier: 1.10.0
+        version: 1.10.0(@typespec/compiler@1.10.0(@types/node@24.5.2))(@typespec/http@1.10.0(@typespec/compiler@1.10.0(@types/node@24.5.2)))(@typespec/openapi@1.4.0(@typespec/compiler@1.10.0(@types/node@24.5.2))(@typespec/http@1.10.0(@typespec/compiler@1.10.0(@types/node@24.5.2))))
       '@typespec/prettier-plugin-typespec':
         specifier: 1.9.0
         version: 1.9.0
@@ -361,12 +361,16 @@ packages:
     resolution: {integrity: sha512-Y7DLt1bIZF9dvHzJwSJTcC1lpSr1Tbf4VBhHOCRIHu23Rr7/lhQnddRxFmPV1tZXwEQKz7F7yRrubwCfKPCucw==}
     engines: {node: '>=20'}
 
+  '@scalar/helpers@0.2.18':
+    resolution: {integrity: sha512-w1d4tpNEVZ293oB2BAgLrS0kVPUtG3eByNmOCJA5eK9vcT4D3cmsGtWjUaaqit0BQCsBFHK51rasGvSWnApYTw==}
+    engines: {node: '>=20'}
+
   '@scalar/json-magic@0.11.0':
     resolution: {integrity: sha512-1zBseDDEPkKlAVd9lT1HlK9Nefeh0YEE+pcmyDL3J5derIZn9UYXAFecdkeXMdjDtWDgcrkmWCrHhpoT7zVKdQ==}
     engines: {node: '>=20'}
 
-  '@scalar/json-magic@0.9.6':
-    resolution: {integrity: sha512-2TKoqkAophHti1nH+rvQlR4lhD6X9tqQpuNeAE0cytHSX/yndkSOE0yA7cep5T9tFjGN4Km0gMnelvY3LgWs4A==}
+  '@scalar/json-magic@0.11.7':
+    resolution: {integrity: sha512-GVz9E0vXu+ecypkdn0biK1gbQVkK4QTTX1Hq3eMgxlLQC91wwiqWfCqwfhuX0LRu+Z5OmYhLhufDJEEh56rVgA==}
     engines: {node: '>=20'}
 
   '@scalar/openapi-parser@0.24.9':
@@ -397,11 +401,11 @@ packages:
   '@types/trusted-types@2.0.7':
     resolution: {integrity: sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==}
 
-  '@typespec/asset-emitter@0.79.0':
-    resolution: {integrity: sha512-pNMtfSSwgmTQ2ex6bd1l6BUW2RLjSFnWQO5C5bNSleV62YEH5jMLn3THWDU9oUB0JoiBjgomV8cPqNRTJ+iV9w==}
+  '@typespec/asset-emitter@0.79.1':
+    resolution: {integrity: sha512-53s3GLu5BwNkl7Itr/OizfhymTV2u7k5/cwjUOAt03AUDfiKlwbsp+iCIsq1vccJuoDOiXOceJOfL8rAf4/9LQ==}
     engines: {node: '>=20.0.0'}
     peerDependencies:
-      '@typespec/compiler': ^1.9.0
+      '@typespec/compiler': ^1.10.0
 
   '@typespec/compiler@1.10.0':
     resolution: {integrity: sha512-R6BATDkughntPpaxeESJF+wxma5PEjgmnnKvH0/ByqUH8VyhIckQWE9kkP0Uc/EJ0o0VYhe8qCwWQvV70k5lTw==}
@@ -418,19 +422,19 @@ packages:
       '@typespec/streams':
         optional: true
 
-  '@typespec/openapi3@1.9.0':
-    resolution: {integrity: sha512-htwhrGHQxuoNwAljeJE8CBt5yfKOv48T9Ugv91Y+4yNnlevJfDT29yrfD2mXYMujVOr3Kte1qilazClafkUIgg==}
+  '@typespec/openapi3@1.10.0':
+    resolution: {integrity: sha512-G2UTfsDuUprvhFIymHiLKly6FoA9UkRmTImqgmROP4JkKCdY/Mo6Xo03sufY8urywVjIWE3dryXpy5DjpOt9Eg==}
     engines: {node: '>=20.0.0'}
     hasBin: true
     peerDependencies:
-      '@typespec/compiler': ^1.9.0
-      '@typespec/events': ^0.79.0
-      '@typespec/http': ^1.9.0
-      '@typespec/json-schema': ^1.9.0
-      '@typespec/openapi': ^1.9.0
-      '@typespec/sse': ^0.79.0
-      '@typespec/streams': ^0.79.0
-      '@typespec/versioning': ^0.79.0
+      '@typespec/compiler': ^1.10.0
+      '@typespec/events': ^0.80.0
+      '@typespec/http': ^1.10.0
+      '@typespec/json-schema': ^1.10.0
+      '@typespec/openapi': ^1.10.0
+      '@typespec/sse': ^0.80.0
+      '@typespec/streams': ^0.80.0
+      '@typespec/versioning': ^0.80.0
       '@typespec/xml': '*'
     peerDependenciesMeta:
       '@typespec/events':
@@ -938,6 +942,9 @@ packages:
   path-scurry@2.0.2:
     resolution: {integrity: sha512-3O/iVVsJAPsOnpwWIeD+d6z/7PmqApyQePUtCndjatj/9I5LylHvt5qluFaBT3I5h3r1ejfR056c+FCv+NnNXg==}
     engines: {node: 18 || 20 || >=22}
+
+  pathe@2.0.3:
+    resolution: {integrity: sha512-WUjGcAqP1gQacoQe+OBJsFA7Ld4DyXuUIjZ5cc75cLHvJ7dtNsTugphxIADwspS+AraAUePCKrSVtPLFj/F88w==}
 
   perfect-scrollbar@1.5.6:
     resolution: {integrity: sha512-rixgxw3SxyJbCaSpo1n35A/fwI1r2rdwMKOTCg/AcG+xOEyZcE8UHVjpZMFCVImzsFoCZeJTT+M/rdEIQYO2nw==}
@@ -1659,14 +1666,17 @@ snapshots:
 
   '@scalar/helpers@0.2.11': {}
 
+  '@scalar/helpers@0.2.18': {}
+
   '@scalar/json-magic@0.11.0':
     dependencies:
       '@scalar/helpers': 0.2.11
       yaml: 2.8.2
 
-  '@scalar/json-magic@0.9.6':
+  '@scalar/json-magic@0.11.7':
     dependencies:
-      '@scalar/helpers': 0.2.11
+      '@scalar/helpers': 0.2.18
+      pathe: 2.0.3
       yaml: 2.8.2
 
   '@scalar/openapi-parser@0.24.9':
@@ -1703,7 +1713,7 @@ snapshots:
   '@types/trusted-types@2.0.7':
     optional: true
 
-  '@typespec/asset-emitter@0.79.0(@typespec/compiler@1.10.0(@types/node@24.5.2))':
+  '@typespec/asset-emitter@0.79.1(@typespec/compiler@1.10.0(@types/node@24.5.2))':
     dependencies:
       '@typespec/compiler': 1.10.0(@types/node@24.5.2)
 
@@ -1733,12 +1743,12 @@ snapshots:
     dependencies:
       '@typespec/compiler': 1.10.0(@types/node@24.5.2)
 
-  '@typespec/openapi3@1.9.0(@typespec/compiler@1.10.0(@types/node@24.5.2))(@typespec/http@1.10.0(@typespec/compiler@1.10.0(@types/node@24.5.2)))(@typespec/openapi@1.4.0(@typespec/compiler@1.10.0(@types/node@24.5.2))(@typespec/http@1.10.0(@typespec/compiler@1.10.0(@types/node@24.5.2))))':
+  '@typespec/openapi3@1.10.0(@typespec/compiler@1.10.0(@types/node@24.5.2))(@typespec/http@1.10.0(@typespec/compiler@1.10.0(@types/node@24.5.2)))(@typespec/openapi@1.4.0(@typespec/compiler@1.10.0(@types/node@24.5.2))(@typespec/http@1.10.0(@typespec/compiler@1.10.0(@types/node@24.5.2))))':
     dependencies:
-      '@scalar/json-magic': 0.9.6
+      '@scalar/json-magic': 0.11.7
       '@scalar/openapi-parser': 0.24.9
       '@scalar/openapi-types': 0.5.3
-      '@typespec/asset-emitter': 0.79.0(@typespec/compiler@1.10.0(@types/node@24.5.2))
+      '@typespec/asset-emitter': 0.79.1(@typespec/compiler@1.10.0(@types/node@24.5.2))
       '@typespec/compiler': 1.10.0(@types/node@24.5.2)
       '@typespec/http': 1.10.0(@typespec/compiler@1.10.0(@types/node@24.5.2))
       '@typespec/openapi': 1.4.0(@typespec/compiler@1.10.0(@types/node@24.5.2))(@typespec/http@1.10.0(@typespec/compiler@1.10.0(@types/node@24.5.2)))
@@ -2167,6 +2177,8 @@ snapshots:
     dependencies:
       lru-cache: 11.2.2
       minipass: 7.1.3
+
+  pathe@2.0.3: {}
 
   perfect-scrollbar@1.5.6: {}
 
