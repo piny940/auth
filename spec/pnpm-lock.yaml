@@ -25,8 +25,8 @@ importers:
         specifier: 1.11.0
         version: 1.11.0(@typespec/compiler@1.11.0(@types/node@24.5.2))
       '@typespec/openapi3':
-        specifier: 1.10.0
-        version: 1.10.0(@typespec/compiler@1.11.0(@types/node@24.5.2))(@typespec/http@1.11.0(@typespec/compiler@1.11.0(@types/node@24.5.2)))(@typespec/openapi@1.4.0(@typespec/compiler@1.11.0(@types/node@24.5.2))(@typespec/http@1.11.0(@typespec/compiler@1.11.0(@types/node@24.5.2))))
+        specifier: 1.11.0
+        version: 1.11.0(@typespec/compiler@1.11.0(@types/node@24.5.2))(@typespec/http@1.11.0(@typespec/compiler@1.11.0(@types/node@24.5.2)))(@typespec/openapi@1.4.0(@typespec/compiler@1.11.0(@types/node@24.5.2))(@typespec/http@1.11.0(@typespec/compiler@1.11.0(@types/node@24.5.2))))
       '@typespec/prettier-plugin-typespec':
         specifier: 1.10.0
         version: 1.10.0
@@ -418,19 +418,19 @@ packages:
       '@typespec/streams':
         optional: true
 
-  '@typespec/openapi3@1.10.0':
-    resolution: {integrity: sha512-G2UTfsDuUprvhFIymHiLKly6FoA9UkRmTImqgmROP4JkKCdY/Mo6Xo03sufY8urywVjIWE3dryXpy5DjpOt9Eg==}
+  '@typespec/openapi3@1.11.0':
+    resolution: {integrity: sha512-AjMpTkIUy8+YlRaqUyQ1NZxbmVbWyT4fPpztVzclyX+TXyvxo9gqLEdqoMfvQ9KUjcU0nsOjfPdaYb5rj25oIA==}
     engines: {node: '>=20.0.0'}
     hasBin: true
     peerDependencies:
-      '@typespec/compiler': ^1.10.0
-      '@typespec/events': ^0.80.0
-      '@typespec/http': ^1.10.0
-      '@typespec/json-schema': ^1.10.0
-      '@typespec/openapi': ^1.10.0
-      '@typespec/sse': ^0.80.0
-      '@typespec/streams': ^0.80.0
-      '@typespec/versioning': ^0.80.0
+      '@typespec/compiler': ^1.11.0
+      '@typespec/events': ^0.81.0
+      '@typespec/http': ^1.11.0
+      '@typespec/json-schema': ^1.11.0
+      '@typespec/openapi': ^1.11.0
+      '@typespec/sse': ^0.81.0
+      '@typespec/streams': ^0.81.0
+      '@typespec/versioning': ^0.81.0
       '@typespec/xml': '*'
     peerDependenciesMeta:
       '@typespec/events':
@@ -1741,7 +1741,7 @@ snapshots:
     dependencies:
       '@typespec/compiler': 1.11.0(@types/node@24.5.2)
 
-  '@typespec/openapi3@1.10.0(@typespec/compiler@1.11.0(@types/node@24.5.2))(@typespec/http@1.11.0(@typespec/compiler@1.11.0(@types/node@24.5.2)))(@typespec/openapi@1.4.0(@typespec/compiler@1.11.0(@types/node@24.5.2))(@typespec/http@1.11.0(@typespec/compiler@1.11.0(@types/node@24.5.2))))':
+  '@typespec/openapi3@1.11.0(@typespec/compiler@1.11.0(@types/node@24.5.2))(@typespec/http@1.11.0(@typespec/compiler@1.11.0(@types/node@24.5.2)))(@typespec/openapi@1.4.0(@typespec/compiler@1.11.0(@types/node@24.5.2))(@typespec/http@1.11.0(@typespec/compiler@1.11.0(@types/node@24.5.2))))':
     dependencies:
       '@scalar/json-magic': 0.11.7
       '@scalar/openapi-parser': 0.24.9
