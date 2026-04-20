@@ -28,8 +28,8 @@ importers:
         specifier: 1.11.0
         version: 1.11.0(@typespec/compiler@1.11.0(@types/node@24.5.2))(@typespec/http@1.11.0(@typespec/compiler@1.11.0(@types/node@24.5.2)))(@typespec/openapi@1.4.0(@typespec/compiler@1.11.0(@types/node@24.5.2))(@typespec/http@1.11.0(@typespec/compiler@1.11.0(@types/node@24.5.2))))
       '@typespec/prettier-plugin-typespec':
-        specifier: 1.10.0
-        version: 1.10.0
+        specifier: 1.11.0
+        version: 1.11.0
       '@typespec/rest':
         specifier: 0.80.0
         version: 0.80.0(@typespec/compiler@1.11.0(@types/node@24.5.2))(@typespec/http@1.11.0(@typespec/compiler@1.11.0(@types/node@24.5.2)))
@@ -453,8 +453,8 @@ packages:
       '@typespec/compiler': ^1.4.0
       '@typespec/http': ^1.4.0
 
-  '@typespec/prettier-plugin-typespec@1.10.0':
-    resolution: {integrity: sha512-X4/YjQIxa+uQ4bPrOIcjn6ucIX09SlBWOb8GEwbwqkfZqDvbJEevA2A3OmgI0cyhIndo4PdrkBydWtoK0J0Z+A==}
+  '@typespec/prettier-plugin-typespec@1.11.0':
+    resolution: {integrity: sha512-oeqygasCMH/Iv73YeBWN/YIXQRgwvGUnNmCWZA7b2rxneSGTAlu32WNr0rRfL5cIC4iISOwXJprNGQlXi0pUVg==}
 
   '@typespec/rest@0.80.0':
     resolution: {integrity: sha512-xczXLoB2akSIDner41gQYTS9CG6TdCN0QHYvXBT6ZrYEnBh+pMvdymW//5CSOTamZLOGo9AOJVJaFfwbFA4vQQ==}
@@ -1757,7 +1757,7 @@ snapshots:
       '@typespec/compiler': 1.11.0(@types/node@24.5.2)
       '@typespec/http': 1.11.0(@typespec/compiler@1.11.0(@types/node@24.5.2))
 
-  '@typespec/prettier-plugin-typespec@1.10.0':
+  '@typespec/prettier-plugin-typespec@1.11.0':
     dependencies:
       prettier: 3.8.1
 
