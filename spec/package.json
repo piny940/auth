@@ -16,7 +16,7 @@
     "react-dom": "19.2.5"
   },
   "devDependencies": {
-    "@redocly/cli": "2.30.2",
+    "@redocly/cli": "2.30.3",
     "@typespec/compiler": "1.11.0",
     "@typespec/http": "1.11.0",
     "@typespec/openapi3": "1.11.0",
