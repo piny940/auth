@@ -16,8 +16,8 @@ importers:
         version: 19.2.7(react@19.2.7)
     devDependencies:
       '@redocly/cli':
-        specifier: 2.34.0
-        version: 2.34.0
+        specifier: 2.38.0
+        version: 2.38.0
       '@typespec/compiler':
         specifier: 1.11.0
         version: 1.11.0(@types/node@24.5.2)
@@ -194,8 +194,8 @@ packages:
     resolution: {integrity: sha512-oGB+UxlgWcgQkgwo8GcEGwemoTFt3FIO9ababBmaGwXIoBKZ+GTy0pP185beGg7Llih/NSHSV2XAs1lnznocSg==}
     engines: {node: '>= 8'}
 
-  '@redocly/cli@2.34.0':
-    resolution: {integrity: sha512-wlEy03fyf+xrEatHbSSLFGP7T8slYwyJHO6xooArvUOntiGRMPuTGivaSPhxx+f2bFhe69zDDzDy51+CsvJ/zw==}
+  '@redocly/cli@2.38.0':
+    resolution: {integrity: sha512-zYwQiDJTqoiscB6pFwd80FwI065gA13lp8hg2tgjDDu4p8gotVdCD/EOCaPTalIHskiIa1UFxEPRErPOgkWqJw==}
     engines: {node: '>=22.12.0 || >=20.19.0 <21.0.0', npm: '>=10'}
     hasBin: true
 
@@ -748,7 +748,7 @@ snapshots:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.17.1
 
-  '@redocly/cli@2.34.0': {}
+  '@redocly/cli@2.38.0': {}
 
   '@scalar/helpers@0.2.11': {}
 
