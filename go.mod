@@ -17,7 +17,7 @@ require (
 	github.com/oapi-codegen/runtime v1.4.2
 	golang.org/x/crypto v0.53.0
 	gorm.io/driver/postgres v1.6.0
-	gorm.io/gen v0.3.27
+	gorm.io/gen v0.3.28
 	gorm.io/gorm v1.31.2
 	gorm.io/plugin/dbresolver v1.6.2
 )
@@ -62,6 +62,7 @@ require (
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/vmware-labs/yaml-jsonpath v0.3.2 // indirect
 	github.com/woodsbury/decimal128 v1.3.0 // indirect
+	golang.org/x/exp v0.0.0-20240404231335-c0f41cb1a7a0 // indirect
 	golang.org/x/mod v0.36.0 // indirect
 	golang.org/x/net v0.56.0 // indirect
 	golang.org/x/sync v0.21.0 // indirect
