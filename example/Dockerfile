@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 ################################################################################
-FROM node:22.23.1-slim AS base
+FROM node:24.18.0-slim AS base
 
 WORKDIR /usr/src/app
 
