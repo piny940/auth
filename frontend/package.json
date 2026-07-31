@@ -17,8 +17,8 @@
     "@mui/material": "7.3.11",
     "next": "15.5.22",
     "openapi-fetch": "0.17.0",
-    "react": "19.2.7",
-    "react-dom": "19.2.7",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
     "react-hook-form": "7.81.0"
   },
   "devDependencies": {
@@ -27,8 +27,8 @@
     "@eslint/js": "9.39.5",
     "@stylistic/eslint-plugin": "5.10.0",
     "@types/node": "22.20.1",
-    "@types/react": "19.2.17",
-    "@types/react-dom": "19.2.3",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.4",
     "eslint": "9.39.5",
     "eslint-config-next": "15.5.22",
     "openapi-typescript": "7.13.0",
