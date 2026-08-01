@@ -31,8 +31,8 @@ importers:
         specifier: 1.14.0
         version: 1.14.0
       '@typespec/rest':
-        specifier: 0.83.0
-        version: 0.83.0(@typespec/compiler@1.11.0(@types/node@24.5.2))(@typespec/http@1.14.0(@typespec/compiler@1.11.0(@types/node@24.5.2)))
+        specifier: 0.84.0
+        version: 0.84.0(@typespec/compiler@1.11.0(@types/node@24.5.2))(@typespec/http@1.14.0(@typespec/compiler@1.11.0(@types/node@24.5.2)))
 
 packages:
 
@@ -285,12 +285,12 @@ packages:
   '@typespec/prettier-plugin-typespec@1.14.0':
     resolution: {integrity: sha512-OW5VW8sqNdfoDgHgMo8sGsI1vCfY+Q54lgTU/uNqGKSgF6jBDyjpnQjRyxTZGX6GH7lWPQceolUV5noTjfWrRg==}
 
-  '@typespec/rest@0.83.0':
-    resolution: {integrity: sha512-WMEwEe1kdaOdZ0c+ct5BVmTSBXkrPniUYDWCz3K52T4in2dNc7J6YGP6tL8bXgQz5B0CsP0VNO12N+UysQDsLw==}
+  '@typespec/rest@0.84.0':
+    resolution: {integrity: sha512-9s5dDfRoHRPdtbVvkBasUx/RnMvwWMTuXRieSQDEji4gWGgxVu4Zt4MiEEKSfQrkMr3Aw0QjRCSxBxjMCHIOmA==}
     engines: {node: '>=22.0.0'}
     peerDependencies:
-      '@typespec/compiler': ^1.13.0
-      '@typespec/http': ^1.13.0
+      '@typespec/compiler': ^1.14.0
+      '@typespec/http': ^1.14.0
 
   ajv-draft-04@1.0.0:
     resolution: {integrity: sha512-mv00Te6nmYbRp5DCwclxtt7yV/joXJPGS7nM+97GdxvuttCOfgI3K4U25zboyeX0O+myI8ERluxQe5wljMmVIw==}
@@ -828,7 +828,7 @@ snapshots:
     dependencies:
       prettier: 3.8.1
 
-  '@typespec/rest@0.83.0(@typespec/compiler@1.11.0(@types/node@24.5.2))(@typespec/http@1.14.0(@typespec/compiler@1.11.0(@types/node@24.5.2)))':
+  '@typespec/rest@0.84.0(@typespec/compiler@1.11.0(@types/node@24.5.2))(@typespec/http@1.14.0(@typespec/compiler@1.11.0(@types/node@24.5.2)))':
     dependencies:
       '@typespec/compiler': 1.11.0(@types/node@24.5.2)
       '@typespec/http': 1.14.0(@typespec/compiler@1.11.0(@types/node@24.5.2))
