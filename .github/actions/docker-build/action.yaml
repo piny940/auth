@@ -28,7 +28,7 @@ runs:
         username: ${{ inputs.github-actor }}
         password: ${{ inputs.gh-token }}
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      uses: docker/setup-buildx-action@v4
     - name: Build and push Docker Image
       uses: docker/build-push-action@v6
       with:
