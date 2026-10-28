@@ -22,7 +22,7 @@
     "react-hook-form": "7.85.0"
   },
   "devDependencies": {
-    "@eslint/compat": "2.1.0",
+    "@eslint/compat": "2.1.1",
     "@eslint/eslintrc": "3.3.6",
     "@eslint/js": "9.39.5",
     "@stylistic/eslint-plugin": "5.10.0",
