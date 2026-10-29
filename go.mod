@@ -16,7 +16,7 @@ require (
 	github.com/oapi-codegen/oapi-codegen/v2 v2.5.0
 	github.com/oapi-codegen/runtime v1.4.2
 	golang.org/x/crypto v0.53.0
-	gorm.io/driver/postgres v1.6.2
+	gorm.io/driver/postgres v1.6.3
 	gorm.io/gen v0.3.27
 	gorm.io/gorm v1.31.2
 	gorm.io/plugin/dbresolver v1.6.2
