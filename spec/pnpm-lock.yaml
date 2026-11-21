@@ -28,8 +28,8 @@ importers:
         specifier: 1.14.0
         version: 1.14.0(@typespec/compiler@1.11.0(@types/node@24.5.2))(@typespec/http@1.14.0(@typespec/compiler@1.11.0(@types/node@24.5.2)))(@typespec/openapi@1.4.0(@typespec/compiler@1.11.0(@types/node@24.5.2))(@typespec/http@1.14.0(@typespec/compiler@1.11.0(@types/node@24.5.2))))
       '@typespec/prettier-plugin-typespec':
-        specifier: 1.14.0
-        version: 1.14.0
+        specifier: 1.18.0
+        version: 1.18.0
       '@typespec/rest':
         specifier: 0.84.0
         version: 0.84.0(@typespec/compiler@1.11.0(@types/node@24.5.2))(@typespec/http@1.14.0(@typespec/compiler@1.11.0(@types/node@24.5.2)))
@@ -282,8 +282,8 @@ packages:
       '@typespec/compiler': ^1.4.0
       '@typespec/http': ^1.4.0
 
-  '@typespec/prettier-plugin-typespec@1.14.0':
-    resolution: {integrity: sha512-OW5VW8sqNdfoDgHgMo8sGsI1vCfY+Q54lgTU/uNqGKSgF6jBDyjpnQjRyxTZGX6GH7lWPQceolUV5noTjfWrRg==}
+  '@typespec/prettier-plugin-typespec@1.18.0':
+    resolution: {integrity: sha512-ZPVoTECVfh+3PA1F+EcWMlG8rK8TL/lm77O3kXeJsYUt4AhN9moXiI+dJmPB3AvWGnKNSIUCz6qZFbTRtc/45Q==}
 
   '@typespec/rest@0.84.0':
     resolution: {integrity: sha512-9s5dDfRoHRPdtbVvkBasUx/RnMvwWMTuXRieSQDEji4gWGgxVu4Zt4MiEEKSfQrkMr3Aw0QjRCSxBxjMCHIOmA==}
@@ -473,6 +473,11 @@ packages:
   picomatch@2.3.1:
     resolution: {integrity: sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==}
     engines: {node: '>=8.6'}
+
+  prettier@3.10.1:
+    resolution: {integrity: sha512-70vp3ZUYoPlFbF9uiTdXHUUCGEIp7d4+6p+8DYbkm2jP7x/3i/paXVF6dopSI3zd/CEitrZN1rc4i85xWmmXlg==}
+    engines: {node: '>=14'}
+    hasBin: true
 
   prettier@3.8.1:
     resolution: {integrity: sha512-UOnG6LftzbdaHZcKoPFtOcCKztrQ57WkHDeRD9t/PTQtmT0NHSeWWepj6pS0z/N7+08BHFDQVUrfmfMRcZwbMg==}
@@ -824,9 +829,9 @@ snapshots:
       '@typespec/compiler': 1.11.0(@types/node@24.5.2)
       '@typespec/http': 1.14.0(@typespec/compiler@1.11.0(@types/node@24.5.2))
 
-  '@typespec/prettier-plugin-typespec@1.14.0':
+  '@typespec/prettier-plugin-typespec@1.18.0':
     dependencies:
-      prettier: 3.8.1
+      prettier: 3.10.1
 
   '@typespec/rest@0.84.0(@typespec/compiler@1.11.0(@types/node@24.5.2))(@typespec/http@1.14.0(@typespec/compiler@1.11.0(@types/node@24.5.2)))':
     dependencies:
@@ -975,6 +980,8 @@ snapshots:
   picocolors@1.1.1: {}
 
   picomatch@2.3.1: {}
+
+  prettier@3.10.1: {}
 
   prettier@3.8.1: {}
 
